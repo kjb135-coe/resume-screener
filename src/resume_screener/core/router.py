@@ -58,7 +58,6 @@ class Model(ABC):
         *,
         max_tokens: int = 1024,
         cache_system: bool = True,
-        temperature: float = 0.0,
     ) -> ModelResponse:
         """Run one completion.
 
@@ -68,8 +67,12 @@ class Model(ABC):
         candidate evidence) into `user`. Caching is prefix-based, so a
         system string that differs per call silently defeats it.
 
-        Default temperature is 0, not the provider's default -- this is a
-        scoring task, not creative generation.
+        There is deliberately no `temperature` argument. The Anthropic SDK
+        removed it in 1.0 (sampling is no longer a caller-facing knob), and
+        an interface advertising a parameter its primary provider ignores
+        would be worse than not having one. Providers that do expose
+        sampling controls take them as constructor arguments instead --
+        see OllamaModel.
         """
 
 
@@ -92,7 +95,6 @@ class AnthropicModel(Model):
         *,
         max_tokens: int = 1024,
         cache_system: bool = True,
-        temperature: float = 0.0,
     ) -> ModelResponse:
         system_block = [
             {
@@ -105,7 +107,6 @@ class AnthropicModel(Model):
         response = await self._client.messages.create(
             model=self._model_id,
             max_tokens=max_tokens,
-            temperature=temperature,
             system=system_block,
             messages=[{"role": "user", "content": user}],
         )
@@ -130,9 +131,18 @@ class OllamaModel(Model):
     (VRAM/compute limits, not a code limitation).
     """
 
-    def __init__(self, model_id: str, host: str = "http://localhost:11434"):
+    def __init__(
+        self,
+        model_id: str,
+        host: str = "http://localhost:11434",
+        temperature: float = 0.0,
+    ):
         self._model_id = model_id
         self._host = host
+        # Scoring is a classification task, not creative generation, so this
+        # defaults to deterministic. Provider-specific because Anthropic no
+        # longer exposes sampling controls at all.
+        self._temperature = temperature
 
     async def complete(
         self,
@@ -141,7 +151,6 @@ class OllamaModel(Model):
         *,
         max_tokens: int = 1024,
         cache_system: bool = True,
-        temperature: float = 0.0,
     ) -> ModelResponse:
         import httpx
 
@@ -155,7 +164,7 @@ class OllamaModel(Model):
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
                     ],
-                    "options": {"temperature": temperature},
+                    "options": {"temperature": self._temperature},
                     "stream": False,
                 },
             )

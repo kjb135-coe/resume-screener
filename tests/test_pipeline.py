@@ -127,10 +127,6 @@ class TestCachingContract:
         await screen_one(FIXTURE, JD, models)
         assert all(c["cache_system"] for c in models["panel"].calls)
 
-    async def test_scoring_runs_deterministically(self):
-        models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models)
-        assert all(c["temperature"] == 0.0 for c in models["panel"].calls)
 
 
 class TestFallbacks:

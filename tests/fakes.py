@@ -25,14 +25,12 @@ class FakeModel(Model):
         *,
         max_tokens: int = 1024,
         cache_system: bool = True,
-        temperature: float = 0.0,
     ) -> ModelResponse:
         self.calls.append(
             {
                 "system": system,
                 "user": user,
                 "cache_system": cache_system,
-                "temperature": temperature,
             }
         )
         text = self._responses[min(len(self.calls) - 1, len(self._responses) - 1)]
