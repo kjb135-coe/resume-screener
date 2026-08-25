@@ -1,25 +1,27 @@
 # Lucas Ferreira
 AI Engineer | Agent Systems & Healthcare Tech
-ferreira.lucas@mailbox.net | (617) 842-3614 | Boston, MA
+São Paulo, Brazil | +55 11 98765-4321 | lucas.ferreira@email.com
 
 ## Experience
 
-**Senior AI Engineer** | Helix Diagnostics | Boston, MA | March 2023 – Present
-- Shipped multi-agent diagnostic assistant handling 12K+ monthly queries from clinic staff and patients; orchestrated tool-calling workflows across lab APIs, EHR systems, and risk assessment engines
-- Built and maintain on-call rotation for production monitoring; resolved 47 incidents YTD with <15min median MTTR; iterated on agent prompts and memory management based on failure patterns
-- Integrated Claude API with proprietary HL7 message broker; engineered fallback logic for high-stakes clinical decision support
-- Presented agent system capabilities to hospital C-suite and nursing directors; translated technical constraints and accuracy metrics into operational language for procurement discussions
+**Senior AI Engineer, Diagnóstica Labs**
+*March 2023 – Present*
+- Shipped clinical decision support agent serving 47 hospitals; processes 12,000+ patient cases monthly in production
+- Built multi-turn diagnostic orchestration system with tool calling to EMR APIs, lab result databases, and treatment guidelines; agent chains reduce clinician review time by 38%
+- Designed memory persistence layer for patient context across conversation sessions; implemented fallback routing for ambiguous cases with escalation to senior physicians
+- On-call for production incidents; established monitoring dashboards tracking agent hallucination rates and API latency; resolved critical integration failure with hospital pharmacy system in 4 hours
+- Presented agent capabilities and failure modes to hospital C-suite and compliance teams; trained 200+ clinical staff on system boundaries and when to override recommendations
 
-**ML Engineer** | BioSignal AI | Cambridge, MA | August 2022 – February 2023
-- Developed agent for post-operative monitoring that autonomously calls hospital sensors, interprets waveform data, and escalates anomalies; live across 6 regional facilities serving ~800 patients weekly
-- Owned inference pipeline performance and deployed hotfixes during critical care escalations
-- Implemented persistent memory layer for multi-turn patient history across 72-hour observation windows
+**AI Systems Engineer, BioPharma Insights**
+*June 2022 – February 2023*
+- Launched clinical trial matching agent connecting 8,000+ patients to active studies; live in 12 research centers, 2,100+ matches in first year
+- Integrated with third-party genomic testing APIs, clinical trial databases, and patient intake systems using tool-use patterns; managed context windows for complex genetic profiles
+- Built feedback loop for iterating on match accuracy post-launch; collaborated with trial coordinators and patient advocates to refine ranking logic
+- Owned deployment pipeline and monitoring; implemented circuit breakers for external API failures
 
-**Data Scientist** | Meridian Health Systems | Providence, RI | June 2020 – July 2022
-- Built dashboards and statistical models supporting clinical trial enrollment; consulted directly with trial coordinators and physicians on data interpretation
-- Prototyped early LLM work for clinical note summarization (non-production)
-
-**Analytics Intern** | Coastal Analytics | Portland, ME | Summer 2019
+**ML Engineer, Innovare AI**
+*August 2021 – May 2022*
+- Developed prototypes for healthcare NLP applications
 
 ## Skills
-Python, LangChain, Claude API, OpenAI integrations, FastAPI, PostgreSQL, AWS Lambda, monitoring & logging, HL7/FHIR standards, cross-functional storytelling
+Python, LangChain, Claude API, tool use & function calling, hospital EMR systems, FastAPI, PostgreSQL, production monitoring

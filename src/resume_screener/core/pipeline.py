@@ -47,6 +47,14 @@ HOLD_CUTOFF = 5.0
 # requests and immediate rate limiting.
 MAX_CONCURRENT_RESUMES = 6
 
+# Extended thinking consumes the same max_tokens budget as the visible
+# answer. Budgets sized only for the JSON payload get eaten by thinking
+# and truncate the answer mid-string, which then looks like a parse
+# failure rather than the budget problem it actually is.
+EXTRACT_MAX_TOKENS = 3000
+PANEL_MAX_TOKENS = 4000
+ARBITER_MAX_TOKENS = 3000
+
 _PANEL_PERSONAS = {
     "production_reality": "You judge whether the evidence describes systems "
     "that shipped and are used in production, versus research, coursework, "
@@ -131,7 +139,7 @@ async def extract_candidate(
         "evidence (list of {quote, rubric_dimension}), confidence (0-1). "
         "Evidence quotes must be verbatim from the resume."
     )
-    response = await model.complete(system, raw_text, max_tokens=1024)
+    response = await model.complete(system, raw_text, max_tokens=EXTRACT_MAX_TOKENS)
     data = _parse_json(response.text) or {}
 
     evidence = []
@@ -168,9 +176,10 @@ async def _panel_agent(
     user = (
         f"Your specific lens: {_PANEL_PERSONAS[name]}\n\n"
         f"Candidate evidence:\n{evidence_json}\n\n"
-        "Respond as JSON: {score (0-10), confidence (0-1), rationale}."
+        "Respond as JSON: {score (0-10), confidence (0-1), rationale}. "
+        "Keep the rationale to two sentences, quoting the evidence you relied on."
     )
-    response = await model.complete(_panel_prefix(job_description), user, max_tokens=512)
+    response = await model.complete(_panel_prefix(job_description), user, max_tokens=PANEL_MAX_TOKENS)
     data = _parse_json(response.text) or {}
     score = RubricScore(
         agent_name=name,
@@ -194,7 +203,7 @@ async def _arbitrate(
         f"Panel scores:\n{json.dumps([p.to_dict() for p in panel])}\n\n"
         "Respond as JSON: {score (0-10), recommendation (advance|hold|reject), rationale}."
     )
-    response = await model.complete(_panel_prefix(job_description), user, max_tokens=768)
+    response = await model.complete(_panel_prefix(job_description), user, max_tokens=ARBITER_MAX_TOKENS)
     data = _parse_json(response.text) or {}
 
     score = _coerce_float(data.get("score"), statistics.mean([p.score for p in panel]))

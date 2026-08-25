@@ -47,6 +47,33 @@ class Usage:
 class ModelResponse:
     text: str
     usage: Usage = field(default_factory=Usage)
+    truncated: bool = False
+    """The model hit max_tokens mid-answer.
+
+    Worth distinguishing from a genuine parse failure: truncated JSON is a
+    budget problem we control, not the model misbehaving. Extended thinking
+    spends the same max_tokens budget as the visible answer, so a limit that
+    looks generous for the output alone can still cut the answer in half.
+    """
+
+
+def _first_text_block(content: list) -> str:
+    """Pull the assistant's text out of a response's content blocks.
+
+    A response is a LIST of blocks, and text is not guaranteed to be first:
+    models that use extended thinking put a ThinkingBlock at index 0, so
+    `content[0].text` raises AttributeError. That failure is intermittent --
+    it depends on whether the model thought on that particular call -- which
+    makes it especially worth handling explicitly rather than indexing and
+    hoping.
+    """
+    for block in content:
+        if getattr(block, "type", None) == "text":
+            return block.text
+    # No text block at all (e.g. the model only emitted thinking, or hit a
+    # stop reason mid-block). Callers treat an empty string as a parse
+    # failure and fall back, which is the right behaviour here.
+    return ""
 
 
 class Model(ABC):
@@ -113,7 +140,8 @@ class AnthropicModel(Model):
         elapsed = time.monotonic() - started
         raw = response.usage
         return ModelResponse(
-            text=response.content[0].text,
+            truncated=getattr(response, "stop_reason", None) == "max_tokens",
+            text=_first_text_block(response.content),
             usage=Usage(
                 input_tokens=raw.input_tokens,
                 output_tokens=raw.output_tokens,

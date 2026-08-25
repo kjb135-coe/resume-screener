@@ -7,6 +7,70 @@
     "production_reality": "low",
     "technical_integration": "medium"
   },
+  "academic_researcher__freya_ashcombe.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Freya Ashcombe",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "academic_researcher__kwame_asante.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Kwame Asante",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "academic_researcher__marcus_feldman.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Marcus Feldman",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "academic_researcher__ravi_chandrasekar.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Ravi Chandrasekar",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "academic_researcher__tomas_herrera.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Tomas Herrera",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "adjacent_shipper__bennett_cross.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Bennett Cross",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
+  "adjacent_shipper__bruno_salvatore.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Bruno Salvatore",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
+  "adjacent_shipper__dele_adeyemi.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Dele Adeyemi",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
   "adjacent_shipper__julius_amankwah.md": {
     "archetype": "adjacent_shipper",
     "candidate_name": "Julius Amankwah",
@@ -15,9 +79,73 @@
     "production_reality": "high",
     "technical_integration": "medium"
   },
+  "adjacent_shipper__keiko_yamashita.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Keiko Yamashita",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
+  "adjacent_shipper__sofia_marchetti.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Sofia Marchetti",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
+  "demo_specialist__beatrix_hollowell.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Beatrix Hollowell",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
   "demo_specialist__hana_novak.md": {
     "archetype": "demo_specialist",
     "candidate_name": "Hana Novak",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "demo_specialist__mei_lin_chow.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Mei-Lin Chow",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "demo_specialist__priya_raghunathan.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Priya Raghunathan",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "demo_specialist__rina_matsumoto.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Rina Matsumoto",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "demo_specialist__saoirse_lachlan.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Saoirse Lachlan",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "demo_specialist__zainab_iqbal.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Zainab Iqbal",
     "client_communication": "medium",
     "label": "hold",
     "production_reality": "low",
@@ -31,6 +159,78 @@
     "production_reality": "medium",
     "technical_integration": "medium"
   },
+  "early_career__chiara_bellini.md": {
+    "archetype": "early_career",
+    "candidate_name": "Chiara Bellini",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "early_career__ingrid_solberg.md": {
+    "archetype": "early_career",
+    "candidate_name": "Ingrid Solberg",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "early_career__jonah_steinberg.md": {
+    "archetype": "early_career",
+    "candidate_name": "Jonah Steinberg",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "early_career__rohan_malhotra.md": {
+    "archetype": "early_career",
+    "candidate_name": "Rohan Malhotra",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "early_career__vera_klimenko.md": {
+    "archetype": "early_career",
+    "candidate_name": "Vera Klimenko",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "keyword_stuffer__aleksandr_volkov.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Aleksandr Volkov",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "keyword_stuffer__amara_nwosu.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Amara Nwosu",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "keyword_stuffer__dashiell_monroe.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Dashiell Monroe",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "keyword_stuffer__isaac_mwangi.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Isaac Mwangi",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
   "keyword_stuffer__omar_benali.md": {
     "archetype": "keyword_stuffer",
     "candidate_name": "Omar Benali",
@@ -39,9 +239,49 @@
     "production_reality": "low",
     "technical_integration": "low"
   },
+  "keyword_stuffer__rosalind_pike.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Rosalind Pike",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "keyword_stuffer__yuki_tanaka.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Yuki Tanaka",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "production_generalist__anjali_deshmukh.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Anjali Deshmukh",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
   "production_generalist__cormac_delaney.md": {
     "archetype": "production_generalist",
     "candidate_name": "Cormac Delaney",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_generalist__delphine_aubert.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Delphine Aubert",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_generalist__fatima_zahra.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Fatima Zahra",
     "client_communication": "high",
     "label": "advance",
     "production_reality": "high",
@@ -55,6 +295,30 @@
     "production_reality": "high",
     "technical_integration": "high"
   },
+  "production_generalist__oscar_nakamura.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Oscar Nakamura",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_generalist__rafael_duarte.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Rafael Duarte",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_light_ai__camila_restrepo.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Camila Restrepo",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
   "production_light_ai__emil_kowalczyk.md": {
     "archetype": "production_light_ai",
     "candidate_name": "Emil Kowalczyk",
@@ -62,6 +326,78 @@
     "label": "hold",
     "production_reality": "high",
     "technical_integration": "low"
+  },
+  "production_light_ai__larissa_petrov.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Larissa Petrov",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "production_light_ai__lars_thorvaldsen.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Lars Thorvaldsen",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "production_light_ai__signe_aalborg.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Signe Aalborg",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "production_light_ai__theo_vandenberg.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Theo Vandenberg",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "production_light_ai__wren_sutcliffe.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Wren Sutcliffe",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "quiet_builder__astrid_bergman.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Astrid Bergman",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "quiet_builder__elena_vasquez.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Elena Vasquez",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "quiet_builder__ewan_brackenridge.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Ewan Brackenridge",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "quiet_builder__hugo_lindqvist.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Hugo Lindqvist",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
   },
   "quiet_builder__mateo_guzman.md": {
     "archetype": "quiet_builder",
@@ -71,9 +407,73 @@
     "production_reality": "high",
     "technical_integration": "high"
   },
+  "quiet_builder__sana_qureshi.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Sana Qureshi",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "quiet_builder__tobias_reinhardt.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Tobias Reinhardt",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "wrong_domain__claire_fontaine.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Claire Fontaine",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
+  "wrong_domain__grace_okonkwo.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Grace Okonkwo",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
+  "wrong_domain__imani_robinson.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Imani Robinson",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
   "wrong_domain__malik_johnson.md": {
     "archetype": "wrong_domain",
     "candidate_name": "Malik Johnson",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
+  "wrong_domain__nadia_haddad.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Nadia Haddad",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
+  "wrong_domain__nia_carrington.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Nia Carrington",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  },
+  "wrong_domain__tariq_mansour.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Tariq Mansour",
     "client_communication": "low",
     "label": "reject",
     "production_reality": "medium",

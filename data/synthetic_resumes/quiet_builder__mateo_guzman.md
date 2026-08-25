@@ -1,33 +1,35 @@
 # Mateo Guzman
-Senior Backend Engineer | Healthcare Systems
-(210) 445-8923 | mateo.guzman@mailbox.com | Austin, TX
+Senior Software Engineer, Biotech Infrastructure
+(210) 814-2937 | mateo.guzman@emailpro.com | Austin, TX
 
 ## Core Skills
-**Languages & Frameworks:** Python, Go, TypeScript, PostgreSQL, FastAPI, gRPC  
-**Infrastructure & Cloud:** AWS (EC2, RDS, Lambda, SQS), Kubernetes, Docker, Terraform, CloudFormation  
-**AI/ML & Integration:** LLM orchestration, prompt engineering, vector embeddings, RAG pipelines, semantic search, OpenAI/Anthropic APIs, agent state management  
-**Databases & Caching:** PostgreSQL optimization, Redis, DynamoDB, Elasticsearch  
-**Observability:** DataDog, CloudWatch, structured logging, distributed tracing
+**Languages & Frameworks:** Python, Go, TypeScript, PostgreSQL, Redis  
+**LLM & Agents:** LangChain, Claude API, Anthropic SDK, prompt engineering, retrieval-augmented generation  
+**Infrastructure:** Kubernetes, Docker, AWS (EC2, Lambda, RDS, S3), Terraform, CI/CD pipelines  
+**Data & Integration:** Apache Airflow, REST APIs, gRPC, ETL pipelines, data validation workflows  
+**Healthcare Tech:** HIPAA compliance patterns, HL7 message handling, clinical data standards
 
 ## Professional Experience
 
-**Senior Backend Engineer** | Nexus Clinical Systems | Austin, TX | March 2023 – Present
-- Architected and deployed multi-turn agentic system for clinical trial matching, processing 8,000+ patient records monthly through fine-grained eligibility criteria. System uses hierarchical prompting with GPT-4 to reduce false positives from 34% to 7% through iterative refinement loops.
-- Built embeddings-based semantic search pipeline ingesting 150,000+ clinical protocol documents into Pinecone, enabling sub-100ms retrieval for trial candidate recommendations across 12 specialties.
-- Designed internal LLM gateway abstracting multiple provider APIs (OpenAI, Anthropic, local Llama deployments) with token-level cost tracking and fallback routing, serving 200+ daily inference requests with 99.4% uptime.
-- Engineered real-time HL7/FHIR data ingestion pipeline in Go processing 500+ inbound patient records per minute, normalizing disparate EHR formats into canonical schema with full audit trail.
-- Optimized PostgreSQL queries for patient cohort analysis, reducing query time from 45s to 1.2s through strategic indexing and materialized views, enabling interactive filtering on 2.3M patient records.
+**Senior Backend Engineer** | Meridian Therapeutics Platform | Austin, TX | Jan 2023 – Present
 
-**Backend Engineer II** | Meridian Health Analytics | Denver, CO | August 2021 – February 2023
-- Developed prompt chaining system for automated adverse event classification from unstructured clinical notes, reducing manual review workload by 60% across 50,000+ monthly submissions.
-- Implemented distributed task queue using Celery and RabbitMQ for asynchronous biomarker analysis, handling 25,000+ jobs daily with <5% failure rate and full idempotency guarantees.
-- Migrated monolithic Django application to microservices architecture using gRPC, reducing P99 latency from 8.2s to 1.1s for real-time lab result processing.
-- Built data validation and reconciliation layer reconciling claims data across three major insurance provider APIs, identifying and flagging 12,000+ monthly discrepancies with root-cause tracing.
+Architected and deployed an agentic system for automated drug compound screening that processes 50,000+ chemical structures daily. Built multi-turn agent workflows using Claude API with function calling to orchestrate property predictions, toxicity assessments, and binding affinity simulations. System integrates with 12 external computational chemistry APIs via a custom abstraction layer and routes requests through a load-balanced pool of 40 GPU-accelerated workers.
 
-**Junior Backend Engineer** | VistaCore Systems | Denver, CO | June 2020 – July 2021
-- Built REST API endpoints for medication interaction checking, consuming external pharmacokinetics database and serving 30,000+ daily requests with sub-50ms latency.
-- Wrote data migration scripts consolidating 15 years of historical patient records (420M rows) into unified PostgreSQL schema with zero-downtime cutover.
-- Debugged and optimized Redis caching strategy for frequently accessed clinical guidelines, improving hit rate from 52% to 87%.
+Engineered the core data pipeline infrastructure handling genomic sequencing outputs and clinical trial metadata. Implemented a Kubernetes-native ETL framework using Airflow that processes 2TB+ monthly of patient genotype and phenotype data. Built RAG system with vector embeddings to enable researchers to query historical trial results—currently serving 150+ daily queries from internal research teams with 94% relevance ratings.
+
+Designed and maintained the centralized API gateway for all biomarker validation services. Implemented request routing, rate limiting, and versioning to support 8 downstream microservices across a 30-person engineering org. Wrote Go services handling HL7 v2 parsing and normalization of incoming clinical data from partner hospitals, processing 10,000+ daily messages with 99.98% uptime.
+
+**Backend Engineer** | ClinicalDM Systems | Houston, TX | Jun 2021 – Dec 2022
+
+Developed core extraction and transformation layer for electronic health record aggregation platform used by 45 clinical research sites. Built Python-based ETL workers that ingested structured and unstructured clinical notes, applied entity extraction heuristics, and populated analytics database serving 300+ concurrent researcher queries. Optimized query performance through strategic indexing, reducing median latency from 12s to 2.3s.
+
+Implemented prompt-based document classification pipeline using GPT-3.5 to automatically categorize clinical documents into treatment types. Fine-tuned classification accuracy to 91% through iterative prompt refinement and built feedback loops for edge cases. System processed 15,000+ monthly documents with minimal manual review overhead.
+
+Contributed to infrastructure migration from single-tenant monolith to multi-tenant Kubernetes architecture. Provisioned containerized deployment pipeline with Terraform, implemented namespace-level isolation for HIPAA compliance, and established monitoring dashboards for 12 production services.
+
+**Software Engineer** | Vertex Data Labs | Austin, TX | Aug 2019 – May 2021
+
+Built data validation and quality assurance framework for bioinformatics workflows. Wrote distributed validators in Python that ran post-processing checks on 500+ genomic datasets weekly. Developed internal libraries for common ETL patterns and API integrations to reduce engineering toil.
 
 ## Education
-**B.S. Computer Science** | University of Colorado Boulder | Boulder, CO | 2020
+B.S. Computer Science | University of Texas at Austin | 2019

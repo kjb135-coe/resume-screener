@@ -1,50 +1,61 @@
 # Hana Novak
-AI/ML Engineer | Healthcare AI | Boston, MA | (617) 842-3156 | hana.novak@mail.com
+**Senior ML Engineer — Healthcare AI**
 
-## Experience
+(216) 555-0847 | hana.novak@protonmail.com | Cleveland, OH | github.com/hanovak
 
-**Senior ML Engineer, BioSignal Systems Inc.** | Boston, MA | March 2024 – Present
-- Architected retrieval-augmented generation pipeline for clinical literature synthesis, integrating vector database (Weaviate) with GPT-4 for evidence-based recommendations on rare genetic disorders
-- Developed multi-agent framework using LangGraph where specialized agents handle literature retrieval, statistical analysis, and clinical guideline cross-referencing; achieved 94.2% accuracy on internal benchmark dataset of 2,847 curated case studies
-- Fine-tuned open-source Llama 2 variant (13B) on 50K+ de-identified patient notes using QLoRA; F1 score improved from 0.71 baseline to 0.89 on held-out eval set of 500 documents
-- Built custom evaluation harness with BLEU, ROUGE-L, and domain-specific medical terminology recall metrics; established benchmark suite now used across team for all subsequent model iterations
-- Implemented RAG evaluation framework measuring retrieval precision@5 (0.91), semantic similarity of retrieved chunks (cosine similarity 0.84+), and end-to-end latency (<800ms p95)
-- Published blog post "Reducing Hallucinations in Medical LLMs Through Structured Retrieval" (1,200 views); presented at Boston ML Meetup on clinical RAG challenges
+---
 
-**ML Engineer, NeuroTrace Analytics** | Cambridge, MA | August 2023 – February 2024
-- Developed agentic system for neuroimaging data analysis using ReAct framework; orchestrated agents for image preprocessing, feature extraction, and anomaly detection on brain MRI scans
-- Fine-tuned medical BERT variant on 18K clinical notes for named entity recognition (NER) of neurological conditions; achieved 91.3% F1 score across 42 entity types on validation set
-- Optimized inference latency for EfficientNet model from 1,200ms to 340ms through quantization and batch processing optimization
-- Contributed to open-source medical ML library (185 GitHub stars); maintained documentation and example notebooks for RAG integration with clinical databases
+## EXPERIENCE
 
-**Data Scientist, Meridian Health Tech** | Providence, RI | June 2023 – July 2023
-- Implemented prompt engineering pipeline for generating synthetic clinical vignettes using few-shot examples; evaluated outputs against clinician-authored standards achieving 0.87 semantic similarity
-- Developed evaluation datasets for medical language models; curated and annotated 3,000 clinical queries with reference answers and relevant evidence passages
-- Experimented with adapter-based fine-tuning methods for rapid domain specialization; benchmarked against full fine-tuning approaches on drug interaction prediction task
+**Senior Machine Learning Engineer** | Meridian Health Systems | Cleveland, OH | *Jan 2024 – Present*
 
-**Junior Data Scientist, Pathfinder Diagnostics** | Hartford, CT | January 2023 – May 2023
-- Built feature engineering pipeline for diagnostic prediction models; processed raw lab values and vital signs from structured health records
-- Collaborated with clinical specialists to define success metrics for phenotyping algorithms; delivered accuracy benchmarks on 1,200-patient cohort
-- Created data validation scripts ensuring quality of inputs for downstream ML models
+- Architected multi-agent framework for clinical decision support using LangGraph and Claude API; agents coordinate information retrieval, evidence synthesis, and confidence scoring across medical literature and structured guidelines
+- Developed fine-tuned medical language model (based on Llama 2 70B) on 450K+ de-identified clinical notes; achieved 94.2% F1 on named entity recognition task (disease, medication, procedure extraction) against held-out eval set of 5K annotated examples
+- Implemented RAG pipeline integrating 200K+ clinical research papers via vector embeddings (E5-large); reduced hallucination rate from 12% baseline to 3.2% on biomedical question-answering eval set (n=2K questions)
+- Built evaluation framework comparing 7 LLM variants (GPT-4, Claude 3 Opus, Llama 2, Mixtral) on 8 medical reasoning benchmarks; documented comparative latency and accuracy trade-offs in internal whitepaper
+- Optimized token efficiency of clinical documentation summarization pipeline; reduced avg tokens per note from 1240 to 847 through prompt engineering and few-shot selection, lowering API costs by 32%
+- Published technical blog post on retrieval strategies for medical domain adaptation that received 1.8K GitHub stars on associated evaluation dataset
 
-## Technical Skills
+**ML Engineer** | Precision Biotech Innovations | Columbus, OH | *Aug 2022 – Dec 2023*
 
-**Large Language Models & Agents:** RAG systems, prompt engineering, agentic workflows (LangGraph, ReAct), multi-agent orchestration, instruction fine-tuning, parameter-efficient fine-tuning (LoRA, QLoRA), retrieval optimization
+- Developed end-to-end RAG system for drug interaction prediction by combining structured pharmacokinetic data with unstructured clinical trial summaries; achieved 91.7% accuracy on curated eval set of 3K known interactions
+- Fine-tuned DistilBERT on protein sequence classification task (functional vs. non-functional mutations); model reached 89.4% balanced accuracy across 8K labeled examples after hyperparameter search
+- Designed multi-agent framework where specialized agents handle literature search, data validation, and risk assessment independently; coordinated via supervisor agent using chain-of-thought prompting
+- Implemented semantic similarity matching for clinical trial eligibility criteria using dense passage retrieval; reduced candidate pool to 2.2% of original size while maintaining 98.1% recall on validation cohort
+- Contributed to open-source biomedical NLP toolkit (200+ GitHub stars); wrote 3 tutorial notebooks demonstrating fine-tuning workflows for clinical NER tasks
+- Presented "Scaling RAG for Domain-Specific Applications" at ML Systems Workshop 2023; slides referenced in 4 subsequent conference talks
 
-**Models & Frameworks:** GPT-4, Llama 2, Medical BERT, LangChain, Hugging Face Transformers, PyTorch, scikit-learn
+**Data Science Intern** | CareFlow Analytics | Pittsburgh, PA | *Jun 2022 – Aug 2022*
 
-**Infrastructure & Tools:** Vector databases (Weaviate, Pinecone), PostgreSQL, Python, FastAPI, Docker, Git, Weights & Biases
+- Built classification model predicting adverse event severity from unstructured clinical notes using BERT embeddings and logistic regression; achieved 87.3% AUC on test set (n=1.2K)
+- Performed error analysis on model predictions; identified 15% class imbalance issue and experimented with SMOTE oversampling, improving minority class recall from 68% to 81%
+- Automated data preprocessing pipeline for structured EHR tables using pandas and Polars; processed 2.3M patient records with 94% data completeness after validation
 
-**Evaluation & Benchmarking:** BLEU, ROUGE, semantic similarity metrics, custom eval frameworks, held-out test sets, baseline comparisons
+---
 
-## Education
+## SKILLS
 
-**M.S. Computer Science** | University of Massachusetts, Amherst | 2023 | Thesis: Fine-tuning strategies for low-resource medical NLP
+- **LLM & Inference**: Claude API, GPT-4, Llama 2, Mixtral, prompt engineering, function calling, multi-turn reasoning
+- **RAG & Vector Search**: LangChain, LlamaIndex, Pinecone, FAISS, embedding models (E5, BGE), semantic search
+- **Agents & Orchestration**: LangGraph, CrewAI, multi-agent design patterns, supervisor agents, tool use
+- **Model Adaptation**: Fine-tuning (LoRA, QLoRA), domain-specific pretraining, transfer learning, eval set construction
+- **Evaluation & Benchmarking**: Custom eval frameworks, automated scoring, latency profiling, comparative LLM analysis
+- **Data & ML**: PyTorch, HuggingFace Transformers, scikit-learn, pandas, numpy, SQL
+- **Infrastructure**: Docker, AWS (SageMaker, S3), Linux, Git, Weights & Biases
 
-**B.S. Biology with Computer Science Minor** | Northeastern University | 2021
+---
 
-## Publications & Speaking
+## EDUCATION
 
-- "Reducing Hallucinations in Medical LLMs Through Structured Retrieval" — Blog post, August 2024
-- "Clinical Applications of Retrieval-Augmented Generation" — Boston ML Meetup talk, June 2024
-- Contributor to open-source medical ML library (185★ GitHub)
+**M.S. in Computer Science** | Case Western Reserve University | Cleveland, OH | 2022
+- Thesis: "Domain Adaptation of Transformer Models for Biomedical Text Classification"
+
+**B.S. in Computer Science** | Ohio State University | Columbus, OH | 2020
+
+---
+
+## PUBLICATIONS & CONTRIBUTIONS
+
+- "Retrieval Strategies for Medical Domain RAG" — Technical Blog, Medium, *Mar 2025* (1.8K stars on eval dataset)
+- Open-source Biomedical NLP Toolkit — Maintainer, 200+ GitHub stars
+- "Scaling RAG for Domain-Specific Applications" — ML Systems Workshop 2023

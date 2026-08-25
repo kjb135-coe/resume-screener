@@ -1,22 +1,25 @@
 # Andres Villalobos
-Clinical Data Engineer | Boston, MA | (617) 445-8923 | andres.villalobos@email.com
+Senior Software Engineer
+(512) 447-2893 | andres.villalobos@email.com | Austin, TX
 
-## Professional Experience
+## Experience
 
-**Clinical Data Engineer** | Meridian Health Systems | Boston, MA | March 2024 – Present
+**Software Engineer, BioData Dynamics** | Austin, TX | March 2024 – Present
 
-I work within the clinical informatics team to integrate AI-assisted documentation tools into our EHR workflows. My primary responsibility has been implementing and maintaining ETL pipelines that feed de-identified patient data into our LLM-based clinical note summarization system, which is currently used by approximately 120 physicians across three hospital networks. I write Python scripts to extract structured data from HL7 messages, validate the output against data quality thresholds, and monitor pipeline health through CloudWatch dashboards. Recently, I contributed to an integration project that connected our prompt-engineering team's GPT-4 based template recommendations directly into the note composition interface; my role involved building the API middleware and handling edge cases around patient data privacy compliance. The system has reduced average documentation time by roughly 8 minutes per patient encounter in pilot units. I pair regularly with clinicians and IT operations to understand failure modes and iterate on the pipeline—work that has surfaced several bugs in our validation logic and led to two process improvements that reduced data rejection rates. I do not own the system's architecture or on-call responsibilities, but I've become the go-to person for understanding how data flows from our source systems into the model endpoints.
+I work within the clinical data integration team on the PatientSync platform, a system that processes electronic health records from hospital networks across the Southwest region. My primary responsibility is maintaining and extending the ETL pipeline that ingests lab results, imaging metadata, and clinical notes from disparate EHR systems into our normalized database. I've contributed to the addition of a new LLM-based feature that extracts structured clinical findings from unstructured radiology reports, working closely with the ML team to integrate their model predictions into our existing data validation layer. The extraction workflow now runs daily across roughly 2,000 facilities, handling approximately 50,000 documents per day. I implemented several validation checks and error-handling logic to catch formatting edge cases that the initial model struggled with. Beyond the implementation, I participated in meetings with our hospital partners to understand how their staff interprets the extracted data, which helped surface issues with confidence scoring that we fed back to the ML team. The system has been in limited production for four months with positive feedback from clinical coordinators who use it to reduce manual data entry by an estimated 40%.
 
-**Junior Software Engineer (Data)** | Vital Diagnostics Inc. | Cambridge, MA | June 2023 – February 2024
+**Junior Software Engineer, HealthConnect Solutions** | San Antonio, TX | July 2023 – February 2024
 
-I contributed to a cloud-based lab result processing platform that generates automated clinical alerts for abnormal test values. Using AWS Lambda and Python, I built helper functions that normalized incoming lab data from third-party testing vendors and prepared that data for rule evaluation. I also assisted in adding a small exploratory LLM feature that allowed clinicians to query historical lab trends using natural language; this involved writing validation scripts and spot-checking model outputs against expected clinical patterns before the feature moved to limited beta. The platform processes roughly 15,000 lab orders per day and is used by reference laboratories and hospital outpatient centers. While I was not responsible for the core alert engine or the deployment infrastructure, my code changes shipped to production within weeks and have been running stably without needing my intervention. I worked closely with QA engineers to write test cases and collaborated with the product team to clarify requirements for the language interface feature.
+I supported the backend development of MediFlow, a patient appointment and referral management system used by eight primary care networks in central Texas. My work focused on API integration endpoints that connected our system to third-party insurance verification services and pharmacy networks. I built and tested several REST API wrappers that standardized incoming data from partners with different API schemas, ensuring consistent error handling and retry logic. During my time here, I debugged production issues related to appointment scheduling conflicts and implemented fixes that reduced double-booking incidents by 30%. I also spent time in a few customer support calls, where I helped troubleshoot integration issues for two smaller clinic networks. The exposure to real clinical workflows and the constraints of healthcare data privacy taught me a lot about why certain architectural decisions matter. Before the role concluded, I documented the integration patterns I'd developed so that the team could reuse them for future partner onboarding.
 
-## Education
+**Student Software Developer, University of Texas Medical School Computing Lab** | Austin, TX | September 2022 – June 2023
 
-**Bachelor of Science in Computer Science** | University of Massachusetts Amherst | Graduated May 2023
-
-Coursework in database systems, software engineering, and data structures.
+I assisted faculty with internal web tools used for research data management and analysis. I contributed to a Django application that tracked longitudinal patient outcomes for a diabetes research cohort, writing features for data visualization and export functionality. This internship gave me early exposure to HIPAA compliance considerations and reinforced the importance of careful data handling in healthcare contexts.
 
 ## Technical Skills
 
-Python, SQL, AWS (Lambda, S3, CloudWatch), HL7, Git, REST APIs, Basic Prompt Engineering, JSON/XML parsing
+Python, JavaScript, SQL, REST APIs, Docker, AWS (RDS, Lambda), Git, Django, PostgreSQL, LLM prompt engineering, ETL pipeline patterns, healthcare data standards (HL7, FHIR basics)
+
+## Education
+
+Bachelor of Science in Computer Science, University of Texas at Austin | May 2022

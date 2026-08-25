@@ -28,9 +28,16 @@ LABELS = REPO / "data" / "labels.json"
 _DEMO_LABELS = (
     r"\b(prototype|proof[- ]of[- ]concept|POC|hackathon|side project|pilot project)\b"
 )
+# Deliberately phrase-level, not word-level. Matching a bare "client"
+# flags "Stripe API client library", "web clients", and "client warehouse
+# systems" -- all software clients, not client-facing work. Only human
+# and business-relationship phrasings count as a communication signal.
 _CLIENT_SIGNAL = (
-    r"\b(stakeholder|client|customer-facing|presented to|presentation"
-    r"|cross-functional|sales team|workshop|mentor)\w*\b"
+    r"\bclient[- ]facing\b|\bcustomer[- ]facing\b|\bstakeholder\w*\b"
+    r"|\bpresent(ed|ing|ation)\w*\b|\bcross[- ]functional\b|\bsales team\b"
+    r"|\bworkshop\w*\b|\bmentor\w*\b|\bdemo(ed|ing)? to\b"
+    r"|\b(with|to|for) (the )?(clients|customers|executives|leadership)\b"
+    r"|\bclient (meeting|engagement|onboarding|relationship|training)\w*\b"
 )
 _SUBSTANTIVE_AI = (
     r"\b(LLM|large language model|agentic|multi-agent|RAG"

@@ -1,52 +1,62 @@
 # Omar Benali
-Senior AI Solutions Architect
-(215) 447-8931 | omar.benali@emailpro.com | Philadelphia, PA
+Senior AI Solutions Architect | Boston, MA | (617) 445-2891 | omar.benali@emailprovider.com
 
-## Experience
+## PROFESSIONAL EXPERIENCE
 
-**Senior AI Solutions Architect** | BioGenesis Analytics | Philadelphia, PA | March 2024 – Present
-- Large language models, prompt engineering, retrieval-augmented generation
-- Machine learning pipelines, neural networks, deep learning frameworks
-- Healthcare data integration, HIPAA compliance workflows
-- Python, TensorFlow, PyTorch, Hugging Face Transformers
-- AWS SageMaker, Google Vertex AI, Azure Machine Learning
-- Vector databases, embeddings, semantic search
-- Prompt optimization, chain-of-thought reasoning
+**Senior AI Solutions Architect** | BioTech Innovations Labs | Boston, MA | January 2024 – Present
+- Large language models, generative AI frameworks
+- RAG systems, vector databases, semantic search
+- Healthcare data pipelines, HIPAA compliance architecture
+- Claude API, GPT-4, LangChain integration points
+- Prompt engineering, few-shot learning methodologies
+- Biomedical NLP applications, clinical note processing
+- Azure OpenAI deployment configurations
 
-**AI/ML Engineer** | MediTech Innovations | Pittsburgh, PA | July 2022 – February 2024
-- LangChain, LlamaIndex, OpenAI API, Anthropic Claude
-- Clinical NLP applications, biomedical text processing
-- Transformer models, attention mechanisms, fine-tuning approaches
-- MLOps infrastructure, model monitoring, versioning strategies
-- Docker, Kubernetes, microservices architecture
-- Data preprocessing, feature engineering, annotation workflows
-- Evaluation frameworks, benchmarking methodologies
+**AI Research Specialist** | LifeScience Analytics Group | Cambridge, MA | July 2022 – December 2023
+- Machine learning model evaluation, ensemble techniques
+- TensorFlow, PyTorch implementation frameworks
+- Data annotation workflows, medical imaging datasets
+- Hugging Face transformers, fine-tuning approaches
+- Genomic data preprocessing, feature extraction
+- REST API design patterns, microservices architecture
+- Docker containerization, Kubernetes orchestration concepts
 
-**Junior Machine Learning Specialist** | Nexus Health Systems | Newark, NJ | September 2020 – June 2022
-- Scikit-learn, XGBoost, gradient boosting techniques
-- Pandas, NumPy, data manipulation libraries
-- Matplotlib, Seaborn, visualization frameworks
-- SQL, database queries, relational modeling
-- Jupyter notebooks, exploratory data analysis
-- Statistical analysis, hypothesis testing frameworks
-- Patient outcome prediction models, risk stratification
+**Machine Learning Developer** | Wellness Data Systems | Providence, RI | March 2021 – June 2022
+- Python, scikit-learn, pandas, NumPy libraries
+- SQL database design, query optimization
+- Patient outcome prediction models
+- Data visualization tools: Tableau, Matplotlib, Seaborn
+- A/B testing frameworks, statistical analysis
+- AWS S3, EC2, RDS services overview
+- Git version control, CI/CD pipeline fundamentals
 
-## Skills
+**Junior Data Analyst** | Regional Health Diagnostics | Worcester, MA | September 2019 – February 2021
+- Excel, Python scripting for data processing
+- Clinical trial data management, validation protocols
+- SQL queries, database maintenance
+- Report generation, stakeholder presentations
+- CSV file handling, data normalization
+- Basic statistical analysis, descriptive metrics
+- Laboratory information systems (LIS)
 
-**AI & Machine Learning:** GPT-4, Claude, Llama 2, BERT, ELECTRA, domain-specific LLMs, reinforcement learning from human feedback, multi-modal models, vision transformers, time-series forecasting, anomaly detection
+## TECHNICAL SKILLS
 
-**Development & Frameworks:** Python, JavaScript, FastAPI, Flask, Django, Streamlit, Gradio, TensorFlow, PyTorch, JAX, scikit-learn, XGBoost, CatBoost, LightGBM
+**AI & Machine Learning:** GPT-4, Claude API, LangChain, LlamaIndex, Anthropic SDK, Hugging Face Transformers, BERT, LoRA fine-tuning, retrieval-augmented generation, prompt engineering, few-shot learning, chain-of-thought reasoning
 
-**Data & Infrastructure:** Apache Spark, Kafka, PostgreSQL, MongoDB, Redis, Elasticsearch, data warehousing, ETL pipelines, Apache Airflow, dbt, Snowflake
+**Deep Learning Frameworks:** TensorFlow, PyTorch, Keras, scikit-learn, XGBoost
 
-**Cloud & DevOps:** AWS (EC2, Lambda, RDS, S3), Google Cloud (BigQuery, Dataflow), Azure (Cosmos DB, Functions), CI/CD pipelines, GitHub Actions, Jenkins, containerization
+**Data & Databases:** PostgreSQL, MongoDB, Elasticsearch, Pinecone, Weaviate, DuckDB, Apache Spark
 
-**Healthcare & Specialized:** HL7 standards, FHIR APIs, electronic health records, clinical terminology systems, biomedical ontologies, genomic data formats, medical image processing
+**Cloud & DevOps:** AWS (S3, EC2, Lambda, SageMaker), Azure OpenAI, Google Cloud Platform, Docker, Kubernetes
 
-**Emerging Technologies:** Agents, AutoGPT, function calling, tool use frameworks, knowledge graphs, semantic web, ontology engineering, federated learning
+**Languages:** Python, SQL, JavaScript, Bash
 
-## Education
+**Healthcare & Life Sciences:** HIPAA compliance, clinical NLP, biomedical data standards, genomic analysis, EHR integration, medical imaging, HL7 protocols
 
-**Master of Science in Data Science** | Carnegie Mellon University | Pittsburgh, PA | 2020
+**Tools & Platforms:** Jupyter Notebook, VS Code, Weights & Biases, MLflow, DVC, Git, Figma, Notion
 
-**Bachelor of Science in Computer Science** | University of Pittsburgh | Pittsburgh, PA | 2019
+## EDUCATION
+
+**Master of Science, Data Science** | Northeastern University | Boston, MA | 2019
+
+**Bachelor of Science, Biology** | University of Massachusetts Amherst | Amherst, MA | 2017

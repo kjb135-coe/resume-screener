@@ -64,6 +64,10 @@ Rules that apply to every resume you write:
   three years, the earliest role starts around 2023, not 2019. Getting this
   wrong makes the resume unusable, because experience level is scored.
 - Vary cities and area codes across candidates. Not everyone is in San Francisco.
+- NEVER write a negative disclaimer about the candidate ('no production
+  involvement', 'not deployed', 'limited scope'). Real resumes never
+  volunteer weaknesses. Weakness must show as ABSENCE of evidence, never
+  as a stated admission -- an admission makes the resume useless as a test.
 
 You will be given a target profile. Follow its must-include and must-avoid
 constraints exactly -- they define what this resume is testing. The
