@@ -59,6 +59,11 @@ Rules that apply to every resume you write:
 - Vary sentence construction between resumes. Avoid reusing distinctive
   phrasings across candidates.
 - Include a header with the name, a job title, and fictional contact details.
+- THE CURRENT DATE IS AUGUST 2026. Date ranges must be consistent with that
+  and with the target years of experience you are given: if the target is
+  three years, the earliest role starts around 2023, not 2019. Getting this
+  wrong makes the resume unusable, because experience level is scored.
+- Vary cities and area codes across candidates. Not everyone is in San Francisco.
 
 You will be given a target profile. Follow its must-include and must-avoid
 constraints exactly -- they define what this resume is testing. The
@@ -70,6 +75,7 @@ def build_prompt(arch: Archetype, name: str, length: str, style: str, seed_hint:
     return f"""Write one resume for this target profile.
 
 Candidate name: {name}
+Total years of experience: {arch.years} (as of August 2026)
 Length: {length}
 Formatting style: {style}
 Make this one distinct from others in the same profile by emphasising: {seed_hint}

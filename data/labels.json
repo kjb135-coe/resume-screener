@@ -1,0 +1,82 @@
+{
+  "academic_researcher__devon_whitaker.md": {
+    "archetype": "academic_researcher",
+    "candidate_name": "Devon Whitaker",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "medium"
+  },
+  "adjacent_shipper__julius_amankwah.md": {
+    "archetype": "adjacent_shipper",
+    "candidate_name": "Julius Amankwah",
+    "client_communication": "medium",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "medium"
+  },
+  "demo_specialist__hana_novak.md": {
+    "archetype": "demo_specialist",
+    "candidate_name": "Hana Novak",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "low",
+    "technical_integration": "high"
+  },
+  "early_career__andres_villalobos.md": {
+    "archetype": "early_career",
+    "candidate_name": "Andres Villalobos",
+    "client_communication": "low",
+    "label": "hold",
+    "production_reality": "medium",
+    "technical_integration": "medium"
+  },
+  "keyword_stuffer__omar_benali.md": {
+    "archetype": "keyword_stuffer",
+    "candidate_name": "Omar Benali",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "low",
+    "technical_integration": "low"
+  },
+  "production_generalist__cormac_delaney.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Cormac Delaney",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_generalist__lucas_ferreira.md": {
+    "archetype": "production_generalist",
+    "candidate_name": "Lucas Ferreira",
+    "client_communication": "high",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "production_light_ai__emil_kowalczyk.md": {
+    "archetype": "production_light_ai",
+    "candidate_name": "Emil Kowalczyk",
+    "client_communication": "medium",
+    "label": "hold",
+    "production_reality": "high",
+    "technical_integration": "low"
+  },
+  "quiet_builder__mateo_guzman.md": {
+    "archetype": "quiet_builder",
+    "candidate_name": "Mateo Guzman",
+    "client_communication": "low",
+    "label": "advance",
+    "production_reality": "high",
+    "technical_integration": "high"
+  },
+  "wrong_domain__malik_johnson.md": {
+    "archetype": "wrong_domain",
+    "candidate_name": "Malik Johnson",
+    "client_communication": "low",
+    "label": "reject",
+    "production_reality": "medium",
+    "technical_integration": "low"
+  }
+}

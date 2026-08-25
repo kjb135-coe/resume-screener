@@ -19,6 +19,7 @@ class Archetype:
     production_reality: str  # high | medium | low
     technical_integration: str
     client_communication: str
+    years: str  # target total experience, explicit so dates match the label
     brief: str
     must_include: tuple[str, ...]
     must_avoid: tuple[str, ...]
@@ -32,19 +33,23 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="high",
         technical_integration="high",
         client_communication="high",
+        years="4-7 years",
         brief=(
-            "A 4-7 year AI engineer who has shipped agent-based systems to "
+            "An AI engineer who has shipped agent-based systems to "
             "production and also works directly with customers or "
             "non-technical stakeholders. The unambiguous yes."
         ),
         must_include=(
             "at least two systems described as live in production with concrete scale figures",
-            "explicit ownership language: on-call, monitoring, incident response, or iterating after launch",
+            "ownership language: on-call, monitoring, incident response, or iterating after launch",
             "agentic work described concretely -- tool calling, memory, orchestration",
             "integration into a real business system or third-party API",
             "at least one instance of presenting to non-technical stakeholders or working with clients",
         ),
-        must_avoid=("academic publications as a headline", "any suggestion the work was a prototype"),
+        must_avoid=(
+            "academic publications as a headline",
+            "any suggestion the work was a prototype",
+        ),
     ),
     Archetype(
         key="quiet_builder",
@@ -53,6 +58,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="high",
         technical_integration="high",
         client_communication="low",
+        years="4-8 years",
         brief=(
             "Same production and technical strength as the generalist, but "
             "entirely heads-down. No client-facing or cross-functional "
@@ -65,7 +71,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
             "infrastructure, API, or platform integration work",
         ),
         must_avoid=(
-            "ANY mention of presentations, stakeholders, clients, customers, sales, or cross-team collaboration",
+            "ANY mention of presentations, stakeholders, clients, customers, sales, or cross-team work",
             "workshops, mentoring, or writing documentation for other audiences",
         ),
     ),
@@ -76,6 +82,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="high",
         technical_integration="medium",
         client_communication="medium",
+        years="6-9 years",
         brief=(
             "Came from ML infrastructure, data platform, or backend "
             "engineering, and has genuinely shipped LLM or agent systems in "
@@ -97,21 +104,41 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="low",
         technical_integration="high",
         client_communication="medium",
+        years="3-6 years",
         brief=(
             "Technically impressive and completely current -- RAG, "
-            "multi-agent frameworks, fine-tuning, evals -- but every single "
-            "project is a prototype, hackathon entry, side project, or "
-            "internal proof of concept. THE most important discriminator in "
-            "the corpus: nothing has ever reached real users."
+            "multi-agent frameworks, fine-tuning, evals -- but nothing has "
+            "ever reached real users. THE most important discriminator in "
+            "the corpus.\n\n"
+            "Critically: this person does NOT know their work reads as "
+            "demo-stage. They write with total confidence, the way an "
+            "ambitious engineer actually writes. The demo-stage reality must "
+            "be inferable ONLY from what is absent -- no users, no uptime, "
+            "no operational ownership -- never from a self-applied label. A "
+            "resume that announces its own weakness is not a realistic test "
+            "case."
         ),
         must_include=(
-            "genuinely current and sophisticated AI techniques described competently",
-            "framing that is explicitly prototype, POC, hackathon, demo, side project, or internal experiment",
-            "GitHub stars or demo links rather than production metrics",
+            "genuinely current and sophisticated AI techniques described competently and confidently",
+            (
+                "impressive-sounding metrics that are all OFFLINE: benchmark scores, "
+                "eval-set accuracy, latency measured locally, improvements over a baseline"
+            ),
+            "artifacts that stand in for adoption: GitHub stars, demo links, blog posts, talks",
+            "roles that are plausibly real jobs with normal titles and normal date ranges",
         ),
         must_avoid=(
-            "ANY production deployment, real user counts, uptime, on-call, or monitoring",
-            "any system described as serving live traffic or customers",
+            (
+                "the words prototype, POC, proof of concept, hackathon, demo, side project, "
+                "experiment, pilot, or research project ANYWHERE -- this person would never "
+                "describe their own work that way"
+            ),
+            "any disclaimer such as 'not deployed', 'internal only', or 'not for production use'",
+            (
+                "ANY production signal: real user or customer counts, request volume from live "
+                "traffic, uptime, SLAs, on-call, incident response, monitoring, or revenue impact"
+            ),
+            "any statement that a system was launched, rolled out, adopted, or is in use by anyone",
         ),
     ),
     Archetype(
@@ -121,6 +148,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="high",
         technical_integration="low",
         client_communication="medium",
+        years="5-8 years",
         brief=(
             "Strong, real production engineering history -- APIs, "
             "distributed systems, cloud, on-call -- with only peripheral AI "
@@ -143,14 +171,15 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="medium",
         technical_integration="medium",
         client_communication="low",
+        years="1-3 years",
         brief=(
-            "One to three years of experience. Real contributions to "
-            "production systems, but narrow scope and clearly not owning "
-            "systems yet. Below the posting's 3-6+ year band without being "
-            "unqualified. Genuinely ambiguous by construction."
+            "Real contributions to production systems, but narrow scope and "
+            "clearly not owning systems yet. Below the posting's 3-6+ year "
+            "band without being unqualified. Genuinely ambiguous by "
+            "construction, which is why hold is the right label."
         ),
         must_include=(
-            "1-3 years total experience, junior or mid title",
+            "a junior or mid-level title, and dates consistent with 1-3 years total",
             "real contribution to a shipped system, but as a contributor rather than an owner",
             "some genuine LLM or AI exposure, modest in scope",
         ),
@@ -163,6 +192,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="low",
         technical_integration="low",
         client_communication="low",
+        years="4-7 years",
         brief=(
             "Dense skills sections naming every fashionable tool, but every "
             "bullet is a noun phrase with no verb describing what was built. "
@@ -172,11 +202,14 @@ ARCHETYPES: tuple[Archetype, ...] = (
         ),
         must_include=(
             "a very long skills section naming many current AI tools and frameworks",
-            "bullets that are noun phrases or tool lists, NOT sentences describing actions and outcomes",
+            (
+                "bullets that are noun phrases or bare tool lists, NEVER sentences describing "
+                "an action taken or an outcome achieved"
+            ),
             "a senior-sounding title that the described substance does not support",
         ),
         must_avoid=(
-            "any concrete metric, scale figure, or outcome",
+            "any concrete metric, percentage, or scale figure",
             "any sentence explaining what the person actually did or built",
         ),
     ),
@@ -187,6 +220,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="medium",
         technical_integration="low",
         client_communication="low",
+        years="4-8 years",
         brief=(
             "Competent and legitimately experienced, in something else "
             "entirely: frontend, data analytics, IT operations, or QA. May "
@@ -206,6 +240,7 @@ ARCHETYPES: tuple[Archetype, ...] = (
         production_reality="low",
         technical_integration="medium",
         client_communication="low",
+        years="4-7 years including PhD",
         brief=(
             "PhD or research-track. Publications, citations, benchmark "
             "results, novel architectures. Real intellectual depth, but no "

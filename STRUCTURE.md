@@ -5,7 +5,18 @@ removing files rather than editing this by hand.
 
 ```
 ├── data/                        Generated corpus and its ground-truth labels.
-│   └── synthetic_resumes/           The 60 generated resumes. Fictional; no real candidates.
+│   ├── synthetic_resumes/           The 60 generated resumes. Fictional; no real candidates.
+│   │   ├── academic_researcher__devon_whitaker.md NEEDS DESCRIPTION
+│   │   ├── adjacent_shipper__julius_amankwah.md NEEDS DESCRIPTION
+│   │   ├── demo_specialist__hana_novak.md NEEDS DESCRIPTION
+│   │   ├── early_career__andres_villalobos.md NEEDS DESCRIPTION
+│   │   ├── keyword_stuffer__omar_benali.md NEEDS DESCRIPTION
+│   │   ├── production_generalist__cormac_delaney.md NEEDS DESCRIPTION
+│   │   ├── production_generalist__lucas_ferreira.md NEEDS DESCRIPTION
+│   │   ├── production_light_ai__emil_kowalczyk.md NEEDS DESCRIPTION
+│   │   ├── quiet_builder__mateo_guzman.md NEEDS DESCRIPTION
+│   │   └── wrong_domain__malik_johnson.md NEEDS DESCRIPTION
+│   └── labels.json                  Ground-truth label per resume, written at generation time. (not generated yet)
 ├── docs/                        Design documents and the target job posting.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
 │   └── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
@@ -17,6 +28,7 @@ removing files rather than editing this by hand.
 │   └── synthetic_corpus_sources.md  Public resume datasets surveyed, and why the corpus is generated instead.
 ├── scripts/                     Developer utilities. Not part of the installed package.
 │   ├── archetypes.py                NEEDS DESCRIPTION
+│   ├── check_corpus.py              NEEDS DESCRIPTION
 │   ├── generate_corpus.py           Generates the synthetic resume corpus. (not written yet)
 │   └── update_structure.py          Regenerates STRUCTURE.md from the real tree.
 ├── src/                         Package source.
