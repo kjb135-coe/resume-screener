@@ -4,20 +4,49 @@ Every tier calls `complete()` on a Model instance and never touches a
 provider SDK directly. Swapping Anthropic for Microsoft Foundry is a
 base_url and auth change, not an architecture change -- that claim only
 holds if nothing in core/ ever imports `anthropic` directly, so don't.
+
+`complete()` returns a ModelResponse, not a bare string, specifically so
+real token accounting survives the abstraction. The cost methodology in
+research/cost_latency_methodology.md depends on summing actual
+cache_read/cache_creation token counts per call; an interface that
+returned only text would make that impossible to measure honestly.
 """
 
 from __future__ import annotations
 
+import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
-class ModelTier:
-    """One rung of the cascade. Not tied to a specific vendor's model name."""
+class Usage:
+    """Real token accounting for one call. Zeros for providers that don't report."""
 
-    name: str  # "triage" | "panel" | "arbiter"
-    model_id: str
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_creation_input_tokens: int = 0
+    cache_read_input_tokens: int = 0
+    latency_s: float = 0.0
+    model_id: str = ""
+
+    def __add__(self, other: Usage) -> Usage:
+        return Usage(
+            input_tokens=self.input_tokens + other.input_tokens,
+            output_tokens=self.output_tokens + other.output_tokens,
+            cache_creation_input_tokens=self.cache_creation_input_tokens
+            + other.cache_creation_input_tokens,
+            cache_read_input_tokens=self.cache_read_input_tokens
+            + other.cache_read_input_tokens,
+            latency_s=self.latency_s + other.latency_s,
+            model_id=self.model_id or other.model_id,
+        )
+
+
+@dataclass
+class ModelResponse:
+    text: str
+    usage: Usage = field(default_factory=Usage)
 
 
 class Model(ABC):
@@ -30,22 +59,24 @@ class Model(ABC):
         max_tokens: int = 1024,
         cache_system: bool = True,
         temperature: float = 0.0,
-    ) -> str:
-        """Return the model's raw text response.
+    ) -> ModelResponse:
+        """Run one completion.
+
+        `system` is the cacheable prefix -- callers must put ONLY content
+        that is byte-identical across many calls here (rubric + job
+        description), and push anything that varies per call (persona,
+        candidate evidence) into `user`. Caching is prefix-based, so a
+        system string that differs per call silently defeats it.
 
         Default temperature is 0, not the provider's default -- this is a
-        scoring task, not creative generation. See
-        research/stonestepper_ablation_review.md; StoneStepper's own
-        ablation baseline is temp 0 for the same reason, and this code
-        previously left it unset, silently riding whatever the API
-        defaults to.
+        scoring task, not creative generation.
         """
 
 
 class AnthropicModel(Model):
     """Default provider. Also the exact code path that runs unmodified
     against Anthropic's Claude models hosted in Microsoft Foundry -- only
-    the base_url and auth differ, per Anthropic's own Foundry integration.
+    the base_url and auth differ.
     """
 
     def __init__(self, model_id: str, api_key: str, base_url: str | None = None):
@@ -62,7 +93,7 @@ class AnthropicModel(Model):
         max_tokens: int = 1024,
         cache_system: bool = True,
         temperature: float = 0.0,
-    ) -> str:
+    ) -> ModelResponse:
         system_block = [
             {
                 "type": "text",
@@ -70,6 +101,7 @@ class AnthropicModel(Model):
                 **({"cache_control": {"type": "ephemeral"}} if cache_system else {}),
             }
         ]
+        started = time.monotonic()
         response = await self._client.messages.create(
             model=self._model_id,
             max_tokens=max_tokens,
@@ -77,7 +109,19 @@ class AnthropicModel(Model):
             system=system_block,
             messages=[{"role": "user", "content": user}],
         )
-        return response.content[0].text
+        elapsed = time.monotonic() - started
+        raw = response.usage
+        return ModelResponse(
+            text=response.content[0].text,
+            usage=Usage(
+                input_tokens=raw.input_tokens,
+                output_tokens=raw.output_tokens,
+                cache_creation_input_tokens=getattr(raw, "cache_creation_input_tokens", 0) or 0,
+                cache_read_input_tokens=getattr(raw, "cache_read_input_tokens", 0) or 0,
+                latency_s=elapsed,
+                model_id=self._model_id,
+            ),
+        )
 
 
 class OllamaModel(Model):
@@ -98,9 +142,10 @@ class OllamaModel(Model):
         max_tokens: int = 1024,
         cache_system: bool = True,
         temperature: float = 0.0,
-    ) -> str:
+    ) -> ModelResponse:
         import httpx
 
+        started = time.monotonic()
         async with httpx.AsyncClient(base_url=self._host, timeout=120.0) as client:
             resp = await client.post(
                 "/api/chat",
@@ -115,4 +160,13 @@ class OllamaModel(Model):
                 },
             )
             resp.raise_for_status()
-            return resp.json()["message"]["content"]
+            body = resp.json()
+        return ModelResponse(
+            text=body["message"]["content"],
+            usage=Usage(
+                input_tokens=body.get("prompt_eval_count", 0) or 0,
+                output_tokens=body.get("eval_count", 0) or 0,
+                latency_s=time.monotonic() - started,
+                model_id=self._model_id,
+            ),
+        )
