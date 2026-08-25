@@ -16,6 +16,8 @@ removing files rather than editing this by hand.
 │   ├── stonestepper_ablation_review.md Review of a prior project's ablation study and the corrections it forced here.
 │   └── synthetic_corpus_sources.md  Public resume datasets surveyed, and why the corpus is generated instead.
 ├── scripts/                     Developer utilities. Not part of the installed package.
+│   ├── archetypes.py                NEEDS DESCRIPTION
+│   ├── generate_corpus.py           Generates the synthetic resume corpus. (not written yet)
 │   └── update_structure.py          Regenerates STRUCTURE.md from the real tree.
 ├── src/                         Package source.
 │   └── resume_screener/             The installable package.
