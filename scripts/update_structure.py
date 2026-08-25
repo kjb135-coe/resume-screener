@@ -58,8 +58,8 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/core/enrichment.py": "Documented extension point for consuming external MCP servers. Intentionally unimplemented.",
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
     "src/resume_screener/adapters/mcp_server.py": "MCP server exposing four tools. The primary interface.",
-    "src/resume_screener/adapters/cli.py": "Terminal entry point. (not written yet)",
-    "src/resume_screener/adapters/api.py": "FastAPI backend for the web demo. (not written yet)",
+    "src/resume_screener/adapters/cli.py": "Terminal entry point. Not written yet.",
+    "src/resume_screener/adapters/api.py": "FastAPI backend for the web demo. Not written yet.",
     "src/resume_screener/prompts": "Prompt text kept out of code so it can be diffed and cached.",
     "src/resume_screener/prompts/rubric.md": "The scoring rubric. Forms the cacheable prefix shared by every panel call.",
 
@@ -69,18 +69,28 @@ DESCRIPTIONS: dict[str, str] = {
     "tests/test_pipeline.py": "Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.",
     "tests/test_query.py": "SQL safety, aggregate handling, and the two query primitives.",
     "tests/test_mcp_server.py": "Tool registration and session lifecycle.",
+    "tests/test_router.py": "Response text-block extraction (thinking-block bug regression) and Usage accumulation.",
     "tests/fixtures": "Static inputs for tests.",
     "tests/fixtures/sample_resume.md": "One well-formed resume used across pipeline tests.",
 
     # data/
-    "data": "Generated corpus and its ground-truth labels.",
-    "data/synthetic_resumes": "The 60 generated resumes. Fictional; no real candidates.",
-    "data/labels.json": "Ground-truth label per resume, written at generation time. (not generated yet)",
+    "data": "Generated corpus, its ground-truth labels, and the latest eval run.",
+    "data/synthetic_resumes": "The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.",
+    "data/labels.json": "Ground-truth label + archetype + target dimension levels per resume, written at generation time.",
+    "data/eval_run.json": "Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.",
+
+    # docs/ (eval outputs)
+    "docs/EVAL_RESULTS.md": "Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.",
+    "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
 
     # scripts/
     "scripts": "Developer utilities. Not part of the installed package.",
     "scripts/update_structure.py": "Regenerates STRUCTURE.md from the real tree.",
-    "scripts/generate_corpus.py": "Generates the synthetic resume corpus. (not written yet)",
+    "scripts/archetypes.py": "The 9 archetype specs (label, per-dimension targets, must-include/avoid) that generate_corpus.py writes from.",
+    "scripts/generate_corpus.py": "Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.",
+    "scripts/check_corpus.py": "Lints generated resumes for leaked or missing signals against their own archetype's constraints.",
+    "scripts/evaluate.py": "Scores the pipeline against the labeled corpus. Writes EVAL_RESULTS.md and eval_run.json.",
+    "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
 }
 
 HEADER = """# Repository structure
@@ -128,6 +138,14 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
 
         name = f"{entry.name}/" if entry.is_dir() else entry.name
         lines.append(f"{prefix}{connector}{name:<28} {description}")
+
+        # Individually undescribed by design (see DESCRIPTIONS) -- 60
+        # generated resumes with the same shape don't need 60 tree rows.
+        if entry.is_dir() and rel == "data/synthetic_resumes":
+            child_count = len(list(entry.iterdir()))
+            sub_prefix = prefix + ("    " if last else "│   ")
+            lines.append(f"{sub_prefix}└── ({child_count} generated resumes, listed in data/labels.json)")
+            continue
 
         if entry.is_dir():
             sub_lines, sub_missing = walk(entry, prefix + ("    " if last else "│   "))
