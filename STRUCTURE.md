@@ -31,9 +31,9 @@ removing files rather than editing this by hand.
 │   └── resume_screener/             The installable package.
 │       ├── adapters/                    Thin translation layers over core. No scoring logic lives here.
 │       │   ├── static/                      Static assets for the web adapter.
-│       │   │   └── index.html                   The rubric-preview page. One file, no build step, no external assets.
+│       │   │   └── index.html                   Two-tab page: candidates from the recorded run, and rubric preview. One file, no build step.
 │       │   ├── __init__.py                  Package marker.
-│       │   ├── api.py                       FastAPI backend: paste a posting, read the generated rubric. Does not screen.
+│       │   ├── api.py                       FastAPI backend: the recorded run's verdicts, plus live rubric generation. Does not screen.
 │       │   ├── cli.py                       Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.
 │       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.
@@ -54,7 +54,7 @@ removing files rather than editing this by hand.
 │   │   └── sample_resume.md             One well-formed resume used across pipeline tests.
 │   ├── __init__.py                  Package marker.
 │   ├── fakes.py                     Scripted Model implementation so tests are free, deterministic, and key-less.
-│   ├── test_api.py                  Web adapter: the rubric endpoint and every error surface it can show.
+│   ├── test_api.py                  Web adapter: the results and rubric endpoints, and every error surface they show.
 │   ├── test_cli.py                  Terminal adapter, including that the advertised console script still imports.
 │   ├── test_mcp_server.py           Tool registration, session lifecycle, and the preview-to-screen rubric handoff.
 │   ├── test_pipeline.py             Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.

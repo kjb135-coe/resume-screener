@@ -43,10 +43,86 @@ class TestPage:
     def test_index_serves_the_page(self, client):
         response = client.get("/")
         assert response.status_code == 200
-        assert "Rubric preview" in response.text
+        assert "Resume Screener" in response.text
 
     def test_health(self, client):
         assert client.get("/health").json() == {"ok": True}
+
+
+class TestResults:
+    """The recorded run is the landing view. It reads a file, so it must
+    work with no API key and cost nothing.
+    """
+
+    def test_serves_every_candidate_with_a_verdict(self, client):
+        body = client.get("/api/results").json()
+
+        assert body["summary"]["n"] == len(body["candidates"]) == 60
+        for candidate in body["candidates"]:
+            assert candidate["recommendation"] in {"advance", "hold", "reject"}
+            assert len(candidate["panel"]) == 3
+            assert candidate["resume_text"], f"{candidate['file']} has no resume text"
+
+    def test_sorted_best_first(self, client):
+        scores = [c["score"] for c in client.get("/api/results").json()["candidates"]]
+        assert scores == sorted(scores, reverse=True)
+
+    def test_summary_counts_match_the_candidates(self, client):
+        body = client.get("/api/results").json()
+        summary, candidates = body["summary"], body["candidates"]
+
+        for bucket in ("advance", "hold", "reject"):
+            actual = sum(1 for c in candidates if c["recommendation"] == bucket)
+            assert summary[bucket] == actual
+        assert summary["needs_human_review"] == sum(
+            1 for c in candidates if c["needs_human_review"]
+        )
+
+    def test_needs_review_always_carries_a_reason(self, client):
+        """A flag with no explanation is not actionable for a reviewer."""
+        for candidate in client.get("/api/results").json()["candidates"]:
+            assert bool(candidate["needs_human_review"]) == bool(candidate["review_reason"])
+
+    def test_escalated_candidates_are_flagged(self, client):
+        for candidate in client.get("/api/results").json()["candidates"]:
+            if candidate["escalated"]:
+                assert candidate["needs_human_review"]
+
+    def test_ground_truth_comparison_is_reported(self, client):
+        body = client.get("/api/results").json()
+        for candidate in body["candidates"]:
+            assert candidate["matches_ground_truth"] == (
+                candidate["expected"] == candidate["recommendation"]
+            )
+
+    def test_missing_run_returns_a_readable_error(self, client, monkeypatch, tmp_path):
+        api.load_recorded_run.cache_clear()
+        monkeypatch.setattr(api, "RUN_JSON", tmp_path / "absent.json")
+
+        response = client.get("/api/results")
+        api.load_recorded_run.cache_clear()
+
+        assert response.status_code == 404
+        assert "evaluate.py" in response.json()["error"]
+
+
+class TestReviewReason:
+    def test_unreadable_response_takes_priority_over_escalation(self):
+        reason = api._review_reason(
+            {"panel": [{"parse_failed": True}], "escalated": True, "panel_spread": 4.0}
+        )
+        assert "unreadable" in reason
+
+    def test_escalation_reports_the_spread(self):
+        reason = api._review_reason(
+            {"panel": [{"parse_failed": False}], "escalated": True, "panel_spread": 4.0}
+        )
+        assert "4.0" in reason
+
+    def test_clean_agreeing_panel_needs_no_review(self):
+        assert api._review_reason(
+            {"panel": [{"parse_failed": False}], "escalated": False, "panel_spread": 0.5}
+        ) is None
 
 
 class TestRubricEndpoint:

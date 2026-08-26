@@ -50,6 +50,18 @@ resume-screener rank data/synthetic_resumes docs/job_description.md --top 10
 
 Add `-g` to any of `screen`/`rank` to score against a rubric written from the posting instead of the built-in one.
 
+## Seeing the results
+
+```bash
+uvicorn resume_screener.adapters.api:app --reload
+```
+
+The **Candidates** tab opens on the last recorded run — all 60 resumes ranked, split into advance / hold / reject, with the 33 that want a human eye flagged. Click any one to see each of the three agents' scores, confidences, and reasoning, the arbiter's ruling where the panel disagreed, and the resume itself.
+
+That view reads `data/eval_run.json` from disk. It costs nothing, needs no API key, and loads instantly. Re-run `scripts/evaluate.py` and restart the server to see a new run.
+
+There is deliberately no "screen this pool" button. That is a minutes-long, dollars-scale job, and it belongs behind the CLI or the MCP server, where whoever starts it knows they started it.
+
 ## The rubric is written, not hardcoded
 
 Give it a job posting and it writes its own scoring standard: three dimensions, each with the criteria the panel scores against and the brief for the agent that owns it. Nothing is pinned to one role.
@@ -67,7 +79,7 @@ Preview it in the browser:
 uvicorn resume_screener.adapters.api:app --reload
 ```
 
-Paste a posting, read the rubric. That page does not screen resumes; screening a pool is a minutes-long, dollars-scale job that belongs behind the MCP server or `scripts/evaluate.py`.
+The **Rubric** tab takes a pasted posting and shows what the panel would be told to look for. That is the one live API call the page makes.
 
 In Claude Desktop there is nothing to build — the chat *is* the input. Paste the posting, call `preview_rubric`, read the rubric, then hand its `rubric_id` to `rank_pool` so the pool is scored against the rubric you actually approved. Generation isn't deterministic, which is exactly why the id exists.
 
