@@ -22,6 +22,8 @@ EXCLUDE_DIRS = {
     "node_modules", ".mypy_cache", "dist", "build", ".idea", ".vscode",
 }
 EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".egg-info"}
+# Gitignored, so they are not part of the repo even though they are on disk.
+EXCLUDE_NAMES = {".DS_Store"}
 
 DESCRIPTIONS: dict[str, str] = {
     # Top level
@@ -56,20 +58,26 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/core/pipeline.py": "The cascade: extract -> panel -> arbitrate on disagreement. Owns the caching contract.",
     "src/resume_screener/core/query.py": "Follow-up questions: sandboxed DuckDB SQL plus a bounded evidence-judgment call.",
     "src/resume_screener/core/enrichment.py": "Documented extension point for consuming external MCP servers. Intentionally unimplemented.",
+    "src/resume_screener/core/rubric_gen.py": "Writes the rubric and the three panel personas from any job posting. Validated, not trusted.",
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
-    "src/resume_screener/adapters/mcp_server.py": "MCP server exposing four tools. The primary interface.",
+    "src/resume_screener/adapters/mcp_server.py": "MCP server exposing five tools. The primary interface.",
     "src/resume_screener/adapters/cli.py": "Terminal entry point. Not written yet.",
-    "src/resume_screener/adapters/api.py": "FastAPI backend for the web demo. Not written yet.",
+    "src/resume_screener/adapters/api.py": "FastAPI backend: paste a posting, read the generated rubric. Does not screen.",
+    "src/resume_screener/adapters/static": "Static assets for the web adapter.",
+    "src/resume_screener/adapters/static/index.html": "The rubric-preview page. One file, no build step, no external assets.",
     "src/resume_screener/prompts": "Prompt text kept out of code so it can be diffed and cached.",
-    "src/resume_screener/prompts/rubric.md": "The scoring rubric. Forms the cacheable prefix shared by every panel call.",
+    "src/resume_screener/prompts/rubric.md": "The hand-written rubric for docs/job_description.md. Default when no rubric is generated.",
+    "src/resume_screener/prompts/rubric_generator.md": "Meta-prompt: the instructions for writing a rubric from a posting.",
 
     # tests/
     "tests": "Offline test suite. Never calls a real API.",
     "tests/fakes.py": "Scripted Model implementation so tests are free, deterministic, and key-less.",
     "tests/test_pipeline.py": "Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.",
     "tests/test_query.py": "SQL safety, aggregate handling, and the two query primitives.",
-    "tests/test_mcp_server.py": "Tool registration and session lifecycle.",
+    "tests/test_mcp_server.py": "Tool registration, session lifecycle, and the preview-to-screen rubric handoff.",
     "tests/test_router.py": "Response text-block extraction (thinking-block bug regression) and Usage accumulation.",
+    "tests/test_rubric_gen.py": "Rubric validation: dimension count, identifier names, and failing loud on junk.",
+    "tests/test_api.py": "Web adapter: the rubric endpoint and every error surface it can show.",
     "tests/fixtures": "Static inputs for tests.",
     "tests/fixtures/sample_resume.md": "One well-formed resume used across pipeline tests.",
 
@@ -120,7 +128,8 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
 
     entries = [
         e for e in sorted(directory.iterdir(), key=lambda p: (p.is_file(), p.name.lower()))
-        if e.name not in EXCLUDE_DIRS and e.suffix not in EXCLUDE_SUFFIXES
+        if e.name not in EXCLUDE_DIRS and e.name not in EXCLUDE_NAMES
+        and e.suffix not in EXCLUDE_SUFFIXES
         and not e.name.endswith(".egg-info")
     ]
 

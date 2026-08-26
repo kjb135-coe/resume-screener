@@ -29,8 +29,9 @@ piece before we can move on).
 - MCP is the primary interface — the recruiter talks to an AI client
   they already have, rather than adopting a new app. Web UI is a demo
   instrument for the three evaluators, not the production design.
-- Four MCP tools, one per action: `screen_resume`, `rank_pool`,
-  `explain_verdict`, `query_candidates`.
+- Five MCP tools, one per action: `preview_rubric`, `screen_resume`,
+  `rank_pool`, `explain_verdict`, `query_candidates`. (`preview_rubric`
+  was added with generated rubrics — see §3a.)
 - MCP scope: **server-only** for the demo. `core/enrichment.py`
   documents the client-consuming extension point (e.g. verifying a
   candidate's GitHub profile via an external MCP server) without a
@@ -62,6 +63,49 @@ The old "skeptic" instinct (don't credit unbacked claims) is a shared
 instruction across all three personas, not a fourth persona — kept
 deliberately to avoid preempting the still-open agent-count question.
 
+### 3a. Generated rubrics — settled and built (2026-08-25)
+
+The table above is now the *default*, not the only option. `core/
+rubric_gen.py` writes an equivalent rubric — three dimensions, each with
+scoring criteria and its agent's brief — from any posting handed to it.
+`prompts/rubric_generator.md` holds the meta-prompt.
+
+Why this was worth building: the hardcoded rubric made the demo's central
+claim ("scored against *this* posting, not a generic template") true for
+exactly one posting. A reviewer pasting their own req would have gotten
+scores computed against someone else's job.
+
+Decisions inside it, each load-bearing:
+
+- **Resolved once per batch, never per resume.** The panel's cached
+  prefix is `rubric + job_description`. A rubric regenerated per resume
+  would differ slightly every time and turn every cache read into a
+  cache write. `rank_all` takes the rubric as a parameter for this
+  reason; it does not generate one internally.
+- **Exactly three dimensions, enforced in code.** `DISAGREEMENT_
+  THRESHOLD` is a spread across a three-agent panel. A four-dimension
+  rubric changes what that spread means without changing the number, so
+  the count is validated rather than trusted to the model.
+- **Failure raises, no silent fallback.** Falling back to
+  `prompts/rubric.md` would score one job's candidates against another
+  job's criteria — a wrong answer that looks like a right one.
+- **The agent brief stays out of the shared prefix.** Each dimension's
+  `lens` travels in the user turn, like the hand-written personas do.
+  In the system block it would both break caching and tell all three
+  agents how the other two were briefed.
+- **Written by the most expensive model in the cascade** (`rubric` slot,
+  Opus). It runs once per batch and sets the standard every later score
+  is judged against — the cheapest place to buy quality.
+- **`scripts/evaluate.py` keeps using the hand-written rubric.** The
+  published metrics were measured against it; auto-generating there
+  would make consecutive eval runs incomparable.
+
+Human-in-the-loop: `preview_rubric` returns a `rubric_id`, and
+`rank_pool` accepts one, so the rubric a person read is the rubric that
+scores the pool. Generation is not deterministic — without the id,
+re-generating at screening time would quietly score against a rubric
+nobody approved.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return
@@ -86,9 +130,12 @@ deliberately to avoid preempting the still-open agent-count question.
   `usage.cache_read_input_tokens`/`cache_creation_input_tokens` the API
   returns, report the measured delta. Latency as p50/p95, not mean,
   compared against a flat "everything hits all three tiers" run.
-- **Nothing here is implemented.** No per-call usage logging exists in
-  `pipeline.py` yet — this needs to be added before any real number can
-  be produced.
+- **Partly implemented.** `Usage` accumulates through the cascade and
+  `scripts/evaluate.py` reports real totals — the last run measured
+  $0.890981 for 60 resumes (p50 31.3s, p95 44.0s, 425K cache-read
+  tokens). What is still missing is the *comparison*: no uncached run
+  has been done, so the caching saving is recorded but not yet
+  quantified against its own baseline.
 
 ## 6. Local and embedding models — settled
 
@@ -106,31 +153,34 @@ deliberately to avoid preempting the still-open agent-count question.
 
 ## 7. What's actually built vs. designed-only (read this before assuming progress)
 
-**Exists as real code:**
-`core/models.py`, `core/router.py` (Anthropic + Ollama, temperature
-bug now fixed), `core/ingest.py`, `core/pipeline.py` (Tier 0/1/2 logic,
-using the JD-anchored personas), `core/query.py` (the two-primitive
-query design), `core/enrichment.py` (documented stub),
-`adapters/mcp_server.py` (all 4 tools), `prompts/rubric.md`.
+Rewritten 2026-08-25. The previous version of this section was badly
+stale — it still claimed `tests/` was empty and no API call had ever
+run, both untrue for a while by then.
 
-**Explicitly does not exist yet:**
-- `adapters/api.py` (web UI backend) and `adapters/cli.py` — zero code.
-- Any test at all — `tests/` is empty.
-- The synthetic resume corpus — `data/synthetic_resumes/` is empty,
-  no archetypes generated, no ground-truth labels.
-- Any actual execution — dependencies have never been installed in a
-  venv, no API call this project has written has ever actually run.
-  Everything is syntax-checked, not behavior-checked.
+**Exists as real code, and has been run:**
+- `core/models.py`, `core/router.py` (Anthropic + Ollama), `core/
+  ingest.py`, `core/pipeline.py` (Tier 0/1/2), `core/query.py`,
+  `core/enrichment.py` (documented stub), `core/rubric_gen.py` (§3a).
+- `adapters/mcp_server.py` — all 5 tools.
+- `adapters/api.py` + `adapters/static/index.html` — the rubric-preview
+  page. Deliberately scoped to previewing a rubric; it does not screen.
+- `prompts/rubric.md`, `prompts/rubric_generator.md`.
+- **107 offline tests**, none of which touch the network.
+- The 60-resume synthetic corpus, its labels, and a real eval run:
+  macro-F1 0.630, accuracy 0.667, $0.89 for 60 resumes. Written up in
+  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md`.
+
+**Still does not exist:**
+- `adapters/cli.py` — zero code. The `resume-screener` console script in
+  pyproject.toml points at it and would fail today.
 - `docs/ARCHITECTURE.md`, `docs/LIMITATIONS.md` — referenced by the
-  README, don't exist.
-- The embedding pre-filter, the pydantic validation fix for
-  `_parse_json`, any usage/cost logging, any web UI, any demo
-  recording, any deployment.
-
-This isn't a criticism of pace — it reflects a deliberate choice to go
-deep on research and design correctness before writing more code that
-might need to be redone. Flagging it plainly so the plan reads as
-accurate, not further ahead than it is.
+  README, still missing. LIMITATIONS is the more urgent of the two: §4's
+  known blind spot is documented nowhere a reader would find it.
+- The embedding pre-filter, and the pydantic validation of `_parse_json`.
+- The 3-way architecture bake-off from §8 — only the panel+arbiter arm
+  has been measured. Single-pass and flat-ensemble are unrun, so the
+  "does the cascade earn its complexity" question is still open.
+- Any demo recording, any deployment.
 
 ## 8. Testing and evaluation — ironed out 2026-08-25
 
@@ -244,10 +294,11 @@ can be measured until those 60 resumes and their labels exist.
 
 ## 9. Not started at all
 
-- Synthetic resume corpus generation.
-- Web UI and CLI adapters.
-- Any tests, any eval harness code.
+- The CLI adapter (`adapters/cli.py`), still referenced by the
+  `resume-screener` console script in pyproject.toml.
 - `ARCHITECTURE.md`, `LIMITATIONS.md`.
+- The single-pass and flat-ensemble arms of the §8 bake-off.
+- An uncached eval run to quantify the caching saving (§5).
 - Demo recordings (MCP-in-Claude-Desktop clip, web UI walkthrough).
 - Deployment of the web UI anywhere reachable.
 - Exact timeline — mentioned once as "right now," then explicitly
@@ -255,6 +306,16 @@ can be measured until those 60 resumes and their labels exist.
 
 ## 10. Immediate next decision needed
 
-Testing scope is now locked (§8). Next actual step: generate the 60
-synthetic resumes and their ground-truth labels — everything else in
-§8 is blocked on that existing.
+The corpus, the eval, and generated rubrics (§3a) are all done. The two
+things now most worth doing, in order:
+
+1. **`LIMITATIONS.md`.** §4 names a real blind spot — disagreement-based
+   escalation cannot catch a panel that is unanimously and confidently
+   wrong — and it is currently written down only here, in a planning
+   doc. For a tool that advises on hiring, that belongs somewhere a
+   reader will actually find it.
+2. **The rest of the §8 bake-off.** Only panel+arbiter has been
+   measured, so the claim that the cascade beats a single call is
+   currently asserted rather than shown. Macro-F1 0.630 is not a strong
+   enough number to leave that untested — the honest possibility is that
+   a single-pass baseline matches it for less money.

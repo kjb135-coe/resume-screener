@@ -15,8 +15,9 @@ import uuid
 from mcp.server.mcpserver import MCPServer
 
 from resume_screener.core.models import Verdict
-from resume_screener.core.pipeline import rank_all, screen_one
+from resume_screener.core.pipeline import rank_all, rubric_for, screen_one
 from resume_screener.core.query import answer_query
+from resume_screener.core.rubric_gen import GeneratedRubric, RubricGenerationError
 
 # mcp>=2 renamed FastMCP to MCPServer; pyproject pins >=2.1 accordingly.
 mcp = MCPServer("resume-screener")
@@ -27,6 +28,13 @@ mcp = MCPServer("resume-screener")
 _sessions: dict[str, list[Verdict]] = {}
 _MAX_SESSIONS = 20
 
+# rubric_id -> the exact rubric a human previewed. Kept so that the rubric
+# someone approved is the rubric that actually scores the pool: generation
+# is not deterministic, so re-generating at screening time could score
+# candidates against a rubric nobody reviewed.
+_rubrics: dict[str, GeneratedRubric] = {}
+_MAX_RUBRICS = 20
+
 
 def _store_session(verdicts: list[Verdict]) -> str:
     if len(_sessions) >= _MAX_SESSIONS:
@@ -34,6 +42,39 @@ def _store_session(verdicts: list[Verdict]) -> str:
     session_id = str(uuid.uuid4())
     _sessions[session_id] = verdicts
     return session_id
+
+
+def _store_rubric(rubric: GeneratedRubric) -> str:
+    if len(_rubrics) >= _MAX_RUBRICS:
+        _rubrics.pop(next(iter(_rubrics)))
+    rubric_id = str(uuid.uuid4())
+    _rubrics[rubric_id] = rubric
+    return rubric_id
+
+
+@mcp.tool()
+async def preview_rubric(job_description: str) -> dict:
+    """Write the scoring rubric for a job posting, and show it for approval
+    before any resume is screened against it.
+
+    Use this first when given a new or unfamiliar posting. Paste the posting
+    text in as `job_description`; this returns the three dimensions the panel
+    will score on, each with its criteria and the brief for the agent that
+    owns it, plus a `rubric_id`.
+
+    Show the rubric to the human and let them confirm it reads correctly for
+    the role, then pass the `rubric_id` to rank_pool so the pool is scored
+    against the exact rubric they approved. Generation is not deterministic,
+    so re-running this produces a slightly different rubric -- that is why
+    the id exists.
+
+    This writes scoring criteria. It does not score, rank, or judge anyone.
+    """
+    try:
+        rubric = await rubric_for(job_description)
+    except RubricGenerationError as exc:
+        return {"error": str(exc)}
+    return {"rubric_id": _store_rubric(rubric), **rubric.to_dict()}
 
 
 @mcp.tool()
@@ -53,7 +94,12 @@ async def screen_resume(resume_path: str, job_description: str) -> dict:
 
 
 @mcp.tool()
-async def rank_pool(resume_dir: str, job_description: str, top_n: int = 10) -> dict:
+async def rank_pool(
+    resume_dir: str,
+    job_description: str,
+    top_n: int = 10,
+    rubric_id: str | None = None,
+) -> dict:
     """Screen every resume in a directory and return the top N, ranked.
 
     Use when given a folder of resumes and asked for a shortlist, e.g.
@@ -61,15 +107,36 @@ async def rank_pool(resume_dir: str, job_description: str, top_n: int = 10) -> d
     and pass it to query_candidates or explain_verdict for any follow-up
     about this same pool, rather than screening again.
 
+    Pass `rubric_id` from a previous preview_rubric call to score against a
+    rubric the human already approved. Without one, this writes a fresh
+    rubric for the posting and reports it back under `rubric` so the human
+    can still see what the scores mean.
+
     Note that the session retains the FULL pool, so follow-up questions can
     reach candidates below the top N even though only the top N are listed
     here. Results are advisory; a human confirms before anything is acted on.
     """
-    verdicts = await rank_all(resume_dir, job_description)
+    if rubric_id is not None:
+        rubric = _rubrics.get(rubric_id)
+        if rubric is None:
+            return {
+                "error": f"Unknown rubric_id {rubric_id!r}. Run preview_rubric first.",
+                "known_rubric_ids": list(_rubrics),
+            }
+    else:
+        try:
+            rubric = await rubric_for(job_description)
+        except RubricGenerationError as exc:
+            return {"error": str(exc)}
+        rubric_id = _store_rubric(rubric)
+
+    verdicts = await rank_all(resume_dir, job_description, rubric=rubric)
     session_id = _store_session(verdicts)
     flagged = [v for v in verdicts if v.review_reason is not None]
     return {
         "session_id": session_id,
+        "rubric_id": rubric_id,
+        "rubric": rubric.to_dict(),
         "screened_count": len(verdicts),
         "needs_human_review_count": len(flagged),
         "candidates": [v.to_dict() for v in verdicts[:top_n]],

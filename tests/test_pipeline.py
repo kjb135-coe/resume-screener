@@ -13,9 +13,17 @@ from resume_screener.core.pipeline import (
     _parse_json,
     rank_all,
     recommendation_from_score,
+    rubric_for,
     screen_one,
 )
-from tests.fakes import EXTRACTION_JSON, FakeModel, arbiter_json, panel_json
+from resume_screener.core.rubric_gen import parse_rubric
+from tests.fakes import (
+    EXTRACTION_JSON,
+    FakeModel,
+    arbiter_json,
+    panel_json,
+    rubric_json,
+)
 
 FIXTURE = str(Path(__file__).parent / "fixtures" / "sample_resume.md")
 JD = "We want an AI solutions engineer who ships to production."
@@ -126,6 +134,86 @@ class TestCachingContract:
         models = _models([7.0, 7.0, 7.0])
         await screen_one(FIXTURE, JD, models)
         assert all(c["cache_system"] for c in models["panel"].calls)
+
+    async def test_generated_rubric_keeps_one_shared_prefix(self):
+        """The whole point of resolving the rubric once per batch. If a
+        generated rubric ever leaked per-resume variation into the prefix,
+        every panel call would pay a cache write instead of a read.
+        """
+        rubric = parse_rubric(json.loads(rubric_json()))
+        models = _models([7.0, 7.0, 7.0])
+        await screen_one(FIXTURE, JD, models, rubric)
+
+        systems = {c["system"] for c in models["panel"].calls}
+        assert len(systems) == 1
+        assert rubric.markdown in systems.pop()
+
+
+class TestGeneratedRubricDrivesThePanel:
+    """A generated rubric has to actually replace the hardcoded one --
+    not merely be accepted and ignored.
+    """
+
+    async def test_panel_agents_are_named_by_the_generated_dimensions(self):
+        rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
+        models = _models([7.0, 7.0, 7.0])
+        verdict = await screen_one(FIXTURE, JD, models, rubric)
+
+        assert {p.agent_name for p in verdict.panel_scores} == {"shipping", "depth", "comms"}
+
+    async def test_static_personas_are_not_used_when_a_rubric_is_given(self):
+        rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
+        models = _models([7.0, 7.0, 7.0])
+        await screen_one(FIXTURE, JD, models, rubric)
+
+        sent = " ".join(c["user"] for c in models["panel"].calls)
+        assert "You judge shipping only" in sent
+        assert "Be skeptical of buzzwords" not in sent, "hand-written persona leaked in"
+
+    async def test_hand_written_rubric_still_used_when_none_given(self):
+        """scripts/evaluate.py depends on this: the published metrics were
+        measured against the hand-written rubric, so the default path must
+        not quietly start generating one.
+        """
+        models = _models([7.0, 7.0, 7.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert {p.agent_name for p in verdict.panel_scores} == {
+            "production_reality",
+            "technical_integration",
+            "client_communication",
+        }
+
+    async def test_arbiter_sees_the_generated_rubric_too(self):
+        rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
+        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        await screen_one(FIXTURE, JD, models, rubric)
+
+        assert rubric.markdown in models["arbiter"].calls[0]["system"]
+
+    async def test_rank_all_reuses_one_rubric_across_the_batch(self, tmp_path):
+        for i in range(4):
+            (tmp_path / f"cand_{i}.md").write_text("Engineer who shipped things.")
+
+        rubric = parse_rubric(json.loads(rubric_json()))
+        models = _models([7.0, 7.0, 7.0])
+        await rank_all(str(tmp_path), JD, models, rubric=rubric)
+
+        systems = {c["system"] for c in models["panel"].calls}
+        assert len(systems) == 1, "one prefix for the whole batch, not one per resume"
+        assert len(models["panel"].calls) == 12  # 4 resumes x 3 agents
+
+
+class TestRubricFor:
+    async def test_uses_the_rubric_model_slot(self):
+        models = _models([7.0, 7.0, 7.0])
+        models["rubric"] = FakeModel([rubric_json()])
+
+        rubric = await rubric_for(JD, models)
+
+        assert rubric.role_title == "AI Solutions Engineer"
+        assert len(models["rubric"].calls) == 1
+        assert models["panel"].calls == [], "writing a rubric must not score anyone"
 
 
 

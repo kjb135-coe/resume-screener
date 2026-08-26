@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resume Screener — rubric preview</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #16181d; --muted: #5d6470; --line: #dfe3ea;
+    --panel: #f6f8fa; --accent: #2f5bd0; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12141a; --fg: #e7e9ee; --muted: #99a1af; --line: #2a2f3a;
+      --panel: #1a1d25; --accent: #7d9bf0; --err: #f2857c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px; background: var(--bg); color: var(--fg);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  main { max-width: 780px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  textarea {
+    width: 100%; min-height: 220px; padding: 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical;
+  }
+  .row { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  button {
+    background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+    padding: 11px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  .status { color: var(--muted); font-size: 13px; }
+  .status.error { color: var(--err); }
+  #out { margin-top: 34px; }
+  #out[hidden] { display: none; }
+  .role { font-size: 19px; font-weight: 700; margin: 0 0 4px; }
+  .summary { color: var(--muted); margin: 0 0 24px; }
+  .dim {
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 8px; padding: 16px 18px; margin-bottom: 14px; background: var(--panel);
+  }
+  .dim h3 { margin: 0 0 3px; font-size: 15px; }
+  .dim code { color: var(--muted); font-size: 12px; }
+  .dim p { margin: 10px 0 0; }
+  .lens { border-top: 1px dashed var(--line); margin-top: 12px; padding-top: 10px; font-size: 14px; }
+  .lens b { color: var(--muted); font-weight: 600; font-size: 12px;
+            text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 3px; }
+  details { margin-top: 20px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px; overflow-x: auto; font-size: 12px; line-height: 1.5; margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Rubric preview</h1>
+  <p class="sub">Paste any job posting. The panel's scoring rubric is written from
+  it — nothing here is hardcoded to one role.</p>
+
+  <textarea id="jd" placeholder="Paste the full job posting here…" spellcheck="false"></textarea>
+
+  <div class="row">
+    <button id="go">Generate rubric</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <section id="out" hidden>
+    <p class="role" id="role"></p>
+    <p class="summary" id="summary"></p>
+    <div id="dims"></div>
+    <details>
+      <summary>Rubric as the panel receives it</summary>
+      <pre id="md"></pre>
+    </details>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function setStatus(text, isError) {
+  $("status").textContent = text;
+  $("status").className = isError ? "status error" : "status";
+}
+
+function render(data) {
+  $("role").textContent = data.role_title;
+  $("summary").textContent = data.summary;
+  $("md").textContent = data.markdown;
+  $("dims").replaceChildren(...data.dimensions.map((d, i) => {
+    const el = document.createElement("div");
+    el.className = "dim";
+    const h = document.createElement("h3");
+    h.textContent = `${i + 1}. ${d.title}`;
+    const code = document.createElement("code");
+    code.textContent = d.name;
+    const criteria = document.createElement("p");
+    criteria.textContent = d.criteria;
+    const lens = document.createElement("div");
+    lens.className = "lens";
+    const label = document.createElement("b");
+    label.textContent = "Agent brief";
+    const lensText = document.createElement("span");
+    lensText.textContent = d.lens;
+    lens.append(label, lensText);
+    el.append(h, code, criteria, lens);
+    return el;
+  }));
+  $("out").hidden = false;
+}
+
+async function generate() {
+  const jd = $("jd").value.trim();
+  if (!jd) { setStatus("Paste a job posting first.", true); return; }
+
+  $("go").disabled = true;
+  $("out").hidden = true;
+  setStatus("Writing the rubric… this takes a few seconds.", false);
+
+  try {
+    const res = await fetch("/api/rubric", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_description: jd }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setStatus(data.error || `Request failed (${res.status}).`, true);
+      return;
+    }
+    render(data);
+    setStatus("", false);
+  } catch (err) {
+    setStatus(`Could not reach the server: ${err.message}`, true);
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+$("go").addEventListener("click", generate);
+$("jd").addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") generate();
+});
+</script>
+</body>
+</html>

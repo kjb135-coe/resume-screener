@@ -7,6 +7,8 @@ silent rename or a dropped tool is a real regression.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from resume_screener.adapters import mcp_server
@@ -17,8 +19,16 @@ from resume_screener.core.models import (
     RubricScore,
     Verdict,
 )
+from resume_screener.core.rubric_gen import parse_rubric
+from tests.fakes import rubric_json
 
-EXPECTED_TOOLS = {"screen_resume", "rank_pool", "explain_verdict", "query_candidates"}
+EXPECTED_TOOLS = {
+    "preview_rubric",
+    "screen_resume",
+    "rank_pool",
+    "explain_verdict",
+    "query_candidates",
+}
 
 
 def _verdict(name: str) -> Verdict:
@@ -45,12 +55,14 @@ def _verdict(name: str) -> Verdict:
 @pytest.fixture(autouse=True)
 def clean_sessions():
     mcp_server._sessions.clear()
+    mcp_server._rubrics.clear()
     yield
     mcp_server._sessions.clear()
+    mcp_server._rubrics.clear()
 
 
 class TestToolRegistration:
-    async def test_all_four_tools_registered(self):
+    async def test_all_tools_registered(self):
         names = {t.name for t in await mcp_server.mcp.list_tools()}
         assert names == EXPECTED_TOOLS
 
@@ -91,3 +103,26 @@ class TestSessions:
         for _ in range(mcp_server._MAX_SESSIONS + 5):
             mcp_server._store_session([_verdict("X")])
         assert len(mcp_server._sessions) <= mcp_server._MAX_SESSIONS
+
+
+class TestRubricHandoff:
+    """preview_rubric -> rank_pool must carry the *same* rubric across.
+    Generation is not deterministic, so re-generating at screening time
+    would score candidates against a rubric nobody approved.
+    """
+
+    async def test_rank_pool_rejects_unknown_rubric_id(self):
+        result = await mcp_server.rank_pool("/tmp", "Some posting.", rubric_id="nope")
+        assert "error" in result
+        assert "preview_rubric" in result["error"]
+
+    async def test_stored_rubric_is_returned_unchanged(self):
+        rubric = parse_rubric(json.loads(rubric_json()))
+        rubric_id = mcp_server._store_rubric(rubric)
+        assert mcp_server._rubrics[rubric_id] is rubric
+
+    async def test_rubrics_are_evicted_rather_than_growing_forever(self):
+        rubric = parse_rubric(json.loads(rubric_json()))
+        for _ in range(mcp_server._MAX_RUBRICS + 5):
+            mcp_server._store_rubric(rubric)
+        assert len(mcp_server._rubrics) <= mcp_server._MAX_RUBRICS

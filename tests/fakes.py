@@ -77,3 +77,28 @@ def arbiter_json(score: float, recommendation: str = "advance") -> str:
     return json.dumps(
         {"score": score, "recommendation": recommendation, "rationale": "Arbiter resolved."}
     )
+
+
+def rubric_json(names: list[str] | None = None) -> str:
+    """A well-formed rubric-generator response.
+
+    Defaults to the same three dimension names the hand-written rubric
+    uses, so tests can swap a generated rubric in for the static one and
+    compare like with like.
+    """
+    names = names or ["production_reality", "technical_integration", "client_communication"]
+    return json.dumps(
+        {
+            "role_title": "AI Solutions Engineer",
+            "summary": "Wants production-shipped agentic systems, not research or demos.",
+            "dimensions": [
+                {
+                    "name": name,
+                    "title": name.replace("_", " ").title(),
+                    "criteria": f"Score the evidence for {name}. Demo-stage work scores low.",
+                    "lens": f"You judge {name} only. Ignore every other dimension.",
+                }
+                for name in names
+            ],
+        }
+    )

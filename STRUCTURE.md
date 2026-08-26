@@ -30,8 +30,11 @@ removing files rather than editing this by hand.
 ├── src/                         Package source.
 │   └── resume_screener/             The installable package.
 │       ├── adapters/                    Thin translation layers over core. No scoring logic lives here.
+│       │   ├── static/                      Static assets for the web adapter.
+│       │   │   └── index.html                   The rubric-preview page. One file, no build step, no external assets.
 │       │   ├── __init__.py                  Package marker.
-│       │   └── mcp_server.py                MCP server exposing four tools. The primary interface.
+│       │   ├── api.py                       FastAPI backend: paste a posting, read the generated rubric. Does not screen.
+│       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.
 │       │   ├── __init__.py                  Package marker.
 │       │   ├── enrichment.py                Documented extension point for consuming external MCP servers. Intentionally unimplemented.
@@ -39,19 +42,23 @@ removing files rather than editing this by hand.
 │       │   ├── models.py                    Shared dataclasses: Evidence, ExtractedCandidate, RubricScore, Verdict.
 │       │   ├── pipeline.py                  The cascade: extract -> panel -> arbitrate on disagreement. Owns the caching contract.
 │       │   ├── query.py                     Follow-up questions: sandboxed DuckDB SQL plus a bounded evidence-judgment call.
-│       │   └── router.py                    Model provider abstraction. Returns ModelResponse with real token/latency usage.
+│       │   ├── router.py                    Model provider abstraction. Returns ModelResponse with real token/latency usage.
+│       │   └── rubric_gen.py                Writes the rubric and the three panel personas from any job posting. Validated, not trusted.
 │       ├── prompts/                     Prompt text kept out of code so it can be diffed and cached.
-│       │   └── rubric.md                    The scoring rubric. Forms the cacheable prefix shared by every panel call.
+│       │   ├── rubric.md                    The hand-written rubric for docs/job_description.md. Default when no rubric is generated.
+│       │   └── rubric_generator.md          Meta-prompt: the instructions for writing a rubric from a posting.
 │       └── __init__.py                  Package marker.
 ├── tests/                       Offline test suite. Never calls a real API.
 │   ├── fixtures/                    Static inputs for tests.
 │   │   └── sample_resume.md             One well-formed resume used across pipeline tests.
 │   ├── __init__.py                  Package marker.
 │   ├── fakes.py                     Scripted Model implementation so tests are free, deterministic, and key-less.
-│   ├── test_mcp_server.py           Tool registration and session lifecycle.
+│   ├── test_api.py                  Web adapter: the rubric endpoint and every error surface it can show.
+│   ├── test_mcp_server.py           Tool registration, session lifecycle, and the preview-to-screen rubric handoff.
 │   ├── test_pipeline.py             Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.
 │   ├── test_query.py                SQL safety, aggregate handling, and the two query primitives.
-│   └── test_router.py               Response text-block extraction (thinking-block bug regression) and Usage accumulation.
+│   ├── test_router.py               Response text-block extraction (thinking-block bug regression) and Usage accumulation.
+│   └── test_rubric_gen.py           Rubric validation: dimension count, identifier names, and failing loud on junk.
 ├── .gitignore                   Excludes venv, caches, .env, and generated databases.
 ├── PLAN.md                      Living status doc — what's settled, what's built, what's open.
 ├── pyproject.toml               Package metadata, dependencies, pytest and ruff config.

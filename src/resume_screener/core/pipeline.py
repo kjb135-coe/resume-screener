@@ -5,12 +5,18 @@ no MCP, no HTTP, no CLI concerns. adapters/ is the only code allowed to
 import this module and translate its shapes outward.
 
 Caching contract (load-bearing, do not break casually):
-the system block passed to any panel call is `RUBRIC + job_description`
+the system block passed to any panel call is `rubric + job_description`
 and nothing else. It is byte-identical across all three personas and
 across every resume in a batch, so one cache write serves every
 subsequent panel call. The persona and the candidate's evidence go in
 the user turn. Putting the persona back into the system string would
 silently create one cache entry per persona and gut the savings.
+
+The rubric half is either the hand-written `prompts/rubric.md` (anchored
+to docs/job_description.md) or a GeneratedRubric written for whatever
+posting the caller supplied -- see core/rubric_gen.py. Either way it must
+be resolved ONCE and reused for the whole batch: a rubric regenerated per
+resume would differ slightly each time and defeat the cache.
 """
 
 from __future__ import annotations
@@ -31,6 +37,7 @@ from resume_screener.core.models import (
     Verdict,
 )
 from resume_screener.core.router import AnthropicModel, Model, Usage
+from resume_screener.core.rubric_gen import GeneratedRubric, generate_rubric
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +62,9 @@ EXTRACT_MAX_TOKENS = 3000
 PANEL_MAX_TOKENS = 4000
 ARBITER_MAX_TOKENS = 3000
 
+# The hand-written panel, paired with prompts/rubric.md. Used when no
+# GeneratedRubric is supplied, which keeps scripts/evaluate.py reproducible
+# against the corpus these were calibrated on.
 _PANEL_PERSONAS = {
     "production_reality": "You judge whether the evidence describes systems "
     "that shipped and are used in production, versus research, coursework, "
@@ -88,14 +98,26 @@ def default_models() -> dict[str, Model]:
         "triage": AnthropicModel("claude-haiku-4-5-20251001", api_key),
         "panel": AnthropicModel("claude-sonnet-5", api_key),
         "arbiter": AnthropicModel("claude-opus-5", api_key),
+        # Writing the rubric sets the standard every later score is judged
+        # against, and it runs once per batch rather than once per resume.
+        # It is the cheapest place in the cascade to buy the best model.
+        "rubric": AnthropicModel("claude-opus-5", api_key),
     }
 
 
-def _panel_prefix(job_description: str) -> str:
+def _panel_prefix(job_description: str, rubric: GeneratedRubric | None = None) -> str:
     """The cacheable system prefix -- see the caching contract in the module
     docstring. Identical for every panel call in a batch, by construction.
+
+    `rubric=None` uses the hand-written rubric anchored to
+    docs/job_description.md.
     """
-    return f"{RUBRIC}\n\n---\n\nJob description:\n{job_description}"
+    body = rubric.markdown if rubric is not None else RUBRIC
+    return f"{body}\n\n---\n\nJob description:\n{job_description}"
+
+
+def _personas_for(rubric: GeneratedRubric | None) -> dict[str, str]:
+    return _PANEL_PERSONAS if rubric is None else rubric.personas
 
 
 def _parse_json(text: str, *, expect: str = "object") -> dict | list | None:
@@ -168,18 +190,25 @@ async def extract_candidate(
 
 
 async def _panel_agent(
-    name: str, candidate: ExtractedCandidate, job_description: str, model: Model
+    name: str,
+    lens: str,
+    candidate: ExtractedCandidate,
+    job_description: str,
+    model: Model,
+    rubric: GeneratedRubric | None = None,
 ) -> tuple[RubricScore, Usage]:
     evidence_json = json.dumps(
         [{"quote": e.quote, "rubric_dimension": e.rubric_dimension} for e in candidate.evidence]
     )
     user = (
-        f"Your specific lens: {_PANEL_PERSONAS[name]}\n\n"
+        f"Your specific lens: {lens}\n\n"
         f"Candidate evidence:\n{evidence_json}\n\n"
         "Respond as JSON: {score (0-10), confidence (0-1), rationale}. "
         "Keep the rationale to two sentences, quoting the evidence you relied on."
     )
-    response = await model.complete(_panel_prefix(job_description), user, max_tokens=PANEL_MAX_TOKENS)
+    response = await model.complete(
+        _panel_prefix(job_description, rubric), user, max_tokens=PANEL_MAX_TOKENS
+    )
     data = _parse_json(response.text) or {}
     score = RubricScore(
         agent_name=name,
@@ -196,6 +225,7 @@ async def _arbitrate(
     panel: list[RubricScore],
     job_description: str,
     model: Model,
+    rubric: GeneratedRubric | None = None,
 ) -> tuple[float, Recommendation, str, Usage]:
     user = (
         "The scoring panel disagreed on this candidate. Read their rationales, "
@@ -203,7 +233,9 @@ async def _arbitrate(
         f"Panel scores:\n{json.dumps([p.to_dict() for p in panel])}\n\n"
         "Respond as JSON: {score (0-10), recommendation (advance|hold|reject), rationale}."
     )
-    response = await model.complete(_panel_prefix(job_description), user, max_tokens=ARBITER_MAX_TOKENS)
+    response = await model.complete(
+        _panel_prefix(job_description, rubric), user, max_tokens=ARBITER_MAX_TOKENS
+    )
     data = _parse_json(response.text) or {}
 
     score = _coerce_float(data.get("score"), statistics.mean([p.score for p in panel]))
@@ -224,16 +256,26 @@ def recommendation_from_score(score: float) -> Recommendation:
 
 
 async def screen_one(
-    resume_path: str, job_description: str, models: dict[str, Model] | None = None
+    resume_path: str,
+    job_description: str,
+    models: dict[str, Model] | None = None,
+    rubric: GeneratedRubric | None = None,
 ) -> Verdict:
+    """Screen one candidate.
+
+    `rubric=None` scores against the hand-written rubric anchored to
+    docs/job_description.md. Pass a GeneratedRubric to score against any
+    other posting -- see rubric_for().
+    """
     models = models or default_models()
+    personas = _personas_for(rubric)
 
     candidate, usage = await extract_candidate(resume_path, models["triage"])
 
     panel_results = await asyncio.gather(
         *[
-            _panel_agent(name, candidate, job_description, models["panel"])
-            for name in _PANEL_PERSONAS
+            _panel_agent(name, lens, candidate, job_description, models["panel"], rubric)
+            for name, lens in personas.items()
         ]
     )
     panel = [score for score, _ in panel_results]
@@ -245,7 +287,7 @@ async def screen_one(
 
     if spread > DISAGREEMENT_THRESHOLD:
         score, recommendation, rationale, arb_usage = await _arbitrate(
-            candidate, panel, job_description, models["arbiter"]
+            candidate, panel, job_description, models["arbiter"], rubric
         )
         return Verdict(
             candidate=candidate,
@@ -271,17 +313,33 @@ async def screen_one(
     )
 
 
+async def rubric_for(
+    job_description: str, models: dict[str, Model] | None = None
+) -> GeneratedRubric:
+    """Write a rubric for a posting, using the cascade's rubric model.
+
+    Thin convenience wrapper so callers don't have to know which model
+    slot writes rubrics. Call once, then pass the result to rank_all.
+    """
+    models = models or default_models()
+    return await generate_rubric(job_description, models["rubric"])
+
+
 async def rank_all(
     resume_dir: str,
     job_description: str,
     models: dict[str, Model] | None = None,
     max_concurrent: int = MAX_CONCURRENT_RESUMES,
+    rubric: GeneratedRubric | None = None,
 ) -> list[Verdict]:
     """Screen every resume in a directory, ranked best-first.
 
     Returns the FULL pool, not a truncated shortlist -- truncation is the
     caller's job. query_candidates has to be able to ask about candidates
     outside the top N, so the session must retain everything.
+
+    `rubric` is resolved once here and reused for every resume, which is
+    what keeps the cached panel prefix identical across the batch.
     """
     models = models or default_models()
     paths = iter_resume_paths(resume_dir)
@@ -290,7 +348,7 @@ async def rank_all(
     async def _bounded(path: str) -> Verdict | None:
         async with semaphore:
             try:
-                return await screen_one(path, job_description, models)
+                return await screen_one(path, job_description, models, rubric)
             except Exception:
                 # One unreadable resume shouldn't sink a 60-resume batch.
                 log.exception("Failed to screen %s", path)
