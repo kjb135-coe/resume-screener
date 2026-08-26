@@ -3,9 +3,15 @@
     python scripts/evaluate.py                # full corpus
     python scripts/evaluate.py --limit 6      # cheap smoke run
     python scripts/evaluate.py --no-cache     # for the caching comparison
+    python scripts/evaluate.py --panel-model claude-haiku-4-5-20251001 \\
+        --tag cheap-panel                     # tier bake-off, PLAN.md section 8
 
-Writes docs/EVAL_RESULTS.md (human-readable) and data/eval_run.json (raw,
-for later comparison between configurations).
+Writes docs/EVAL_RESULTS.md and data/eval_run.json for `--tag baseline`
+(the default) -- these are the canonical run every other doc, the web
+app, and CANDIDATE_REPORTS.md read from. Any other `--tag` writes to
+`docs/EVAL_RESULTS__<tag>.md` and `data/eval_run__<tag>.json` instead, so
+a comparison run can never silently overwrite the baseline everything
+else depends on.
 
 Metrics follow the plan: macro-F1 over advance/hold/reject as the primary
 number, reported SEPARATELY from escalation rate rather than blended, plus
@@ -27,14 +33,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from resume_screener.core.models import Verdict
-from resume_screener.core.pipeline import default_models, screen_one
+from resume_screener.core.pipeline import DEFAULT_MODEL_IDS, default_models, screen_one
 
 REPO = Path(__file__).resolve().parent.parent
 CORPUS = REPO / "data" / "synthetic_resumes"
 LABELS = REPO / "data" / "labels.json"
 JD_PATH = REPO / "docs" / "job_description.md"
-RESULTS_MD = REPO / "docs" / "EVAL_RESULTS.md"
-RESULTS_JSON = REPO / "data" / "eval_run.json"
 
 CLASSES = ("advance", "hold", "reject")
 
@@ -100,7 +104,28 @@ async def main() -> int:
     parser.add_argument("--concurrency", type=int, default=5)
     parser.add_argument("--no-cache", action="store_true", help="disable prompt caching")
     parser.add_argument("--tag", default="baseline", help="label for this configuration")
+    for slot in DEFAULT_MODEL_IDS:
+        parser.add_argument(
+            f"--{slot}-model",
+            default=None,
+            help=f"override the {slot!r} model slot (default: {DEFAULT_MODEL_IDS[slot]})",
+        )
     args = parser.parse_args()
+
+    overrides = {
+        slot: getattr(args, f"{slot}_model")
+        for slot in DEFAULT_MODEL_IDS
+        if getattr(args, f"{slot}_model")
+    }
+
+    # Only `--tag baseline` (the default) is allowed to touch the files
+    # everything else in the repo reads: the web app's recorded-run tab,
+    # CANDIDATE_REPORTS.md, RESULTS_HISTORY.md's numbers. Any other tag is
+    # a comparison run and gets its own filenames so it cannot clobber
+    # that baseline by accident.
+    suffix = "" if args.tag == "baseline" else f"__{args.tag}"
+    results_md = REPO / "docs" / f"EVAL_RESULTS{suffix}.md"
+    results_json = REPO / "data" / f"eval_run{suffix}.json"
 
     labels = json.loads(LABELS.read_text(encoding="utf-8"))
     job_description = JD_PATH.read_text(encoding="utf-8")
@@ -129,8 +154,10 @@ async def main() -> int:
 
         router.AnthropicModel.complete = uncached
 
-    models = default_models()
+    models = default_models(overrides)
     semaphore = asyncio.Semaphore(args.concurrency)
+    if overrides:
+        print(f"Model overrides: {overrides}")
     print(f"Evaluating {len(items)} resumes [{args.tag}]...\n")
     started = time.monotonic()
 
@@ -201,6 +228,11 @@ async def main() -> int:
     add(f"# Evaluation results — `{args.tag}`\n")
     add(f"{len(rows)} of {len(items)} resumes scored. "
         f"Prompt caching: {'off' if args.no_cache else 'on'}.\n")
+    if overrides:
+        add("**Model overrides from baseline:**\n")
+        for slot, model_id in overrides.items():
+            add(f"- `{slot}`: `{DEFAULT_MODEL_IDS[slot]}` → `{model_id}`")
+        add("")
     add("## Headline\n")
     add("| Metric | Value |")
     add("|---|---|")
@@ -258,13 +290,14 @@ async def main() -> int:
             f"{verdict.panel_spread:.1f} | {'yes' if verdict.escalated else 'no'} | {reasoning} |"
         )
 
-    RESULTS_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    results_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    RESULTS_JSON.write_text(
+    results_json.write_text(
         json.dumps(
             {
                 "tag": args.tag,
                 "caching": not args.no_cache,
+                "model_ids": {**DEFAULT_MODEL_IDS, **overrides},
                 "n": len(rows),
                 "macro_f1": macro_f1,
                 "accuracy": accuracy,
@@ -308,7 +341,7 @@ async def main() -> int:
     print(f"  Macro-F1 {macro_f1:.3f} | accuracy {accuracy:.3f} | "
           f"escalated {escalated}/{len(rows)} | ${cost:.3f}")
     print(f"{'=' * 60}")
-    print(f"\nWrote {RESULTS_MD.relative_to(REPO)} and {RESULTS_JSON.relative_to(REPO)}")
+    print(f"\nWrote {results_md.relative_to(REPO)} and {results_json.relative_to(REPO)}")
     return 0
 
 

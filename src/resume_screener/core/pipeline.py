@@ -98,7 +98,31 @@ _PANEL_PERSONAS = {
 }
 
 
-def default_models() -> dict[str, Model]:
+DEFAULT_MODEL_IDS = {
+    "triage": "claude-haiku-4-5-20251001",
+    "panel": "claude-sonnet-5",
+    # Sonnet, not Opus. The arbiter adjudicates between three
+    # rationales already written for it -- reading and choosing,
+    # not fresh analysis. Measured on the recorded run it was ~57%
+    # of total spend while running on 55% of candidates, because
+    # Opus output is 15x Haiku and 5x Sonnet. See PLAN.md 3g.
+    "arbiter": "claude-sonnet-5",
+    # Writing the rubric sets the standard every later score is judged
+    # against, and it runs once per batch rather than once per resume.
+    # It is the cheapest place in the cascade to buy the best model.
+    "rubric": "claude-opus-5",
+}
+
+
+def default_models(overrides: dict[str, str] | None = None) -> dict[str, Model]:
+    """The four model slots, each an independent knob.
+
+    `overrides` swaps individual slots (e.g. `{"panel": "claude-haiku-4-5-
+    20251001"}`) for the tier bake-off in PLAN.md section 8 -- comparing
+    what cheaper models cost the pipeline in accuracy, without touching
+    the caching contract, the escalation logic, or anything else that
+    lives downstream of "which model answered this call".
+    """
     try:
         api_key = os.environ["ANTHROPIC_API_KEY"]
     except KeyError:
@@ -106,20 +130,8 @@ def default_models() -> dict[str, Model]:
             "ANTHROPIC_API_KEY is not set. Export it, or pass an explicit "
             "`models` dict to screen_one/rank_all (tests do this)."
         ) from None
-    return {
-        "triage": AnthropicModel("claude-haiku-4-5-20251001", api_key),
-        "panel": AnthropicModel("claude-sonnet-5", api_key),
-        # Sonnet, not Opus. The arbiter adjudicates between three
-        # rationales already written for it -- reading and choosing,
-        # not fresh analysis. Measured on the recorded run it was ~57%
-        # of total spend while running on 55% of candidates, because
-        # Opus output is 15x Haiku and 5x Sonnet. See PLAN.md 3g.
-        "arbiter": AnthropicModel("claude-sonnet-5", api_key),
-        # Writing the rubric sets the standard every later score is judged
-        # against, and it runs once per batch rather than once per resume.
-        # It is the cheapest place in the cascade to buy the best model.
-        "rubric": AnthropicModel("claude-opus-5", api_key),
-    }
+    model_ids = {**DEFAULT_MODEL_IDS, **(overrides or {})}
+    return {slot: AnthropicModel(model_id, api_key) for slot, model_id in model_ids.items()}
 
 
 def _panel_prefix(job_description: str, rubric: GeneratedRubric | None = None) -> str:

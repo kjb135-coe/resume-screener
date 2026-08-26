@@ -74,6 +74,35 @@ rates. It is not comparable to the "$0.93" in runs 1 and 2, which were
 wrong rather than cheaper. Against a corrected estimate of run 2 at
 roughly $4, moving the arbiter to Sonnet did close to halve real spend.
 
+## Comparison runs — not the baseline
+
+These use `--tag` other than `baseline`, so they write to
+`eval_run__<tag>.json` / `EVAL_RESULTS__<tag>.md` and never touch the
+files everything else in the repo reads.
+
+### All-Haiku panel, Sonnet arbiter — 2026-08-26
+
+Requested experiment: `triage` and `panel` both on Haiku, arbiter kept on
+Sonnet. Full writeup in
+[EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md](EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md).
+
+| | Baseline | All-Haiku panel |
+|---|---|---|
+| macro-F1 | 0.847 | 0.516 |
+| accuracy | 0.850 | 0.533 |
+| cost | $1.796 | $1.286 |
+
+28% cheaper, and not close to worth it. **88 of 180 Haiku panel calls
+(49%) returned unparseable text**, against 2.2% for Sonnet on the
+identical prompt — an instruction-following gap, not a reasoning gap.
+Every failure defaults to a flagged 0.0, so roughly half the panel's
+inputs to the final average were noise rather than judgments.
+
+The review-flag safety net (§4) caught 59 of 60 candidates as a result,
+which is the honest finding: nothing reached an unreviewed decision, but
+"59 of 60 need a human" is not automation with a discount, it's manual
+review with extra steps. **Not adopted.**
+
 ## Offline sweeps — analysis, not runs
 
 Neither of these called an API. Both re-derive decisions from scores

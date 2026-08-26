@@ -12,6 +12,7 @@ it's visible rather than silently blank.
 
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -128,6 +129,7 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
     "docs/CUTOFF_SWEEP.md": "Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.",
+    "docs/EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md": "Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).",
     "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
 
     # scripts/
@@ -136,7 +138,7 @@ DESCRIPTIONS: dict[str, str] = {
     "scripts/archetypes.py": "The 9 archetype specs (label, per-dimension targets, must-include/avoid) that generate_corpus.py writes from.",
     "scripts/generate_corpus.py": "Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.",
     "scripts/check_corpus.py": "Lints generated resumes for leaked or missing signals against their own archetype's constraints.",
-    "scripts/evaluate.py": "Scores the pipeline against the labeled corpus. Writes EVAL_RESULTS.md and eval_run.json.",
+    "scripts/evaluate.py": "Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.",
     "scripts/sweep_escalation.py": "Compares escalation policies on cost and pointless calls. No API calls.",
     "scripts/sweep_cutoffs.py": "Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.",
     "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
@@ -184,6 +186,10 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
 
         if description is None and entry.name == "__init__.py":
             description = "Package marker."
+        elif description is None and re.fullmatch(r"eval_run__.+\.json", entry.name):
+            description = "A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md."
+        elif description is None and re.fullmatch(r"EVAL_RESULTS__.+\.md", entry.name):
+            description = "Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md."
         elif description is None:
             description = "NEEDS DESCRIPTION"
             missing.append(rel)

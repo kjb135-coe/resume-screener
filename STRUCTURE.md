@@ -8,6 +8,7 @@ removing files rather than editing this by hand.
 │   ├── synthetic_resumes/           The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.
 │   │   └── (60 generated resumes, listed in data/labels.json)
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
+│   ├── eval_run__all-haiku-panel-sonnet-arbiter.json A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   └── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
@@ -17,6 +18,8 @@ removing files rather than editing this by hand.
 │   ├── CUTOFF_SWEEP.md              Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.
 │   ├── ESCALATION_SWEEP.md          Output of scripts/sweep_escalation.py: escalation policies compared on cost.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
+│   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
+│   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).
 │   ├── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
 │   └── RESULTS_HISTORY.md           Every measured run, what changed before it, and why the number moved.
 ├── research/                    Background research with citations, gathered before design decisions were made.
@@ -28,7 +31,7 @@ removing files rather than editing this by hand.
 ├── scripts/                     Developer utilities. Not part of the installed package.
 │   ├── archetypes.py                The 9 archetype specs (label, per-dimension targets, must-include/avoid) that generate_corpus.py writes from.
 │   ├── check_corpus.py              Lints generated resumes for leaked or missing signals against their own archetype's constraints.
-│   ├── evaluate.py                  Scores the pipeline against the labeled corpus. Writes EVAL_RESULTS.md and eval_run.json.
+│   ├── evaluate.py                  Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.
 │   ├── generate_candidate_report.py Builds CANDIDATE_REPORTS.md from the last evaluate.py run.
 │   ├── generate_corpus.py           Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.
 │   ├── sweep_cutoffs.py             Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.

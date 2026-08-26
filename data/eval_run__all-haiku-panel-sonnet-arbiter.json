@@ -1,0 +1,2032 @@
+{
+  "tag": "all-haiku-panel-sonnet-arbiter",
+  "caching": true,
+  "model_ids": {
+    "triage": "claude-haiku-4-5-20251001",
+    "panel": "claude-haiku-4-5-20251001",
+    "arbiter": "claude-sonnet-5",
+    "rubric": "claude-opus-5"
+  },
+  "n": 60,
+  "macro_f1": 0.5160507902443385,
+  "accuracy": 0.5333333333333333,
+  "per_class": {
+    "advance": {
+      "precision": 0.7058823529411765,
+      "recall": 0.6,
+      "f1": 0.6486486486486486,
+      "support": 20
+    },
+    "hold": {
+      "precision": 0.45454545454545453,
+      "recall": 0.25,
+      "f1": 0.3225806451612903,
+      "support": 20
+    },
+    "reject": {
+      "precision": 0.46875,
+      "recall": 0.75,
+      "f1": 0.5769230769230769,
+      "support": 20
+    }
+  },
+  "escalation_rate": 0.38333333333333336,
+  "review_flag_rate": 0.9833333333333333,
+  "cost_total": 1.2855431999999996,
+  "cost_per_resume": 0.021425719999999992,
+  "latency_p50": 18.257223500986584,
+  "latency_p95": 29.907527292030863,
+  "wall_clock_s": 182.91303620801773,
+  "cost_by_model": {
+    "claude-haiku-4-5-20251001": 0.8682,
+    "claude-sonnet-5": 0.4174
+  },
+  "tokens": {
+    "input": 392567,
+    "output": 121085,
+    "cache_read": 42504,
+    "cache_write": 4048
+  },
+  "predictions": [
+    {
+      "file": "academic_researcher__devon_whitaker.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "All four evidence items describe research, publication, and academic work with no mention of production systems, client engagement, or cross-functional collaboration outside academia. The posting explicitly requires 'translating complex AI concepts into clear, practical guidance for internal stakeholders and client audiences' and 'support client engagements including technical discussions' \u2014 none of the provided evidence demonstrates either direct client interaction or communication to non-technical business audiences; the citations and peer-reviewed publications signal academic rigor but not the client-facing or business-integration communication this role prioritizes.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] All four evidence items describe research, publication, and academic work with no mention of production systems, client engagement, or cross-functional collaboration outside academia. The posting explicitly requires 'translating complex AI concepts into clear, practical guidance for internal stakeholders and client audiences' and 'support client engagements including technical discussions' \u2014 none of the provided evidence demonstrates either direct client interaction or communication to non-technical business audiences; the citations and peer-reviewed publications signal academic rigor but not the client-facing or business-integration communication this role prioritizes."
+    },
+    {
+      "file": "academic_researcher__freya_ashcombe.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "No evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales, delivery, or business stakeholders. All quotes describe research publication, conference presentation to peer audiences, and academic recognition\u2014which is peer-to-peer technical communication in academic venues, not the client-facing or business-stakeholder translation this posting explicitly requires as a 'required skill.'",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] No evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales, delivery, or business stakeholders. All quotes describe research publication, conference presentation to peer audiences, and academic recognition\u2014which is peer-to-peer technical communication in academic venues, not the client-facing or business-stakeholder translation this posting explicitly requires as a 'required skill.'"
+    },
+    {
+      "file": "academic_researcher__kwame_asante.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 1.3333333333333333,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "This candidate's entire portfolio is research and academic output with no evidence of production systems. The quotes describe 'synthetic transaction datasets,' 'internal benchmark,' published papers, and a dissertation\u2014all hallmarks of research work that stopped at publication or demo. There is zero mention of deployed systems, real user load, on-call responsibility, production monitoring, or iteration post-launch; the posting explicitly requires 'not demos or prototypes, but systems used in production,' and this candidate does not meet that bar.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains zero direct quotes demonstrating client-facing communication, cross-functional collaboration with sales/delivery/engineering teams, or engagement with non-technical audiences. The candidate's work is entirely research-oriented: \"Published research on temporal graph neural networks,\" \"Published 4 peer-reviewed papers in top-tier venues,\" and \"Designed evaluation framework for anomaly detection models\" \u2014 all academic outputs with no mention of translating these concepts for business stakeholders, working alongside product or sales teams, or explaining technical decisions to non-engineers.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] This candidate's entire portfolio is research and academic output with no evidence of production systems. The quotes describe 'synthetic transaction datasets,' 'internal benchmark,' published papers, and a dissertation\u2014all hallmarks of research work that stopped at publication or demo. There is zero mention of deployed systems, real user load, on-call responsibility, production monitoring, or iteration post-launch; the posting explicitly requires 'not demos or prototypes, but systems used in production,' and this candidate does not meet that bar. | [technical_integration] No rationale returned. | [client_communication] The evidence provided contains zero direct quotes demonstrating client-facing communication, cross-functional collaboration with sales/delivery/engineering teams, or engagement with non-technical audiences. The candidate's work is entirely research-oriented: \"Published research on temporal graph neural networks,\" \"Published 4 peer-reviewed papers in top-tier venues,\" and \"Designed evaluation framework for anomaly detection models\" \u2014 all academic outputs with no mention of translating these concepts for business stakeholders, working alongside product or sales teams, or explaining technical decisions to non-engineers."
+    },
+    {
+      "file": "academic_researcher__marcus_feldman.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "panel_spread": 1.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's entire profile is research-focused: \"ML systems researcher\" designing compiler frameworks, publishing at NeurIPS/ICML/ICLR, and benchmarking against academic baselines. There is zero evidence of client-facing communication, cross-functional collaboration with sales/delivery teams, or explaining technical work to non-technical audiences\u2014the posting explicitly names these as required skills and differentiators.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate's entire profile is research-focused: \"ML systems researcher\" designing compiler frameworks, publishing at NeurIPS/ICML/ICLR, and benchmarking against academic baselines. There is zero evidence of client-facing communication, cross-functional collaboration with sales/delivery teams, or explaining technical work to non-technical audiences\u2014the posting explicitly names these as required skills and differentiators."
+    },
+    {
+      "file": "academic_researcher__ravi_chandrasekar.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "panel_spread": 1.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "Zero evidence of client engagement, cross-functional collaboration with sales/delivery teams, or translation of technical work to non-technical audiences. The entire evidence set describes academic research outputs (publications, citations, dissertation, fellowships, mentoring of junior researchers) with no mention of explaining concepts to business stakeholders, working with customer-facing teams, or supporting client implementations\u2014all explicitly named as required skills in the job description.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] Zero evidence of client engagement, cross-functional collaboration with sales/delivery teams, or translation of technical work to non-technical audiences. The entire evidence set describes academic research outputs (publications, citations, dissertation, fellowships, mentoring of junior researchers) with no mention of explaining concepts to business stakeholders, working with customer-facing teams, or supporting client implementations\u2014all explicitly named as required skills in the job description."
+    },
+    {
+      "file": "academic_researcher__tomas_herrera.md",
+      "archetype": "academic_researcher",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence describes pure research and academic publication work (\"Published findings on attention mechanisms for fashion recommendation in the ICML 2025 Workshop\", \"Published primary dissertation work... in ACM Transactions on Information Systems\"), with no quotable evidence of explaining technical concepts to non-technical audiences, cross-functional collaboration with sales/delivery/engineering teams, or client engagement. The job posting explicitly names \"Communication to technical and non-technical audiences\" and \"Cross-functional collaboration (engineering, innovation, sales, delivery)\" as required skills \u2014 this candidate's evidence shows none of those signals.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence describes pure research and academic publication work (\"Published findings on attention mechanisms for fashion recommendation in the ICML 2025 Workshop\", \"Published primary dissertation work... in ACM Transactions on Information Systems\"), with no quotable evidence of explaining technical concepts to non-technical audiences, cross-functional collaboration with sales/delivery/engineering teams, or client engagement. The job posting explicitly names \"Communication to technical and non-technical audiences\" and \"Cross-functional collaboration (engineering, innovation, sales, delivery)\" as required skills \u2014 this candidate's evidence shows none of those signals."
+    },
+    {
+      "file": "adjacent_shipper__bennett_cross.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.92,
+          "rationale": "The evidence is saturated with production ownership signals: \"8 years of production systems experience\" with \"18 months shipping LLM-powered features at scale,\" a multi-agent service \"deployed\" (not prototyped) for compliance workflows, and infrastructure handling \"2TB daily\" across real user load (\"3M+ users\"). Every claim includes measurable production impact (60% latency improvement, 28% cost reduction, 500K+ daily requests at p99 <200ms), not demo metrics. The only gap is absence of on-call/incident response language, but the depth of owned systems (feature platform, SDK adoption by 15+ scientists, streaming pipelines) demonstrates sustained production responsibility.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate shows strong production infrastructure and LLM technical depth but provides zero evidence of client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical work to non-technical audiences. The evidence describes internal platform work ('Owned the data ingestion and feature serving platform supporting a 40-person ML team') and backend optimization, but contains no quote describing interaction with external clients, translation of concepts for non-technical stakeholders, or collaborative work spanning engineering, sales, and delivery teams as the posting explicitly requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The panel's dimensions diverge sharply and must be reconciled rather than averaged blindly. Production reality is strongly supported: quotes like '8 years of production systems experience,' '18 months shipping LLM-powered features at scale,' a multi-agent service 'deployed' for compliance workflows, and hard metrics ('500K+ daily requests at p99 <200ms,' '2TB daily,' '3M+ users') directly match the posting's demand for systems 'used in production' rather than demos \u2014 this justifies a high score (~9) on that axis. Technical/integration depth evidence (multi-agent service, LLM feature platform, SDK adoption by 15+ scientists, streaming pipelines) suggests genuine hands-on building of agentic and LLM systems, though the technical_integration agent's rationale was lost to a parse failure, so this dimension carries more uncertainty (~7 estimated, lower confidence). Client-facing and cross-functional signal is essentially absent: the client_communication agent found 'zero evidence of client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical work to non-technical audiences,' with all cited work being internal platform ownership \u2014 this is the weakest dimension (~2) and matches the posting's explicit ask by name, which the rubric flags as a genuine differentiator whose absence is not disqualifying but should not be inflated. Combining these \u2014 strong production ownership, solid but partially unverified technical depth, and near-total absence of client/cross-functional evidence \u2014 yields a composite score around 6, reflecting a strong builder profile that underdelivers on the client-facing dimension this specific posting explicitly requires."
+    },
+    {
+      "file": "adjacent_shipper__bruno_salvatore.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "panel_spread": 7.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 7.0,
+          "confidence": 0.82,
+          "rationale": "The candidate demonstrates clear hands-on depth building agentic systems: 'Engineered the agentic layer using Claude API with function calling' on a production system serving 2.8M monthly shoppers, with explicit integration into real business APIs ('integrates with Shopify, WooCommerce, and custom storefronts via REST APIs'). However, the evidence lacks detail on memory and orchestration specifics, infrastructure ownership (cloud platform, deployment pipeline, scaling decisions), or evidence of post-launch production support and iteration\u2014the posting emphasizes 'not demos or prototypes, but systems used in production' and on-call ownership, which are not addressed in the provided quotes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The evidence shows strong technical depth\u2014'Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers' and 'Engineered the agentic layer using Claude API with function calling'\u2014but contains no direct signal of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery, or client engagement. The SDK work 'directly reduced onboarding time for new clients by 35%' shows impact on users, but does not describe the candidate communicating *across* functions or *to* non-technical stakeholders, which the job posting explicitly requires as a differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The production_reality panelist's rationale failed to parse, but the underlying evidence supports a moderate-to-strong production signal: 'Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers' and integration 'with Shopify, WooCommerce, and custom storefronts via REST APIs' indicate a live, business-integrated system rather than a demo, directly matching the posting's emphasis on 'not demos or prototypes, but systems used in production.' However, no quotes describe on-call ownership, monitoring, or post-launch iteration, so full credit isn't warranted. Technical/integration depth is well-supported \u2014 'Engineered the agentic layer using Claude API with function calling' shows real agentic-system work with API integration, though memory/orchestration specifics and infrastructure ownership are unaddressed, consistent with the technical_integration agent's score of 7. Client-facing/cross-functional signal is weak: 'directly reduced onboarding time for new clients by 35%' shows business impact but no direct evidence of communicating to non-technical audiences or cross-functional collaboration, supporting the client_communication agent's low score of 3. Averaging these with production reality weighted heavily per the rubric yields a composite score of 6."
+    },
+    {
+      "file": "adjacent_shipper__dele_adeyemi.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate has no explicit evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams. The only interpersonal signal is 'Mentored 2 junior engineers on cloud deployment practices and code review standards,' which is peer-to-peer technical mentoring, not the client-facing or sales/delivery collaboration this posting requires as a named differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate has no explicit evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams. The only interpersonal signal is 'Mentored 2 junior engineers on cloud deployment practices and code review standards,' which is peer-to-peer technical mentoring, not the client-facing or sales/delivery collaboration this posting requires as a named differentiator."
+    },
+    {
+      "file": "adjacent_shipper__julius_amankwah.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "The evidence describes a shipped, actively used system: \"Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians across Meridian's network\" with sustained operational scale: \"The system currently processes over 2,000 clinical encounters daily and has achieved 92% adoption among eligible providers.\" This is not a prototype or POC\u2014it is production software with real users, measurable adoption, and ongoing operational responsibility (HIPAA compliance, monitoring, incident response).",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The evidence shows strong technical leadership and production impact ('Led the design and launch of an LLM-powered clinical documentation assistant...for over 800 physicians' and '92% adoption among eligible providers'), but contains zero direct evidence of explaining technical work to non-technical audiences, client-facing engagement, or cross-functional collaboration with sales/delivery teams. Mentoring junior engineers ('Mentored two junior engineers on production deployment practices') is internal peer communication, not the client-facing or cross-functional business translation this posting explicitly requires as a differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The panel's dimension scores can only be partially reconciled since the technical_integration agent's rationale failed to parse (score 0, confidence 0), so that score is disregarded rather than averaged in. Production reality is strongly supported: \"Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians across Meridian's network\" and \"currently processes over 2,000 clinical encounters daily and has achieved 92% adoption among eligible providers\" describe a shipped, operationally-owned system, not a demo \u2014 this justifies a high score (9.0, confidence 0.95) on that dimension. On technical/integration depth, the same evidence establishes hands-on LLM/GenAI build-and-deploy work integrated into a real clinical workflow, which is solid but the extracted evidence as summarized does not explicitly mention agentic systems with memory, tools, or orchestration \u2014 the posting's specific language \u2014 so this dimension likely lands in the moderate-to-good range rather than exceptional, though it cannot be scored with confidence given the parse failure. Client-facing/cross-functional signal is weak: as the client_communication agent notes, \"Mentored two junior engineers on production deployment practices\" is internal peer mentoring, not client-facing or non-technical translation, and there is no direct evidence of communicating with non-technical stakeholders or cross-functional sales/delivery work (score 3.0, confidence 0.85). Combining strong production evidence, presumed-solid but unconfirmed agentic/integration depth, and weak client-facing signal yields a blended overall score of 6.0 \u2014 reflecting genuine strength in shipped production AI work but a clear gap on the posting's explicitly named differentiator of client-facing and cross-functional communication, and residual uncertainty on the agentic-architecture depth the posting emphasizes."
+    },
+    {
+      "file": "adjacent_shipper__keiko_yamashita.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.5,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "The evidence describes multiple systems that clearly shipped and operate at scale: a dispute resolution agent 'serving 50K+ daily users,' a payment routing system 'handling $2B+ annual transaction volume,' and infrastructure achieving '99.99% uptime SLA across production environments.' These are not demos or prototypes\u2014they are live, load-bearing systems with measurable real-world impact and operational constraints (failover, reconciliation, peak load optimization).",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's evidence is entirely technical and infrastructure-focused with no direct quotes demonstrating client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of complex concepts to non-technical audiences. While 'real-time transaction dispute resolution agent' and 'Architected and shipped' suggest production ownership, none of the six quotes contain any signal of explaining work to non-technical stakeholders, engaging directly with clients, or working across engineering/sales/delivery boundaries\u2014all explicitly named as required skills in this job description.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Weighing the three dimensions per the rubric: Production reality is strong and well-supported \u2014 the evidence describes live systems with real load and operational rigor, e.g. a dispute resolution agent 'serving 50K+ daily users,' a payment routing system 'handling $2B+ annual transaction volume,' and '99.99% uptime SLA across production environments,' which directly matches the posting's demand for systems 'used in production' rather than demos. Technical/integration depth could not be independently scored (the technical_integration panelist's rationale failed to parse), but the same production evidence implies real API/business-system integration ('Architected and shipped,' payment/dispute 'agent' systems), so a moderate-to-strong estimate is reasonable even without explicit quotes confirming memory/tools/orchestration architecture as the posting specifically names. Client-facing and cross-functional signal is weak: as the client_communication panelist noted with high confidence, 'none of the six quotes contain any signal of explaining work to non-technical stakeholders, engaging directly with clients, or working across engineering/sales/delivery boundaries.' Per the rubric, this absence is a real gap but not disqualifying on its own. Combining a heavily-weighted production score, an inferred-but-unconfirmed technical depth score, and a low client-facing score yields a moderate overall result rather than the 9.0 suggested by production alone."
+    },
+    {
+      "file": "adjacent_shipper__sofia_marchetti.md",
+      "archetype": "adjacent_shipper",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "panel_spread": 8.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates strong production depth: 'Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL systems via REST layers and handles asynchronous job workflows' shows hands-on agentic system building with real API integration and legacy system orchestration. However, evidence of explicit agent memory and tool design is absent\u2014the quotes describe API integration, workflow orchestration, and infrastructure scale, but not the memory, tools, and agent-specific orchestration patterns the job explicitly prioritizes ('Engineer agentic systems with memory, tools, and orchestration').",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The evidence shows strong technical depth and production ownership, but contains no direct signal of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams. The mentorship quote ('Mentored team of five engineers on production Kubernetes operations') addresses internal technical communication only, not the client-facing or business-stakeholder translation the posting explicitly requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The production_reality panelist's output failed to parse, but the underlying evidence cited elsewhere ('Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL systems via REST layers and handles asynchronous job workflows') directly supports the posting's core requirement of production-deployed systems handling real load, not demos \u2014 this should be scored high (~8), not 0. Technical/integration depth is strong and well-evidenced: the same quote shows hands-on agentic system building, API integration with legacy systems, and orchestration of asynchronous workflows at scale, though explicit memory/tool-use design specific to agentic architectures is not quoted, warranting the technical_integration panel's 8/10 rather than a perfect score. Client-facing and cross-functional signal is the weakest dimension: the only quote available ('Mentored team of five engineers on production Kubernetes operations') reflects internal technical mentorship, not client engagement, business-stakeholder translation, or sales/delivery collaboration explicitly requested in the posting, supporting the client_communication panel's low score of 3. Weighting production reality and technical depth (the posting's primary asks) most heavily, with the client-facing gap treated as a real but non-disqualifying weakness per the rubric's own guidance, yields a composite score of 7."
+    },
+    {
+      "file": "demo_specialist__beatrix_hollowell.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 1.0,
+      "panel_spread": 3.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.9,
+          "rationale": "The candidate demonstrates strong technical communication to technical audiences\u2014'documented findings in technical blog post (1,800 views, 60 GitHub stars)' and presented at a meetup\u2014but provides zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery/innovation teams, or direct client engagement. The job posting explicitly requires 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery),' and names client-facing work as a core function; this candidate's evidence is entirely technical-to-technical and lacks any signal of business stakeholder translation or client-side work.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Two of three panel dimensions (production_reality, technical_integration) failed to return usable rationale and carry zero confidence, so no evidence-backed claims can be credited there \u2014 treated as unsupported/absent rather than scored on inference, consistent with the rubric's requirement that every claim cite direct evidence. The only substantive rationale (client_communication, confidence 0.9) found evidence of technical-to-technical communication only: 'documented findings in technical blog post (1,800 views, 60 GitHub stars)' and a meetup presentation, but explicitly no evidence of non-technical stakeholder translation, cross-functional work with sales/delivery/innovation, or client engagement, which the posting names as core requirements. Given the posting's heavy weighting toward production deployment ('not demos or prototypes, but systems used in production') and agentic system depth, and the complete absence of supporting evidence for those dimensions in this panel, the overall evidence base is too thin to support more than a minimal score. Averaging the effectively-zero production and integration signals with a low-moderate (3/10) client-communication score, weighted toward the posting's primary emphasis on production/technical depth where no evidence exists, yields a low overall score."
+    },
+    {
+      "file": "demo_specialist__hana_novak.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.0,
+      "panel_spread": 4.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "All evidence describes research, evaluation, and academic work with no indication of shipped systems or production deployment. The candidate 'published technical blog post,' built 'evaluation framework[s],' and completed a thesis on 'domain adaptation'\u2014all hallmarks of the proof-of-concept and research stage the posting explicitly excludes ('not demos or prototypes, but systems used in production'). No quote mentions on-call support, real user load, post-launch iteration, or operational ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "confidence": 0.72,
+          "rationale": "The candidate demonstrates strong LLM and multi-agent technical depth: 'Architected multi-agent framework for clinical decision support using LangGraph and Claude API' shows hands-on agentic system building, and 'Implemented RAG pipeline integrating 200K+ clinical research papers via vector embeddings' evidences retrieval and integration work. However, the evidence is dominated by model evaluation, fine-tuning, and research artifacts ('Published technical blog post,' 'Thesis'); there is no explicit evidence of production deployment, APIs integrated into business systems, cloud infrastructure choices, or post-launch iteration \u2014 the job posting explicitly distinguishes 'not demos or prototypes, but systems used in production,' and the candidate's portfolio reads as research-grounded proof-of-concept work rather than shipped, operated systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence describes sophisticated technical work in LLM architecture and evaluation\u2014'Architected multi-agent framework for clinical decision support using LangGraph and Claude API' and 'Built evaluation framework comparing 7 LLM variants'\u2014but contains no signal of explaining this work to non-technical audiences, cross-functional collaboration with sales/delivery, or client engagement. The 'Published technical blog post' and thesis are research-facing, not evidence of translating AI concepts for business stakeholders or working across engineering/sales/delivery teams as the posting explicitly requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Weighting the three dimensions per the rubric's emphasis on production reality: production_reality (2.0, conf 0.92) is well-supported \u2014 evidence like 'thesis on domain adaptation' and 'published technical blog post' plus evaluation-framework work are research/proof-of-concept artifacts with no quote indicating shipped, operated, or client-used systems, directly contradicting the posting's explicit 'not demos or prototypes, but systems used in production' requirement. technical_integration (6.0, conf 0.72) correctly credits genuine agentic-system depth \u2014 'Architected multi-agent framework for clinical decision support using LangGraph and Claude API' and 'Implemented RAG pipeline integrating 200K+ clinical research papers via vector embeddings' \u2014 which are strong, specific evidence of orchestration, tools, and memory-adjacent RAG work matching the posting's own language. However, this technical strength is undercut by the same lack of production evidence noted elsewhere, and no API/business-system integration or cloud infrastructure details are cited. client_communication (2.0, conf 0.92) is essentially absent \u2014 no quote shows translating work for non-technical stakeholders or cross-functional/sales/delivery collaboration; 'published technical blog post' is research-facing, not client-facing. Since this posting is explicit that it wants a solutions-engineer, production-deployment profile rather than a research profile, and two of three dimensions are low-confidence-negative on exactly the criteria the JD stresses most heavily, the composite should sit low despite genuine technical depth. A score of 3.0 reflects real agentic/LLM technical signal while reflecting the posting's heavy, explicit weighting toward production reality and client-facing signal, both of which are clearly and confidently absent."
+    },
+    {
+      "file": "demo_specialist__mei_lin_chow.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence shows strong technical depth in ML systems (RAG, multi-agent, fine-tuning) with quantified production metrics, but contains zero direct evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration. The open-source contribution (\"published technical blog post\") targets technical readers, not business stakeholders; no quote describes translating complexity for sales, delivery, client-facing teams, or internal non-technical stakeholders\u2014the exact signal this posting names as essential and a genuine differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows strong technical depth in ML systems (RAG, multi-agent, fine-tuning) with quantified production metrics, but contains zero direct evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration. The open-source contribution (\"published technical blog post\") targets technical readers, not business stakeholders; no quote describes translating complexity for sales, delivery, client-facing teams, or internal non-technical stakeholders\u2014the exact signal this posting names as essential and a genuine differentiator."
+    },
+    {
+      "file": "demo_specialist__priya_raghunathan.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 4.0,
+      "panel_spread": 3.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The candidate describes technical accomplishments\u2014RAG implementation, fine-tuning, model accuracy metrics\u2014but provides no evidence that any of these systems shipped, are in use, or handle real production load. The work reads as research and experimentation: 'I trained several variants of BERT on a 50K-sentence dataset' and 'fine-tuned Mistral 7B' describe model development, not operational systems. No mention of deployment, monitoring, on-call support, real user traffic, or post-launch iteration\u2014all explicit signals the job description distinguishes from 'demos or prototypes.'",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence contains no direct quotes describing client engagement, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. All quoted work is technical implementation (\"architected our agentic reasoning layer,\" \"fine-tuned Mistral 7B\") or research-oriented (\"trained several variants of BERT\"), with no mention of stakeholder communication, business alignment discussion, or customer-facing involvement.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Resolving across dimensions: Production reality is weak (score ~3) \u2014 the evidence describes model development and experimentation ('trained several variants of BERT on a 50K-sentence dataset,' 'fine-tuned Mistral 7B') with no mention of deployment, monitoring, on-call support, or real user traffic, which the job description explicitly distinguishes from valued production work. Technical/integration depth is the strongest dimension \u2014 quotes like 'architected our agentic reasoning layer' and hands-on LLM fine-tuning/RAG work show genuine engagement with agentic systems and GenAI, aligning with the posting's specific language on memory/tools/orchestration, though no evidence ties this into APIs, business systems, or automation platforms in a live environment, so it lands around mid-scale (~5-6) rather than high. Client-facing/cross-functional signal is essentially absent (score ~2) \u2014 no quotes describe client engagement, translating technical work for non-technical audiences, or cross-functional collaboration with sales/delivery, per the client_communication rationale. The technical_integration agent's parse failure removes a formal score for that dimension, but the underlying quotes cited by other agents support a moderate independent estimate. Weighting production reality heavily (per the posting's explicit emphasis) alongside solid but production-unproven technical depth, and near-absent client signal, yields an overall score reflecting a technically capable but production- and client-unproven profile."
+    },
+    {
+      "file": "demo_specialist__rina_matsumoto.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence shows deep technical depth in LLM infrastructure, evaluation, and agentic systems\u2014all core to the role\u2014but contains zero explicit evidence of client-facing communication, cross-functional collaboration with sales/delivery, or non-technical audience explanation. The candidate's work is entirely technical-artifact focused: 'open-source LLM toolkit,' 'evaluation framework,' 'RAG infrastructure,' 'fine-tuning pipeline'\u2014none of which describe translating these concepts for stakeholders, working alongside sales teams, or engaging directly with clients, which the job description names as 'required skills' and 'essential functions.'",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows deep technical depth in LLM infrastructure, evaluation, and agentic systems\u2014all core to the role\u2014but contains zero explicit evidence of client-facing communication, cross-functional collaboration with sales/delivery, or non-technical audience explanation. The candidate's work is entirely technical-artifact focused: 'open-source LLM toolkit,' 'evaluation framework,' 'RAG infrastructure,' 'fine-tuning pipeline'\u2014none of which describe translating these concepts for stakeholders, working alongside sales teams, or engaging directly with clients, which the job description names as 'required skills' and 'essential functions.'"
+    },
+    {
+      "file": "demo_specialist__saoirse_lachlan.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate demonstrates strong technical depth in RAG, multi-agent systems, and inference optimization\u2014all relevant to the role\u2014but **no evidence whatsoever appears for the client-facing, cross-functional, or non-technical communication dimension** that the posting names as a required skill and your lens prioritizes. The entire submission is technical accomplishment; there is no quote describing explaining work to non-technical audiences, collaboration with sales or delivery teams, or any client engagement. The posting explicitly requires 'communication to technical and non-technical audiences' and 'cross-functional collaboration (engineering, innovation, sales, delivery)'; the absence of this signal in the evidence is a material gap for a solutions-engineer role, not a research role.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate demonstrates strong technical depth in RAG, multi-agent systems, and inference optimization\u2014all relevant to the role\u2014but **no evidence whatsoever appears for the client-facing, cross-functional, or non-technical communication dimension** that the posting names as a required skill and your lens prioritizes. The entire submission is technical accomplishment; there is no quote describing explaining work to non-technical audiences, collaboration with sales or delivery teams, or any client engagement. The posting explicitly requires 'communication to technical and non-technical audiences' and 'cross-functional collaboration (engineering, innovation, sales, delivery)'; the absence of this signal in the evidence is a material gap for a solutions-engineer role, not a research role."
+    },
+    {
+      "file": "demo_specialist__zainab_iqbal.md",
+      "archetype": "demo_specialist",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 4.0,
+      "panel_spread": 4.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 4.0,
+          "confidence": 0.8,
+          "rationale": "The candidate claims 4+ years 'building sophisticated language model systems' but provides no evidence of systems that shipped, are monitored in production, or are used by real users\u2014only technical implementations: 'Architected multi-agent framework,' 'Implemented RAG pipeline,' 'Fine-tuned BERT-based classifier,' and 'Built end-to-end fine-tuning pipeline.' These are engineering claims without deployment outcomes, user adoption, incident response, or iteration post-launch, which the posting explicitly distinguishes as required ('not demos or prototypes, but systems used in production').",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provides no citations of client-facing communication, cross-functional collaboration with sales/delivery teams, or explanation of technical work to non-technical audiences. All quotes describe technical implementation details ('Architected multi-agent framework', 'Implemented RAG pipeline', 'Fine-tuned BERT-based classifier') with no mention of stakeholder communication, client engagement, or cross-functional teamwork\u2014the specific differentiator this posting names as a required skill.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Weighing the three panel dimensions against the posting's explicit priorities: (1) Production reality (4.0, conf 0.8) \u2014 the evidence shows technical build claims like 'Architected multi-agent framework,' 'Implemented RAG pipeline,' 'Fine-tuned BERT-based classifier,' and 'Built end-to-end fine-tuning pipeline,' but none of these are tied to deployment, monitoring, real user load, or post-launch iteration \u2014 the posting explicitly requires 'not demos or prototypes, but systems used in production,' which this evidence does not satisfy. (2) Technical/integration depth \u2014 the technical_integration panelist's rationale failed to parse, but the same quotes ('Architected multi-agent framework,' 'Implemented RAG pipeline') do show hands-on agentic-systems work touching orchestration and tool-like retrieval components the posting names by name, so this dimension likely scores moderately higher than the other two, though nothing in the evidence describes integration into 'APIs, business systems, or automation platforms' as the posting requires. (3) Client-facing/cross-functional signal (2.0, conf 0.95) \u2014 no quote shows client engagement, stakeholder translation, or cross-functional collaboration with sales/delivery; all evidence is purely technical-implementation language. Because production deployment evidence and client-facing signal are both weak-to-absent, and the missing technical_integration score prevents fully crediting the agentic-systems depth, the composite score lands low-moderate, reflecting a candidate with plausible engineering skill but with the posting's hardest-weighted requirement (production ownership) and named differentiator (client-facing work) both unsupported by direct evidence."
+    },
+    {
+      "file": "early_career__andres_villalobos.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 4.5,
+      "panel_spread": 7.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "confidence": 0.82,
+          "rationale": "The candidate demonstrates clear production ownership of a live system: 'The extraction workflow now runs daily across roughly 2,000 facilities, handling approximately 50,000 documents per day' establishes scale and ongoing operation, not a demo. However, the evidence is strongest on *maintenance and extension* of existing infrastructure rather than end-to-end ownership of shipped AI systems\u2014the LLM feature was 'contributed to' in collaboration with the ML team, and the Django application is described as internship work on a research cohort, which suggests bounded scope rather than full production stewardship.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The candidate shows no evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration beyond 'working closely with the ML team.' The evidence is entirely technical execution: 'I built and tested several REST API wrappers,' 'I've contributed to the addition of a new LLM-based feature,' and 'I contributed to a Django application' \u2014 all describe internal technical work with no signal of translating concepts for non-technical stakeholders, sales engagement, or client-facing delivery, which the job description explicitly names as a required skill.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Aggregating the three dimensions: Production reality is solid at 7.0 (confidence 0.82), anchored in a concrete production metric \u2014 'The extraction workflow now runs daily across roughly 2,000 facilities, handling approximately 50,000 documents per day' \u2014 though ownership is diluted by phrases like 'contributed to the addition of a new LLM-based feature' and internship-scoped Django work, suggesting maintenance/extension rather than end-to-end ownership. The technical_integration panel score failed to parse, so I infer from the same evidence pool: there is some LLM/API integration work ('I built and tested several REST API wrappers,' 'I've contributed to the addition of a new LLM-based feature') but no evidence of agentic systems with memory, tools, or orchestration as the posting specifically requires \u2014 this caps technical depth in the moderate-low range (~4). Client-facing signal is weak, scored 3.0 (confidence 0.85): all evidence is internal technical execution ('I contributed to a Django application,' 'working closely with the ML team') with no quotes describing client engagement, non-technical translation, or sales/delivery collaboration. Weighting production reality appropriately but not letting it override the near-absence of agentic-system depth and client-facing evidence, the composite lands at 4.5 \u2014 a candidate with real production exposure but thin evidence against the posting's specific asks (agentic orchestration, client communication)."
+    },
+    {
+      "file": "early_career__chiara_bellini.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The candidate shows zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration across engineering/sales/delivery, or direct client engagement. The role is \"Operations Coordinator\" (not technical leadership), and the evidence describes task execution (\"tested and documented,\" \"provided feedback\") with no mention of translating concepts, presenting to stakeholders, or leading cross-functional initiatives\u2014the specific signals this posting requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate shows zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration across engineering/sales/delivery, or direct client engagement. The role is \"Operations Coordinator\" (not technical leadership), and the evidence describes task execution (\"tested and documented,\" \"provided feedback\") with no mention of translating concepts, presenting to stakeholders, or leading cross-functional initiatives\u2014the specific signals this posting requires."
+    },
+    {
+      "file": "early_career__ingrid_solberg.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence describes strong technical depth in Python, LLMs, and backend systems\u2014\"Implemented a retrieval-augmented generation (RAG) system using LangChain\" and \"Contributed to an internal tool that used GPT-4 to auto-classify transaction disputes\"\u2014but contains no direct evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration beyond engineering teams. The only cross-team mention is \"worked closely with database and DevOps teams,\" which is internal technical coordination, not client-facing communication or sales/delivery collaboration that the job description explicitly names as a required skill.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence describes strong technical depth in Python, LLMs, and backend systems\u2014\"Implemented a retrieval-augmented generation (RAG) system using LangChain\" and \"Contributed to an internal tool that used GPT-4 to auto-classify transaction disputes\"\u2014but contains no direct evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration beyond engineering teams. The only cross-team mention is \"worked closely with database and DevOps teams,\" which is internal technical coordination, not client-facing communication or sales/delivery collaboration that the job description explicitly names as a required skill."
+    },
+    {
+      "file": "early_career__jonah_steinberg.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "No evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams. The candidate shows internal tool adoption ('adopted by 30+ engineers') and 'worked alongside senior engineer,' but these are peer-to-peer engineering interactions, not the client-facing communication or business-stakeholder translation the posting explicitly requires as a differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] No evidence of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams. The candidate shows internal tool adoption ('adopted by 30+ engineers') and 'worked alongside senior engineer,' but these are peer-to-peer engineering interactions, not the client-facing communication or business-stakeholder translation the posting explicitly requires as a differentiator."
+    },
+    {
+      "file": "early_career__rohan_malhotra.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 4.3,
+      "panel_spread": 5.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates clear ownership of systems that shipped and are actively used: 'refactored the recommendation API's caching layer...which improved page load metrics for roughly 15% of traffic' shows measurable production impact, and 'integrated a smaller LLM-based product bundling feature that suggests complementary items to customers during checkout' confirms an LLM system running in live checkout flow with real latency constraints. However, the evidence is skewed toward backend optimization and data pipelines rather than agentic systems or AI-driven automation platforms\u2014the LLM work described is narrow (external API call for suggestions) and lacks evidence of the memory, tools, and orchestration depth the posting emphasizes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates solid backend engineering and API integration skills\u2014'I built out the API logic to surface real-time stock levels across locations' and 'I integrated a smaller LLM-based product bundling feature'\u2014but the evidence shows no hands-on depth in agentic systems (memory, tools, orchestration) or production-scale AI orchestration. The LLM work is a narrow feature ('suggests complementary items') integrated via external API, not evidence of building or deploying the agent infrastructure itself; the rest is backend optimization, monitoring, and ETL, which are valuable but orthogonal to the agentic-systems focus this role emphasizes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence contains zero quotes describing explanation of technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or direct client engagement beyond a transactional data pipeline. The closest signal is 'I also helped build a simple web dashboard using Flask and PostgreSQL to let the client visualize their own order trends' \u2014 which describes a tool handed to a client, not evidence of translating concepts, explaining choices, or working across functions to align on business objectives as the posting requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Production reality is genuinely strong for a subset of work: the caching-layer refactor with measurable impact ('improved page load metrics for roughly 15% of traffic') and a live checkout LLM feature ('integrated a smaller LLM-based product bundling feature that suggests complementary items to customers during checkout') both describe shipped, in-use systems rather than demos, supporting the 7.0 score. But the posting weights production reality alongside the specific technical requirement of agentic systems with memory, tools, and orchestration, and here the evidence is thin \u2014 the LLM work is 'a narrow feature... integrated via external API, not evidence of building or deploying the agent infrastructure itself,' as the technical_integration reviewer notes, justifying the low 3.0 there. The rest of the resume ('API logic to surface real-time stock levels,' ETL/monitoring work) is solid backend engineering but orthogonal to the agentic-orchestration focus this role names explicitly. Client-facing signal is nearly absent: the only candidate quote is 'I also helped build a simple web dashboard using Flask and PostgreSQL to let the client visualize their own order trends,' which is a delivered artifact, not evidence of translating technical concepts to non-technical stakeholders or cross-functional collaboration with sales/delivery as required \u2014 the 2.0 score and its rationale are well-supported. Weighting the posting's emphasis on agentic technical depth and production ownership most heavily, with client-facing as a differentiator whose absence is not disqualifying but does not offset the core gap, the overall picture is a capable production engineer without the specific agentic-systems or client-facing evidence this posting is built around."
+    },
+    {
+      "file": "early_career__vera_klimenko.md",
+      "archetype": "early_career",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence contains zero quotes describing explanation of technical work to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. The candidate has 'worked with backend team to optimize query performance,' but this is peer-engineering collaboration, not the client-facing or cross-functional business-alignment signal the posting explicitly names as a required skill and genuine differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence contains zero quotes describing explanation of technical work to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. The candidate has 'worked with backend team to optimize query performance,' but this is peer-engineering collaboration, not the client-facing or cross-functional business-alignment signal the posting explicitly names as a required skill and genuine differentiator."
+    },
+    {
+      "file": "keyword_stuffer__aleksandr_volkov.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence shows strategic AI work (\"AI implementation roadmap development\") and tool familiarity, but contains no concrete signal of explaining technical concepts to non-technical audiences, cross-functional collaboration across engineering/sales/delivery, or direct client engagement\u2014the three explicit differentiators this posting names. The resume describes what was researched and assessed (\"Tool comparison matrices\", \"Strategic assessment\") but not how it was communicated to or executed with non-technical stakeholders, and the BA in Media Studies rather than CS/IT is a secondary concern relative to the complete absence of the client-facing and cross-functional collaboration evidence this role explicitly requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows strategic AI work (\"AI implementation roadmap development\") and tool familiarity, but contains no concrete signal of explaining technical concepts to non-technical audiences, cross-functional collaboration across engineering/sales/delivery, or direct client engagement\u2014the three explicit differentiators this posting names. The resume describes what was researched and assessed (\"Tool comparison matrices\", \"Strategic assessment\") but not how it was communicated to or executed with non-technical stakeholders, and the BA in Media Studies rather than CS/IT is a secondary concern relative to the complete absence of the client-facing and cross-functional collaboration evidence this role explicitly requires."
+    },
+    {
+      "file": "keyword_stuffer__amara_nwosu.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence provides a skills inventory (GPT-4, Claude API, LangChain, Azure OpenAI) but contains no concrete examples of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. The current role title is 'Senior AI Solutions Architect' at a government agency, yet the extracted evidence offers no narrative of how that work was communicated across functions or delivered to stakeholders\u2014only a generic descriptor: 'Results-oriented technology professional with experience in public sector modernization.'",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provides a skills inventory (GPT-4, Claude API, LangChain, Azure OpenAI) but contains no concrete examples of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. The current role title is 'Senior AI Solutions Architect' at a government agency, yet the extracted evidence offers no narrative of how that work was communicated across functions or delivered to stakeholders\u2014only a generic descriptor: 'Results-oriented technology professional with experience in public sector modernization.'"
+    },
+    {
+      "file": "keyword_stuffer__dashiell_monroe.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence provides no direct examples of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. While the candidate holds a 'Solutions Architect' title and lists compliance knowledge (\"PCI DSS, GDPR, SOX requirements\"), there is no narrative describing how they communicated those concepts to stakeholders, worked with sales or delivery teams, or engaged clients\u2014only a skills inventory.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provides no direct examples of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. While the candidate holds a 'Solutions Architect' title and lists compliance knowledge (\"PCI DSS, GDPR, SOX requirements\"), there is no narrative describing how they communicated those concepts to stakeholders, worked with sales or delivery teams, or engaged clients\u2014only a skills inventory."
+    },
+    {
+      "file": "keyword_stuffer__isaac_mwangi.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 2.0,
+      "panel_spread": 3.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "confidence": 0.75,
+          "rationale": "The candidate holds a current title of 'Senior AI Solutions Architect' and lists prior roles as 'E-commerce AI Specialist' and 'Analytics Developer,' but the evidence provided contains only job titles and skill names with no descriptions of what systems shipped, who used them, or how they operate in production. Phrases like 'LLM integration frameworks,' 'Vector database implementations,' and 'Generative AI model evaluation' are skill assertions without sentences describing what was built, deployed, or operated \u2014 they read as a skills checklist, not production shipping evidence.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence provided contains no quotes describing client-facing communication, cross-functional collaboration with sales/delivery, or translation of technical concepts to non-technical audiences. The candidate's titles ('Senior AI Solutions Architect,' 'E-commerce AI Specialist') and technical skills ('LLM integration frameworks,' 'Generative AI model evaluation') suggest technical competence but offer no concrete evidence of the required client engagement or stakeholder communication work that the job posting explicitly names as a differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "All three dimensions are undermined by the same core problem: the extracted evidence consists only of job titles ('Senior AI Solutions Architect,' 'E-commerce AI Specialist,' 'Analytics Developer') and skill-line phrases ('LLM integration frameworks,' 'Vector database implementations,' 'Generative AI model evaluation') with no sentences describing what was actually built, deployed, or operated. Per the rubric, 'a tool named without a sentence describing what it did is not evidence,' so this applies equally to production_reality (no mention of on-call, monitoring, real user load, or iteration post-launch), technical_integration (no description of agentic system components like memory/tools/orchestration or actual API/business-system integration work \u2014 only category labels), and client_communication (zero quotes referencing client engagement, cross-functional work, or translating technical concepts for non-technical audiences). The technical_integration panelist failed to return a rationale, but given the same evidence pool used by the other two agents, there is no basis to assume stronger support exists there. Confidence is high (0.85) that current evidence is insufficient across all three dimensions, warranting a uniformly low score rather than crediting titles/skills as if they were demonstrated work."
+    },
+    {
+      "file": "keyword_stuffer__omar_benali.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains no quotes describing client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. The candidate lists technical skills and domain expertise (\"Claude API, GPT-4, LangChain integration points\"; \"RAG systems, vector databases\"), but the extracted evidence includes no narrative demonstrating the required ability to \"communicate to technical and non-technical audiences\" or \"support client engagements\" as the job description explicitly requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provided contains no quotes describing client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. The candidate lists technical skills and domain expertise (\"Claude API, GPT-4, LangChain integration points\"; \"RAG systems, vector databases\"), but the extracted evidence includes no narrative demonstrating the required ability to \"communicate to technical and non-technical audiences\" or \"support client engagements\" as the job description explicitly requires."
+    },
+    {
+      "file": "keyword_stuffer__rosalind_pike.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence provides only a skills inventory and role titles with no concrete examples of explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement. The current role is listed as 'Senior AI Solutions Architect' but no description of actual work, stakeholder interactions, or communication across functions is provided \u2014 this is a critical absence given the posting's explicit requirement for 'translating complex AI concepts into clear, practical guidance for internal stakeholders and client audiences' and 'support[ing] client engagements including technical discussions.'",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provides only a skills inventory and role titles with no concrete examples of explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement. The current role is listed as 'Senior AI Solutions Architect' but no description of actual work, stakeholder interactions, or communication across functions is provided \u2014 this is a critical absence given the posting's explicit requirement for 'translating complex AI concepts into clear, practical guidance for internal stakeholders and client audiences' and 'support[ing] client engagements including technical discussions.'"
+    },
+    {
+      "file": "keyword_stuffer__yuki_tanaka.md",
+      "archetype": "keyword_stuffer",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains only technical skill lists and role titles with no description of client-facing work, cross-functional collaboration, or evidence of translating technical concepts for non-technical audiences. The candidate lists 'AI & Machine Learning' tools and infrastructure expertise but provides zero quotes describing communication, stakeholder engagement, or delivery-team interaction\u2014the three explicit signals this rubric seeks.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provided contains only technical skill lists and role titles with no description of client-facing work, cross-functional collaboration, or evidence of translating technical concepts for non-technical audiences. The candidate lists 'AI & Machine Learning' tools and infrastructure expertise but provides zero quotes describing communication, stakeholder engagement, or delivery-team interaction\u2014the three explicit signals this rubric seeks."
+    },
+    {
+      "file": "production_generalist__anjali_deshmukh.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate has zero evidence of client-facing communication, cross-functional collaboration with sales or delivery teams, or explaining technical concepts to non-technical audiences. All six quotes describe solo technical execution (agent design, memory architecture, monitoring, API integration, model deployment) with no mention of stakeholder communication, customer engagement, or translation of AI concepts for non-technical audiences\u2014a dimension the job description explicitly names as required.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate has zero evidence of client-facing communication, cross-functional collaboration with sales or delivery teams, or explaining technical concepts to non-technical audiences. All six quotes describe solo technical execution (agent design, memory architecture, monitoring, API integration, model deployment) with no mention of stakeholder communication, customer engagement, or translation of AI concepts for non-technical audiences\u2014a dimension the job description explicitly names as required."
+    },
+    {
+      "file": "production_generalist__cormac_delaney.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "The evidence describes multiple systems explicitly shipped to production and operating at substantial scale: a transaction reconciliation system processing '450M+ transactions monthly,' a dispute resolution agent 'handling 150K+ disputes monthly with 89% autonomous resolution rate,' and a fraud prevention agent 'deployed to 25K+ SMB merchant accounts.' These are not proof-of-concepts or demos\u2014they describe live systems with measurable business impact (settlement delays cut from 2 days to 4 hours, 68% overhead reduction) and continuous operation, which directly aligns with the posting's explicit requirement for 'systems used in production' not 'demos or prototypes.'",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate has no quoted evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement \u2014 the three specific signals the posting requires. All seven quotes describe technical implementation depth (agents, memory, APIs, production deployment) but zero describe communication to non-technical stakeholders, sales enablement, or client-facing work; the absence of this dimension is stark given the posting names it as a required skill and you identified it as a genuine differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The evidence strongly supports production reality and, by extension, technical depth, but is essentially silent on client-facing/cross-functional signal, which pulls the composite score down from what the production evidence alone would suggest. Production: the candidate shipped and operated real systems at scale \u2014 a reconciliation system processing '450M+ transactions monthly,' a 'dispute resolution agent handling 150K+ disputes monthly with 89% autonomous resolution rate,' and a fraud prevention agent 'deployed to 25K+ SMB merchant accounts' \u2014 with measurable operational impact ('settlement delays cut from 2 days to 4 hours,' '68% overhead reduction'). This directly matches the posting's explicit demand for 'systems used in production,' not demos. Technical/integration depth: the technical_integration panelist's rationale failed to parse, but the same underlying evidence (dispute resolution and fraud prevention agents operating autonomously at scale, integrated into transaction/merchant systems) implies real agentic-system engineering and API/business-system integration consistent with the posting's language on 'memory, tools, and orchestration' \u2014 though without a parsed rationale this cannot be scored with full confidence, so it is treated as moderately strong rather than fully verified. Client-facing/cross-functional signal is the clear weak point: as the client_communication reviewer noted, 'no quoted evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement' exists anywhere in the record, despite this being a named required skill and explicit differentiator in the posting. Combining a very strong, well-evidenced production/technical profile with a near-total absence of the client-facing dimension the posting explicitly asks for yields a composite score above the midpoint but well short of a top score."
+    },
+    {
+      "file": "production_generalist__delphine_aubert.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "panel_spread": 6.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "The candidate presents two shipped production systems with concrete operational burden: a recommendation agent \"serving Nexus's streaming platform to 2.8M monthly active users\" with on-call responsibility including \"three production incidents last quarter,\" and a live caption agent \"deployed to production supporting 40+ live events monthly with 99.2% uptime.\" Both examples move well beyond prototype\u2014they describe real infrastructure integration, measurable outcomes (\"reducing recommendation staleness by 34%\"), and the operational reality of production ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "Candidate demonstrates exceptional depth across all three core agentic pillars explicitly named in the job description. Evidence shows shipped production systems at scale: \"Built and shipped an autonomous content recommendation agent serving Nexus's streaming platform to 2.8M monthly active users\" with tool-calling (\"fetches user viewing history, genre metadata, and trending content signals\"), orchestration (\"orchestrates multi-step reasoning\"), and memory (\"Implemented agentic memory that persists user preferences across sessions, reducing recommendation staleness by 34%\"). Second system shows integration into real business infrastructure: \"Developed a live caption generation agent for Beacon's broadcast workflow that integrates with their existing playout infrastructure via REST APIs\" with chained tool calls and 99.2% production uptime across 40+ live events monthly. On-call ownership and incident resolution (\"managed three production incidents last quarter\") directly match the role's production-reality bar of systems \"used in production, not demos or prototypes.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.92,
+          "rationale": "The evidence demonstrates strong production agentic systems work (recommendation agent at 2.8M MAU, live caption agent at 99.2% uptime, on-call incident response), but contains zero citations of client-facing communication, cross-functional collaboration across sales/delivery teams, or explaining technical work to non-technical audiences. The posting explicitly names 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' as required skills; this candidate's portfolio shows no evidence of those dimensions\u2014only pure engineering execution.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The panel agreed strongly on production reality (9.0) and technical/integration depth (9.0), both well-supported by direct quotes: \"Built and shipped an autonomous content recommendation agent serving Nexus's streaming platform to 2.8M monthly active users,\" with memory (\"Implemented agentic memory that persists user preferences across sessions, reducing recommendation staleness by 34%\"), tool use (\"fetches user viewing history, genre metadata, and trending content signals\"), and orchestration (\"orchestrates multi-step reasoning\"). A second system, the live caption agent \"deployed to production supporting 40+ live events monthly with 99.2% uptime\" and integrated \"via REST APIs\" into Beacon's broadcast workflow, plus explicit on-call ownership (\"managed three production incidents last quarter\"), directly matches the posting's emphasis on production systems 'not demos or prototypes' and its named agentic pillars of memory, tools, and orchestration. This is exceptionally strong, well-evidenced alignment on the two dimensions the posting weights most heavily.\n\nHowever, the client-facing/cross-functional dimension scored only 3.0, and the rationale is sound: there is no quoted evidence of client engagement, translating technical concepts to non-technical audiences, or cross-functional work with sales/delivery \u2014 skills the posting names explicitly as required. This is a genuine gap, though the rubric itself notes this dimension's absence is 'not automatically disqualifying' since it's the hardest to find evidence for on a typical resume.\n\nResolving: given the posting's explicit instruction to weight production-reality heavily, and that the technical depth is exceptional and directly matches the posting's own language (memory, tools, orchestration), the strong showing on the two most heavily-weighted dimensions should anchor the composite, while the confirmed absence of client-facing evidence meaningfully pulls the overall score down from a near-perfect fit. A score of 7.0 reflects outstanding core engineering/production fit tempered by a real, evidenced gap in the client-facing dimension the posting names by name."
+    },
+    {
+      "file": "production_generalist__fatima_zahra.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 2.5,
+      "panel_spread": 8.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 8.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates genuine client-facing and cross-functional signal through direct evidence: 'Presented quarterly performance metrics and system roadmap to executive stakeholders in the state water board, translating agent behavior and model confidence thresholds into policy language for non-technical directors' shows explicit translation of technical concepts to non-technical audiences. However, the evidence is limited to one attestation of stakeholder communication; there is no mention of cross-functional collaboration with sales, delivery, or innovation teams, or iterative client engagement during implementation\u2014only post-deployment reporting.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Two of the three panel dimensions (production_reality and technical_integration) failed to parse and returned no rationale or usable evidence at 0.0 confidence \u2014 this is a data gap, not a substantiated finding of zero production or technical depth, but it also means there is no verified evidence to credit the candidate on the two dimensions this job description weights most heavily ('systems used in production,' 'engineer agentic systems with memory, tools, and orchestration'). Only the client_communication dimension returned usable evidence, citing a single quote: 'Presented quarterly performance metrics and system roadmap to executive stakeholders in the state water board, translating agent behavior and model confidence thresholds into policy language for non-technical directors.' This is a genuine and specific signal of translating technical work for non-technical audiences, matching the posting's explicit ask, but it is a single data point limited to post-deployment reporting, with no evidence of cross-functional work with sales/delivery/innovation teams or iterative client engagement during implementation. Given the absence of any verifiable evidence on production deployment or agentic/technical build depth \u2014 the posting's central requirements \u2014 the overall score must stay low despite the one strong communication signal, since a solutions-engineer profile cannot be credited primarily on communication evidence alone."
+    },
+    {
+      "file": "production_generalist__lucas_ferreira.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.5,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "Evidence describes two shipped, live systems in real healthcare environments at scale: 'Shipped clinical decision support agent serving 47 hospitals; processes 12,000+ patient cases monthly in production' and 'live in 12 research centers, 2,100+ matches in first year.' Beyond launch, the candidate demonstrates post-deployment ownership: 'established monitoring dashboards tracking agent hallucination rates and API latency; resolved critical integration failure with hospital pharmacy system in 4 hours'\u2014this is production support, not demo work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence provided shows zero direct signal of client-facing communication, cross-functional collaboration with sales/delivery teams, or translating technical concepts for non-technical audiences. All six quotes focus exclusively on technical implementation (agent architecture, APIs, monitoring) with no mention of stakeholder communication, client engagement, or working across business functions \u2014 the specific differentiator this posting names as a required skill.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Production reality is strong and well-evidenced: 'Shipped clinical decision support agent serving 47 hospitals; processes 12,000+ patient cases monthly in production' and 'live in 12 research centers, 2,100+ matches in first year' describe systems actually deployed and used, not demos. Post-launch ownership is also evidenced: 'established monitoring dashboards tracking agent hallucination rates and API latency; resolved critical integration failure with hospital pharmacy system in 4 hours' shows on-call/support behavior the posting explicitly values. The technical_integration panel entry failed to parse, but the underlying quotes ('clinical decision support agent,' 'agent hallucination rates,' 'API latency,' 'hospital pharmacy system' integration) do provide partial evidence of LLM/agentic work integrated into real business systems (healthcare APIs), suggesting moderate-to-strong technical/integration depth even without an explicit score \u2014 though there is no direct quote describing memory, tools, or orchestration architecture specifically, so this can't be scored at the top of the range. Client-facing and cross-functional signal is weak: as the client_communication reviewer notes, 'zero direct signal of client-facing communication, cross-functional collaboration with sales/delivery teams, or translating technical concepts for non-technical audiences' \u2014 all evidence is purely technical/implementation-focused. Weighing production reality and technical depth heavily (per the posting's explicit emphasis on production systems and agentic/integration work) while treating the absent client-facing evidence as a real but non-disqualifying gap, the resolved score reflects a candidate who is strong on shipped, supported production AI systems but under-evidenced on the client-facing dimension this posting names as a differentiator."
+    },
+    {
+      "file": "production_generalist__oscar_nakamura.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains zero direct quotes about explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. All eight quotes focus exclusively on technical implementation (agent systems, APIs, monitoring, incident response) with no mention of communication to stakeholders, customer interaction, or business translation\u2014the exact signal this posting names as a required skill and genuine differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provided contains zero direct quotes about explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client engagement. All eight quotes focus exclusively on technical implementation (agent systems, APIs, monitoring, incident response) with no mention of communication to stakeholders, customer interaction, or business translation\u2014the exact signal this posting names as a required skill and genuine differentiator."
+    },
+    {
+      "file": "production_generalist__rafael_duarte.md",
+      "archetype": "production_generalist",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.8,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "Every claim is anchored to shipped, live systems with measurable production metrics: the document-processing agent 'now handles 12K+ documents daily across 40+ enterprise clients with 99.2% uptime,' the code-review system 'deployed to production serving 60+ internal developers,' on-call ownership with incident response SLAs, and a customer-support chatbot at 'scale with 2K concurrent users.' The evidence moves past naming tools\u2014each quote describes what the system does, who uses it, and what it measurably achieved in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 7.0,
+          "confidence": 0.72,
+          "rationale": "Strong evidence of cross-functional collaboration\u2014'Presented quarterly performance metrics and roadmap to C-suite; managed feature requests from top 5 accounts' demonstrates stakeholder communication and customer engagement. However, the evidence lacks depth on *explaining* technical concepts to non-technical audiences or sales/delivery team collaboration; the C-suite presentation is mentioned without describing what was explained or how technical concepts were translated, leaving a gap in the 'translate complex AI concepts into clear, practical guidance' requirement the posting emphasizes.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Combining the three dimensions, weighted toward the posting's emphasis on production reality and integration depth. Production reality is very strong and directly evidenced: the candidate's document-processing agent 'now handles 12K+ documents daily across 40+ enterprise clients with 99.2% uptime,' a code-review system was 'deployed to production serving 60+ internal developers,' and a customer-support chatbot operates 'at scale with 2K concurrent users,' with on-call/incident-response ownership cited as well \u2014 this squarely matches the posting's 'not demos or prototypes, but systems used in production' requirement (score ~9, high confidence). The technical_integration panel response failed to parse, so no explicit rationale or quotes exist for that dimension; however, the same underlying evidence (document-processing agent, code-review system, chatbot) implies real API/business-system integration and LLM-based systems in production, though none of the surfaced quotes explicitly reference memory, tools, or orchestration as the posting specifically calls out \u2014 so this dimension is estimated cautiously (~7.5) rather than fully credited, given the missing rationale. Client-facing/cross-functional signal is moderate: 'Presented quarterly performance metrics and roadmap to C-suite; managed feature requests from top 5 accounts' shows stakeholder engagement, but there's no quote describing translation of technical AI concepts for non-technical audiences or sales/delivery collaboration, so this scores lower (7.0, moderate confidence) per the client_communication panel's own caveat. Averaging these with reduced confidence for the unresolved technical dimension yields an overall score of 7.8, reflecting strong production evidence, probable but unconfirmed integration depth, and solid but incomplete client-facing signal."
+    },
+    {
+      "file": "production_light_ai__camila_restrepo.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's evidence describes exceptional production infrastructure work at scale\u2014'7 years building reliable, scalable systems for media platforms serving millions of concurrent users'\u2014but contains zero evidence of client-facing communication, cross-functional collaboration outside of incident response, or explanation of technical work to non-technical audiences. The posting explicitly names 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' as required skills; this resume does not provide a single quote demonstrating either signal.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate's evidence describes exceptional production infrastructure work at scale\u2014'7 years building reliable, scalable systems for media platforms serving millions of concurrent users'\u2014but contains zero evidence of client-facing communication, cross-functional collaboration outside of incident response, or explanation of technical work to non-technical audiences. The posting explicitly names 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' as required skills; this resume does not provide a single quote demonstrating either signal."
+    },
+    {
+      "file": "production_light_ai__emil_kowalczyk.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 1.3333333333333333,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "This candidate has strong production infrastructure and reliability engineering credentials \u2014 \"Manage Kubernetes cluster infrastructure serving 40+ clinical applications with 99.95% uptime SLA\" and \"On-call rotation lead; handled 200+ production incidents annually\" \u2014 but there is zero evidence of AI/ML/GenAI/LLM work, agentic systems, memory, tools, orchestration, or any of the core technical requirements this role demands. The posting explicitly requires \"hands-on experience building or implementing AI/ML/GenAI/LLM-based systems\" and \"developing and integrating APIs, automation workflows\"; this candidate's evidence describes only Kubernetes, databases, Terraform, and microservices migration, which are adjacent infrastructure skills but not the AI solutions engineering profile Marco is hiring for.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "This candidate demonstrates exceptional production engineering depth\u2014'On-call rotation lead; handled 200+ production incidents annually with average resolution time of 18 minutes' and 'Manage Kubernetes cluster infrastructure serving 40+ clinical applications with 99.95% uptime SLA'\u2014but the evidence contains zero citations of client-facing communication, cross-functional collaboration with sales or delivery teams, or translation of technical concepts to non-technical audiences. Mentoring junior engineers is internal knowledge-transfer, not the client engagement or business-stakeholder communication this posting names as a required skill differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] This candidate has strong production infrastructure and reliability engineering credentials \u2014 \"Manage Kubernetes cluster infrastructure serving 40+ clinical applications with 99.95% uptime SLA\" and \"On-call rotation lead; handled 200+ production incidents annually\" \u2014 but there is zero evidence of AI/ML/GenAI/LLM work, agentic systems, memory, tools, orchestration, or any of the core technical requirements this role demands. The posting explicitly requires \"hands-on experience building or implementing AI/ML/GenAI/LLM-based systems\" and \"developing and integrating APIs, automation workflows\"; this candidate's evidence describes only Kubernetes, databases, Terraform, and microservices migration, which are adjacent infrastructure skills but not the AI solutions engineering profile Marco is hiring for. | [technical_integration] No rationale returned. | [client_communication] This candidate demonstrates exceptional production engineering depth\u2014'On-call rotation lead; handled 200+ production incidents annually with average resolution time of 18 minutes' and 'Manage Kubernetes cluster infrastructure serving 40+ clinical applications with 99.95% uptime SLA'\u2014but the evidence contains zero citations of client-facing communication, cross-functional collaboration with sales or delivery teams, or translation of technical concepts to non-technical audiences. Mentoring junior engineers is internal knowledge-transfer, not the client engagement or business-stakeholder communication this posting names as a required skill differentiator."
+    },
+    {
+      "file": "production_light_ai__larissa_petrov.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 4.0,
+      "panel_spread": 5.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates genuine production ownership across multiple systems: \"Built and maintained the infrastructure backbone for a distributed API gateway serving 2.8M requests per day across 14 availability zones\" and \"On-call rotation support with 99.97% uptime SLA achievement over 28 consecutive months\" show systems at scale with sustained operational responsibility. However, the AI/GenAI signal is weak\u2014\"integrated a basic LLM API call to categorize error messages automatically\" describes a narrow, auxiliary use of LLM capability, not agentic systems, memory, orchestration, or the core mission this posting emphasizes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "confidence": 0.92,
+          "rationale": "The candidate demonstrates strong production infrastructure ownership and reliability engineering (\"distributed API gateway serving 2.8M requests per day,\" \"99.97% uptime SLA achievement over 28 consecutive months\"), but the AI/agentic systems work is minimal and shallow: only \"integrated a basic LLM API call to categorize error messages automatically\" \u2014 a single narrow integration that does not demonstrate hands-on depth in memory, tools, orchestration, or agentic design. There is no evidence of building agent systems, defining tool schemas, implementing memory patterns, or deploying AI solutions into business processes or APIs as core work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence shows strong production infrastructure ownership and operational rigor, but contains no signal of client-facing communication, cross-functional collaboration with sales/delivery, or translation of technical concepts to non-technical audiences \u2014 the three explicit differentiators this posting names. The only interpersonal signal is internal mentorship ('Mentored four junior engineers'), which does not address the required skill of explaining work to non-technical stakeholders or engaging directly with clients.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "This posting is explicit that it wants a solutions-engineer profile focused on agentic AI in production, and the panel's evidence shows a mismatch on exactly that axis. Production reality is genuinely strong but for the wrong domain: \"Built and maintained the infrastructure backbone for a distributed API gateway serving 2.8M requests per day across 14 availability zones\" and \"On-call rotation support with 99.97% uptime SLA achievement over 28 consecutive months\" demonstrate real operational ownership, on-call responsibility, and scale \u2014 the kind of production rigor the posting values. But this is infrastructure/SRE production experience, not AI production experience. The posting's core ask \u2014 \"Engineer agentic systems with memory, tools, and orchestration\" and systems 'used in production' specifically for AI/Digital Employee offerings \u2014 is not met. The only AI evidence, \"integrated a basic LLM API call to categorize error messages automatically,\" is a narrow, auxiliary integration with no memory, tools, or orchestration, and no indication it is a business-facing or client-facing AI system. Technical/integration depth is therefore weak against the specific language of this posting, even though the underlying engineering skill (APIs, distributed systems, production deployment) is transferable and gives some credit toward 'integrating APIs, automation workflows, or distributed systems in production environments.' Client-facing and cross-functional signal is essentially absent: the only interpersonal evidence, mentoring junior engineers, does not address explaining technical work to non-technical stakeholders, sales/delivery collaboration, or direct client engagement, which the posting names explicitly as a differentiator. Weighing this specific posting's heavy emphasis on production AI/agentic work over generic infrastructure production, and the near-total absence of client-facing signal, the composite score should sit below the midpoint \u2014 reflecting real but misapplied production strength, weak agentic/AI depth, and minimal client signal."
+    },
+    {
+      "file": "production_light_ai__lars_thorvaldsen.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate demonstrates strong production systems experience and cross-functional coordination (\"coordinated with warehouse operations, carrier partners, and product\"), but there is **no evidence of explaining technical work to non-technical audiences, client engagement, or communication to business stakeholders**. The posting explicitly names 'communication to technical and non-technical audiences' and 'support client engagements' as required skills; this candidate's evidence is purely internal infrastructure work with no signal of translating AI/technical concepts for non-technical decision-makers or clients.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate demonstrates strong production systems experience and cross-functional coordination (\"coordinated with warehouse operations, carrier partners, and product\"), but there is **no evidence of explaining technical work to non-technical audiences, client engagement, or communication to business stakeholders**. The posting explicitly names 'communication to technical and non-technical audiences' and 'support client engagements' as required skills; this candidate's evidence is purely internal infrastructure work with no signal of translating AI/technical concepts for non-technical decision-makers or clients."
+    },
+    {
+      "file": "production_light_ai__signe_aalborg.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence shows strong production engineering and infrastructure expertise (\"Designed and deployed distributed vehicle inspection scheduling API serving 14 regional offices; handles 8,000+ daily requests with 99.97% uptime SLA\", \"Mentored four junior engineers on production debugging, capacity planning, and incident response protocols\"), but contains zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client-facing engagement. The candidate's background is deep ops and backend infrastructure; this posting explicitly requires \"Translate complex AI concepts into clear, practical guidance for internal stakeholders and client audiences\" and \"Support client engagements including technical discussions, solution implementation, pilots\", which are not represented in the provided evidence.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows strong production engineering and infrastructure expertise (\"Designed and deployed distributed vehicle inspection scheduling API serving 14 regional offices; handles 8,000+ daily requests with 99.97% uptime SLA\", \"Mentored four junior engineers on production debugging, capacity planning, and incident response protocols\"), but contains zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or client-facing engagement. The candidate's background is deep ops and backend infrastructure; this posting explicitly requires \"Translate complex AI concepts into clear, practical guidance for internal stakeholders and client audiences\" and \"Support client engagements including technical discussions, solution implementation, pilots\", which are not represented in the provided evidence."
+    },
+    {
+      "file": "production_light_ai__theo_vandenberg.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 1.6666666666666667,
+      "panel_spread": 1.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "This candidate has strong production systems experience\u2014'maintained 99.97% uptime SLA' and 'handled 2.3M transactions daily' are genuine production ownership signals. However, none of this evidence describes AI, LLM, agentic systems, memory, tools, orchestration, or generative AI work\u2014the specific technical domain this posting requires. The candidate is a strong infrastructure and reliability engineer, but the job description explicitly asks for 'hands-on experience building and deploying LLMs, agent-based systems, and automation workflows,' and there is zero evidence of any of that work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "This candidate demonstrates exceptional production systems ownership and cloud infrastructure mastery\u2014\"Architected and operated payment processing infrastructure handling 2.3M transactions daily\" and \"Built Kubernetes cluster management platform supporting 800+ payment processing pods\" prove hands-on depth at scale. However, none of the evidence describes agentic systems (memory, tools, orchestration), LLM/GenAI work, or AI integration into business systems; all accomplishments are infrastructure, reliability, and database engineering unrelated to the AI Solutions Engineer role's core mandate of \"Engineer agentic systems with memory, tools, and orchestration\" and \"Build and implement AI-driven solutions with a focus on LLMs, generative AI, AI agents.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains zero references to client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical concepts to non-technical audiences. All quotes describe infrastructure engineering, reliability, and operations work: 'Architected and operated payment processing infrastructure,' 'maintained 99.97% uptime SLA,' 'Implemented distributed tracing,' 'Managed PostgreSQL cluster scaling,' etc.\u2014none of which demonstrate the required skill of 'communication to technical and non-technical audiences' or 'cross-functional collaboration (engineering, innovation, sales, delivery)' that this posting explicitly names as essential.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] This candidate has strong production systems experience\u2014'maintained 99.97% uptime SLA' and 'handled 2.3M transactions daily' are genuine production ownership signals. However, none of this evidence describes AI, LLM, agentic systems, memory, tools, orchestration, or generative AI work\u2014the specific technical domain this posting requires. The candidate is a strong infrastructure and reliability engineer, but the job description explicitly asks for 'hands-on experience building and deploying LLMs, agent-based systems, and automation workflows,' and there is zero evidence of any of that work. | [technical_integration] This candidate demonstrates exceptional production systems ownership and cloud infrastructure mastery\u2014\"Architected and operated payment processing infrastructure handling 2.3M transactions daily\" and \"Built Kubernetes cluster management platform supporting 800+ payment processing pods\" prove hands-on depth at scale. However, none of the evidence describes agentic systems (memory, tools, orchestration), LLM/GenAI work, or AI integration into business systems; all accomplishments are infrastructure, reliability, and database engineering unrelated to the AI Solutions Engineer role's core mandate of \"Engineer agentic systems with memory, tools, and orchestration\" and \"Build and implement AI-driven solutions with a focus on LLMs, generative AI, AI agents.\" | [client_communication] The evidence provided contains zero references to client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical concepts to non-technical audiences. All quotes describe infrastructure engineering, reliability, and operations work: 'Architected and operated payment processing infrastructure,' 'maintained 99.97% uptime SLA,' 'Implemented distributed tracing,' 'Managed PostgreSQL cluster scaling,' etc.\u2014none of which demonstrate the required skill of 'communication to technical and non-technical audiences' or 'cross-functional collaboration (engineering, innovation, sales, delivery)' that this posting explicitly names as essential."
+    },
+    {
+      "file": "production_light_ai__wren_sutcliffe.md",
+      "archetype": "production_light_ai",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.0,
+      "panel_spread": 8.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "confidence": 0.92,
+          "rationale": "All evidence describes shipped, live systems handling substantial real-world load: 'multi-region e-commerce platform handling 8,000+ concurrent users during peak sales events,' 'achieved 99.95% uptime SLA,' and 'Redis clusters supporting real-time inventory tracking for 200+ retail partners.' The candidate demonstrates clear production ownership through on-call reliability work (disaster recovery, MTTR reduction, monitoring), not prototypes or POCs.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's evidence describes strong infrastructure and production engineering work (e.g., 'Mentored four junior engineers on production troubleshooting, infrastructure-as-code practices, and incident response; led weekly architecture reviews'), but contains no evidence of explaining technical work to non-technical audiences, client-facing engagement, or cross-functional collaboration with sales or delivery teams. The mentorship and architecture reviews cited are internal peer-to-peer technical communication, not translation of AI/technical concepts to non-technical stakeholders or direct client interaction as the job posting requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The panel's evidence is inconsistent with what this posting actually requires. Production_reality correctly identifies strong operational rigor \u2014 'multi-region e-commerce platform handling 8,000+ concurrent users,' '99.95% uptime SLA,' 'Redis clusters supporting real-time inventory tracking for 200+ retail partners' \u2014 but none of this evidence involves AI, LLMs, agents, or GenAI systems at all; it's general infrastructure/SRE work. Since the posting's core requirement is 'engineer agentic systems with memory, tools, and orchestration' and 'hands-on experience building or implementing AI/ML/GenAI/LLM-based systems,' and the technical_integration agent returned no rationale (parse failure) while the underlying evidence shows zero AI-specific content, this dimension must be scored near zero rather than defaulted or ignored \u2014 there is no quoted evidence of LLM, agent, or GenAI work anywhere in the record. Client_communication is well-supported at low score: 'Mentored four junior engineers on production troubleshooting, infrastructure-as-code practices, and incident response; led weekly architecture reviews' is internal peer technical communication, not client-facing or cross-functional (sales/delivery) translation work as required. Weighing all three against this AI Solutions Engineer posting specifically \u2014 strong production ownership but in the wrong domain, no agentic/LLM evidence, and no client-facing signal \u2014 the composite picture is a capable infrastructure engineer with no demonstrated fit to the AI-specific hands-on requirements this role is built around."
+    },
+    {
+      "file": "quiet_builder__astrid_bergman.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate's evidence is entirely technical implementation: 'Architected real-time transaction reconciliation engine,' 'Implemented agentic settlement workflow,' 'Built gRPC service layer,' 'Engineered LLM-powered transaction categorization agent.' There is no mention of explaining these systems to non-technical audiences, working across sales/delivery teams, or any client-facing engagement\u2014the posting explicitly names 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' as required skills.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The candidate's evidence is entirely technical implementation: 'Architected real-time transaction reconciliation engine,' 'Implemented agentic settlement workflow,' 'Built gRPC service layer,' 'Engineered LLM-powered transaction categorization agent.' There is no mention of explaining these systems to non-technical audiences, working across sales/delivery teams, or any client-facing engagement\u2014the posting explicitly names 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' as required skills."
+    },
+    {
+      "file": "quiet_builder__elena_vasquez.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.5,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.92,
+          "rationale": "Every claim is anchored to measurable, operational impact at scale: '2.3M images daily with 94% first-pass accuracy' across '847 field locations,' 'reduced manual review queue from 180k to 12k monthly items,' and 'processes 15k documents per day' \u2014 these are not demos but live systems handling real operational load. The infrastructure work ('sub-200ms response times,' 'Kubernetes cluster scaling,' 'zero downtime' migrations on '120M+ records') confirms ongoing production ownership, not prototype work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence provided contains zero quotes describing client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. All eight quotes focus narrowly on technical implementation (APIs, infrastructure, LLM integration, data pipelines) without a single mention of stakeholder communication, client engagement, or explaining work across functional boundaries\u2014precisely the dimension the posting names as a required skill and genuine differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Production reality is well-supported and strong: quotes like '2.3M images daily with 94% first-pass accuracy' across '847 field locations,' 'reduced manual review queue from 180k to 12k monthly items,' 'processes 15k documents per day,' and 'sub-200ms response times' with 'zero downtime' migrations on '120M+ records' demonstrate genuine production ownership at scale, not demo work \u2014 this aligns strongly with the posting's emphasis on 'not demos or prototypes, but systems used in production.' However, the technical_integration dimension returned no usable rationale (parse failure), so there is no verified evidence connecting this candidate to the posting's specific language on agentic systems \u2014 'memory, tools, and orchestration' \u2014 or to LLM/GenAI work integrated into business systems; the client_communication agent's summary mentions 'LLM integration' and 'data pipelines' only in passing, without supporting detail on architecture, agents, or tool use, so this dimension must be scored cautiously rather than assumed strong. Client-facing and cross-functional signal is weak: 'zero quotes describing client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences' \u2014 a real gap against a posting that names this explicitly as a differentiator. Given strong, well-evidenced production ownership but an unverified core technical fit (agentic systems specifically) and a clear absence of client-facing evidence, the overall score lands in the moderate range rather than at the top."
+    },
+    {
+      "file": "quiet_builder__ewan_brackenridge.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence shows strong technical depth in infrastructure and AI integration\u2014'Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations' and 'Implemented a custom agent framework in Python that monitors production deployments in real-time, using Claude's API'\u2014but contains zero explicit evidence of explaining technical concepts to non-technical audiences, client engagement, or cross-functional collaboration with sales, delivery, or customer-facing teams. The resume describes what was built and its impact, not how it was communicated across organizational boundaries or presented to clients.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows strong technical depth in infrastructure and AI integration\u2014'Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations' and 'Implemented a custom agent framework in Python that monitors production deployments in real-time, using Claude's API'\u2014but contains zero explicit evidence of explaining technical concepts to non-technical audiences, client engagement, or cross-functional collaboration with sales, delivery, or customer-facing teams. The resume describes what was built and its impact, not how it was communicated across organizational boundaries or presented to clients."
+    },
+    {
+      "file": "quiet_builder__hugo_lindqvist.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence provided is entirely technical and infrastructure-focused with no mention of client engagement, cross-functional collaboration with non-technical stakeholders, or translation of technical concepts to business audiences. While the candidate demonstrates strong production systems experience (\"6+ years building high-scale production systems\"), the posting explicitly requires 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' \u2014 neither dimension appears in any of the six provided quotes.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provided is entirely technical and infrastructure-focused with no mention of client engagement, cross-functional collaboration with non-technical stakeholders, or translation of technical concepts to business audiences. While the candidate demonstrates strong production systems experience (\"6+ years building high-scale production systems\"), the posting explicitly requires 'Communication to technical and non-technical audiences' and 'Cross-functional collaboration (engineering, innovation, sales, delivery)' \u2014 neither dimension appears in any of the six provided quotes."
+    },
+    {
+      "file": "quiet_builder__mateo_guzman.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.5,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "Every claim is anchored to measurable production metrics and ongoing operational responsibility: 'processes 50,000+ chemical structures daily,' 'currently serving 150+ daily queries,' '10,000+ daily messages with 99.98% uptime,' and 'monitoring dashboards for 12 production services' all indicate shipped systems under active use and maintenance, not prototypes. The current role (Jan 2023\u2013Present) and specific uptime/query/throughput numbers provide strong evidence of production ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The candidate's evidence is entirely technical: architected agents, built RAG systems, implemented ETL frameworks, and handled healthcare data pipelines. There is zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or direct client engagement\u2014the posting's own named differentiator. This candidate appears to be a strong backend/ML engineer in a biotech context, not a solutions engineer positioned at 'the intersection of emerging AI technologies and practical implementation' where 'this individual works closely with...customer-facing teams.'",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "The panel evidence is uneven across the three dimensions the rubric asks for. Production reality is strongly supported: quotes like 'processes 50,000+ chemical structures daily,' 'currently serving 150+ daily queries,' '10,000+ daily messages with 99.98% uptime,' and 'monitoring dashboards for 12 production services' clearly indicate systems that shipped and are actively operated, not demos \u2014 this aligns well with the posting's explicit emphasis on 'systems used in production.' However, the technical_integration dimension returned no usable rationale (parse failure, 0 confidence), so I cannot verify hands-on evidence of the specific agentic-system components the posting names \u2014 'memory, tools, and orchestration' \u2014 beyond secondhand mentions in the client_communication rationale of 'architected agents, built RAG systems, implemented ETL frameworks.' These phrases suggest real LLM/agent engineering work but lack the sentence-level detail the rubric requires to score confidently high, so I treat this as moderate-depth evidence, not a strong match. Client-facing and cross-functional signal is the weakest area: 'There is zero evidence of explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery teams, or direct client engagement' \u2014 a genuine gap against a posting that names this explicitly as a differentiator ('working closely with... customer-facing teams'). Given strong production ownership but an unverified technical-integration picture and a clear absence of client-facing evidence, the composite score should sit in the middle range rather than near the top \u2014 the candidate reads as a strong backend/ML engineer whose profile only partially matches the solutions-engineer orientation this posting is built around."
+    },
+    {
+      "file": "quiet_builder__sana_qureshi.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence provided contains zero quotes demonstrating client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. While the candidate shows strong production AI/systems work (\"Built and maintained core recommendation engine serving 12M+ daily active users,\" \"Designed LLM-powered content tagging pipeline\"), every piece of evidence is purely technical implementation\u2014no mention of presenting to clients, explaining AI concepts to business stakeholders, or working across sales or delivery functions that the job description explicitly names as required.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence provided contains zero quotes demonstrating client-facing communication, cross-functional collaboration with sales/delivery teams, or translation of technical concepts to non-technical audiences. While the candidate shows strong production AI/systems work (\"Built and maintained core recommendation engine serving 12M+ daily active users,\" \"Designed LLM-powered content tagging pipeline\"), every piece of evidence is purely technical implementation\u2014no mention of presenting to clients, explaining AI concepts to business stakeholders, or working across sales or delivery functions that the job description explicitly names as required."
+    },
+    {
+      "file": "quiet_builder__tobias_reinhardt.md",
+      "archetype": "quiet_builder",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "panel_spread": 9.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "confidence": 0.95,
+          "rationale": "The evidence describes a current production system at scale: \"Architected and deployed production LLM-powered product description generation system processing 180K+ merchandise items monthly\" \u2014 this is live, measurable work, not a prototype. The candidate demonstrates ownership across infrastructure, deployment, and scaling: \"Engineered distributed cache layer using Redis Cluster across 6 nodes handling 45K requests/second peak load\" and \"Migrated legacy monolithic inventory system to microservices architecture across 12 Kubernetes namespaces,\" all concrete operational work that indicates production responsibility and iterative hardening, not a demo that stopped.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The evidence provided contains no mention of client-facing engagement, explanation of technical concepts to non-technical audiences, or cross-functional collaboration with sales, delivery, or innovation teams. All quotes describe backend engineering execution (LLM systems, infrastructure, APIs, databases) with no signal of the communication-to-stakeholders or customer-engagement dimensions the posting explicitly names as required skills.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Resolving the panel: production_reality (9.0, conf 0.95) is well-supported by direct quotes describing a live, scaled system \u2014 \"Architected and deployed production LLM-powered product description generation system processing 180K+ merchandise items monthly\" \u2014 plus infrastructure ownership evidence (\"Engineered distributed cache layer using Redis Cluster across 6 nodes handling 45K requests/second peak load\", \"Migrated legacy monolithic inventory system to microservices architecture across 12 Kubernetes namespaces\"). This is real production deployment, not a demo, and should be weighted heavily per the rubric. However, the technical_integration dimension returned no parseable rationale, so it cannot be scored on its own reasoning; based on the same evidence pool, the candidate shows clear LLM production integration and distributed-systems engineering, but no cited evidence of agentic-specific elements the posting names explicitly \u2014 memory, tools, or orchestration frameworks. That gap tempers what would otherwise be a high score on this axis; a moderate estimate (~6) is appropriate given confirmed LLM/production API work but unconfirmed agentic-system depth. client_communication (2.0, conf 0.92) is well-supported by absence: all quoted evidence is backend/infrastructure focused, with no mention of client interaction, non-technical translation, or cross-functional (sales/delivery) collaboration, which the job description explicitly requires as a differentiator. Averaging the well-evidenced production score, the estimated technical-integration midpoint, and the low client-facing score yields a composite around 6, reflecting strong engineering/production credibility undercut by an unconfirmed agentic-architecture claim and a clear deficit in the client-facing dimension the posting explicitly values."
+    },
+    {
+      "file": "wrong_domain__claire_fontaine.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 1.3333333333333333,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The candidate has 6 years of production experience in QA for streaming platforms\u2014'testing digital media platforms, streaming applications, and content delivery systems'\u2014but every claim describes validation and testing work, not building or owning systems that ship. The evidence shows test automation ('Developed and maintained automated test suites using Selenium and Appium'), not agentic systems, AI deployment, or production engineering ownership; this is a QA specialist profile, not a solutions engineer who 'executes on defined solution architectures' and owns AI systems through deployment and on-call support.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.92,
+          "rationale": "The candidate's entire background is quality assurance and test automation\u2014'Quality assurance specialist with 6 years of progressive experience'\u2014with no evidence of building AI/ML/GenAI systems, agentic systems, or LLM work that the role explicitly requires. There is no evidence whatsoever of client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical concepts to non-technical audiences; the work described ('validated creative rendering,' 'tested integration points') is testing-focused, not solutions engineering.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] The candidate has 6 years of production experience in QA for streaming platforms\u2014'testing digital media platforms, streaming applications, and content delivery systems'\u2014but every claim describes validation and testing work, not building or owning systems that ship. The evidence shows test automation ('Developed and maintained automated test suites using Selenium and Appium'), not agentic systems, AI deployment, or production engineering ownership; this is a QA specialist profile, not a solutions engineer who 'executes on defined solution architectures' and owns AI systems through deployment and on-call support. | [technical_integration] No rationale returned. | [client_communication] The candidate's entire background is quality assurance and test automation\u2014'Quality assurance specialist with 6 years of progressive experience'\u2014with no evidence of building AI/ML/GenAI systems, agentic systems, or LLM work that the role explicitly requires. There is no evidence whatsoever of client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical concepts to non-technical audiences; the work described ('validated creative rendering,' 'tested integration points') is testing-focused, not solutions engineering."
+    },
+    {
+      "file": "wrong_domain__grace_okonkwo.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence shows zero instances of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. Every quote describes internal infrastructure work\u2014'Led the design and rollout of a new CI/CD platform serving 80+ engineers,' 'Managed a multi-region EKS cluster'\u2014with no mention of stakeholder communication, client interaction, or translation of concepts for non-technical audiences, which the job description explicitly names as a required skill.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows zero instances of explaining technical work to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. Every quote describes internal infrastructure work\u2014'Led the design and rollout of a new CI/CD platform serving 80+ engineers,' 'Managed a multi-region EKS cluster'\u2014with no mention of stakeholder communication, client interaction, or translation of concepts for non-technical audiences, which the job description explicitly names as a required skill."
+    },
+    {
+      "file": "wrong_domain__imani_robinson.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.9,
+          "rationale": "The evidence shows internal technical work (SQL, Python, dashboards) but contains zero explicit signal of explaining technical concepts to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. The closest proxy is 'Assisted with PCI-DSS audit preparation; documented data handling procedures,' which suggests some communication of compliance requirements, but this is compliance documentation, not the client-facing or cross-functional business translation the posting requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] The evidence shows internal technical work (SQL, Python, dashboards) but contains zero explicit signal of explaining technical concepts to non-technical audiences, client engagement, or cross-functional collaboration across engineering/sales/delivery. The closest proxy is 'Assisted with PCI-DSS audit preparation; documented data handling procedures,' which suggests some communication of compliance requirements, but this is compliance documentation, not the client-facing or cross-functional business translation the posting requires."
+    },
+    {
+      "file": "wrong_domain__malik_johnson.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 1.5,
+      "panel_spread": 3.0,
+      "escalated": true,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates production experience with data infrastructure\u2014'Develop and maintain 15+ recurring SQL reports' and 'Assisted with migration of legacy reporting system to Snowflake'\u2014but all evidence is in analytics and data warehousing, not AI/ML/agentic systems. No evidence describes building, deploying, or operating any AI system in production; the role is fundamentally a data analyst, not an AI solutions engineer.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "confidence": 0.85,
+          "rationale": "The candidate demonstrates one genuine signal of non-technical communication: 'Built Tableau workbooks for executive leadership showing bed capacity forecasting and surgical throughput metrics; presented findings in monthly board reviews' \u2014 this is direct evidence of translating technical analysis into executive-facing insights. However, the rest of the resume shows no evidence of cross-functional collaboration with engineering, sales, or delivery teams, no client engagement, and no work explaining AI or technical concepts to non-technical audiences \u2014 the specific communication skill this posting requires. The role is a data analyst in healthcare, not a solutions engineer in AI, and the evidence does not bridge that gap.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "Averaging the three dimensions with appropriate weight on the missing AI-specific evidence. Production reality (3.0, conf 0.85): evidence shows genuine production ownership but exclusively in data/BI infrastructure \u2014 'Develop and maintain 15+ recurring SQL reports' and 'Assisted with migration of legacy reporting system to Snowflake' \u2014 with zero mention of AI systems shipped or operated in production, which is the posting's central requirement ('not demos or prototypes, but systems used in production'). Technical/integration depth: the failed panel entry aside, the underlying evidence contains no agentic systems (memory, tools, orchestration), no LLM/GenAI work, and no AI-API integration of any kind \u2014 the candidate's stack is SQL, Tableau, and Snowflake, which does not satisfy this dimension in any way; this should score at or near 0, not be excluded from the aggregate. Client-facing signal (3.0, conf 0.85): one solid data point \u2014 'Built Tableau workbooks for executive leadership showing bed capacity forecasting and surgical throughput metrics; presented findings in monthly board reviews' \u2014 shows genuine translation of technical work for non-technical stakeholders, but there is no cross-functional engineering/sales/delivery collaboration and no client engagement, so it partially but not fully meets the posting's ask. Because this posting is explicit that it wants hands-on AI/agentic system building integrated into business systems, and the candidate's entire evidence base is analytics/BI with no AI component, the composite score must sit low despite the modest production and communication signals \u2014 those signals belong to an adjacent but distinct role (data analyst), not the AI Solutions Engineer profile being screened for."
+    },
+    {
+      "file": "wrong_domain__nadia_haddad.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "panel_spread": 1.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's evidence describes systems administration, helpdesk operations, and infrastructure management\u2014'Manage infrastructure and systems support for 120+ internal users' and 'Administered Windows Server environments'\u2014with no evidence of building, deploying, or integrating AI, LLM, agent-based, or automation systems. The ticketing system upgrade ('reduced average resolution time from 8 hours to 4.5 hours') is operational improvement, not agentic systems work; there is zero mention of memory, tools, orchestration, APIs, business system integration, or any AI/GenAI technology.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "The candidate's evidence describes systems administration and helpdesk operations (ticketing systems, user account management, Windows Server support) with no indication of AI/GenAI work, agentic systems, or client-facing technical communication about emerging technologies. The posting explicitly requires 'hands-on experience building and deploying LLMs, agent-based systems, and automation workflows' and 'translate complex AI concepts into clear, practical guidance' \u2014 none of the provided evidence connects to either requirement or demonstrates the cross-functional collaboration signal this posting names as a differentiator.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] The candidate's evidence describes systems administration, helpdesk operations, and infrastructure management\u2014'Manage infrastructure and systems support for 120+ internal users' and 'Administered Windows Server environments'\u2014with no evidence of building, deploying, or integrating AI, LLM, agent-based, or automation systems. The ticketing system upgrade ('reduced average resolution time from 8 hours to 4.5 hours') is operational improvement, not agentic systems work; there is zero mention of memory, tools, orchestration, APIs, business system integration, or any AI/GenAI technology. | [client_communication] The candidate's evidence describes systems administration and helpdesk operations (ticketing systems, user account management, Windows Server support) with no indication of AI/GenAI work, agentic systems, or client-facing technical communication about emerging technologies. The posting explicitly requires 'hands-on experience building and deploying LLMs, agent-based systems, and automation workflows' and 'translate complex AI concepts into clear, practical guidance' \u2014 none of the provided evidence connects to either requirement or demonstrates the cross-functional collaboration signal this posting names as a differentiator."
+    },
+    {
+      "file": "wrong_domain__nia_carrington.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "panel_spread": 1.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "confidence": 0.95,
+          "rationale": "This candidate's entire work history is in supply chain operations and logistics, with no evidence of AI/ML/GenAI systems, agentic systems, LLMs, or anything resembling the technical stack this role requires. The posting explicitly asks for 'hands-on experience building or implementing AI/ML/GenAI/LLM-based systems' and 'developing and integrating APIs, automation workflows, or distributed systems in production environments'\u2014none of which appear in the evidence. The SQL and Excel skills are not sufficient substitutes for the required AI engineering foundation, and there is no evidence of client-facing technical communication about AI solutions.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] No rationale returned. | [client_communication] This candidate's entire work history is in supply chain operations and logistics, with no evidence of AI/ML/GenAI systems, agentic systems, LLMs, or anything resembling the technical stack this role requires. The posting explicitly asks for 'hands-on experience building or implementing AI/ML/GenAI/LLM-based systems' and 'developing and integrating APIs, automation workflows, or distributed systems in production environments'\u2014none of which appear in the evidence. The SQL and Excel skills are not sufficient substitutes for the required AI engineering foundation, and there is no evidence of client-facing technical communication about AI solutions."
+    },
+    {
+      "file": "wrong_domain__tariq_mansour.md",
+      "archetype": "wrong_domain",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 1.3333333333333333,
+      "panel_spread": 2.0,
+      "escalated": false,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "confidence": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The candidate has demonstrable production experience with data pipelines, cloud migration, and Python scripting, but none of the evidence describes building agentic systems, LLM/GenAI work, or AI integration into business systems\u2014the core technical requirements of this role. The closest evidence is 'Developed Python scripts to validate inventory counts and flag anomalies before they reached storefront,' which is rule-based automation, not agent-based systems with memory, tools, or orchestration as specified in the job description.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "confidence": 0.95,
+          "rationale": "The evidence shows zero direct client engagement, no explanation of technical work to non-technical audiences, and no cross-functional collaboration with sales or delivery teams. The only cross-functional signal is 'Created training documentation for six team members on data QA procedures,' which is internal knowledge transfer to peers, not client-facing communication or sales/delivery collaboration as the posting requires.",
+          "parse_failed": false
+        }
+      ],
+      "rationale": "[production_reality] No rationale returned. | [technical_integration] The candidate has demonstrable production experience with data pipelines, cloud migration, and Python scripting, but none of the evidence describes building agentic systems, LLM/GenAI work, or AI integration into business systems\u2014the core technical requirements of this role. The closest evidence is 'Developed Python scripts to validate inventory counts and flag anomalies before they reached storefront,' which is rule-based automation, not agent-based systems with memory, tools, or orchestration as specified in the job description. | [client_communication] The evidence shows zero direct client engagement, no explanation of technical work to non-technical audiences, and no cross-functional collaboration with sales or delivery teams. The only cross-functional signal is 'Created training documentation for six team members on data QA procedures,' which is internal knowledge transfer to peers, not client-facing communication or sales/delivery collaboration as the posting requires."
+    }
+  ]
+}

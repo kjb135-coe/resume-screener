@@ -580,6 +580,26 @@ exception is noted below under the k-NN candidate.
    judgment this nuanced (production-vs-prototype isn't a keyword you
    can grep for).
 
+### 8a. Model-tier bake-off — first data point (2026-08-26)
+
+The panel/arbiter model choice is itself an axis worth sweeping, not
+just the architecture shape. First data point, via
+`scripts/evaluate.py --panel-model ... --triage-model ... --tag <name>`
+(writes to tag-suffixed files, never the baseline):
+
+**All-Haiku panel, Sonnet arbiter:** macro-F1 0.847 → 0.516, cost $1.796
+→ $1.286. Rejected. The cause is decisive rather than marginal: 88 of 180
+Haiku panel calls (49%) returned unparseable JSON, against 2.2% for
+Sonnet on the identical prompt. Full analysis in
+`docs/EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md`.
+
+Worth noting for later: this reads as a structured-output problem, not a
+capability problem. A "respond as JSON" instruction in prose is exactly
+the failure mode `_close_unterminated` (§3b) already exists to patch
+around, and Haiku just hits it far more often. If a cheaper panel is
+revisited, enforcing the schema via tool-use rather than prose is the
+prerequisite, not a bigger model.
+
 3. **Prompt variant (direct vs. chain-of-thought vs. structured rules)
    — cut**, and I agree with cutting it. Our rubric prompts are already
    closer to StoneStepper's "structured criteria" variant than its bare
