@@ -219,6 +219,7 @@
   .agent .who2{font-size:12.5px;color:var(--muted)}
   .agent .conf{font-size:11.5px;color:var(--faint);margin-left:auto}
   .agent p{margin:0;font-size:13.5px}
+  .agent p.agentnote{margin-top:6px;color:var(--faint);font-size:12px;font-style:italic}
   .warn{color:var(--fail);font-size:11px;font-weight:700;letter-spacing:.04em}
   .cites{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
   .cite{
@@ -449,10 +450,13 @@ function renderScaleNote() {
   const note = $("scale-note");
   if (!note) return;
   note.textContent =
-    `Scores run low by design: one of the three agents finds evidence for its `
-    + `dimension in few resumes, so composites sit below where a 0-10 scale `
-    + `suggests. ≥${CUTOFFS.advance} is advance, ≥${CUTOFFS.hold} is hold. `
-    + `Raising the scale was tested and cost accuracy — see docs/SCORE_SCALE.md.`;
+    `Scores run low by design. Most resumes never document client-facing `
+    + `communication, and the client_communication agent reads that silence `
+    + `close to a disqualifying score rather than a neutral one — so it pulls `
+    + `nearly every composite down. A fairer reading of silence was tested `
+    + `and cost real accuracy (0.880 → 0.796 macro-F1), so the stricter `
+    + `version stays; ≥${CUTOFFS.advance} is advance, ≥${CUTOFFS.hold} is `
+    + `hold. Full reasoning in docs/SCORE_SCALE.md.`;
 }
 
 function renderFilters() {
@@ -522,6 +526,16 @@ function renderDetail(c, mount, opts = {}) {
     if (a.parse_failed) hd.append(el("span","warn","UNREADABLE — EXCLUDED"));
     else hd.append(el("span","conf",`confidence ${a.confidence.toFixed(2)}`));
     box.append(hd);
+
+    // This agent runs low for almost everyone by design (docs/SCORE_SCALE.md):
+    // resumes rarely document client-facing work, and a low score here most
+    // often means the evidence was never written down, not that it doesn't
+    // exist. Shown once per card rather than only in the top-level note,
+    // since a reviewer may open one candidate without reading the summary.
+    if (a.agent === "client_communication") {
+      box.append(el("p","agentnote",
+        "Runs low for most candidates: resumes rarely document this, and silence scores near the bottom of the scale by design (see docs/SCORE_SCALE.md)."));
+    }
 
     const bullets = a.bullets && a.bullets.length ? a.bullets : null;
     if (bullets) {

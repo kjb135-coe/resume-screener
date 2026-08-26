@@ -178,13 +178,13 @@ Other things named rather than hidden:
 
 Every measured run, what changed before it, and why the number moved is tracked in [docs/RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md).
 
-### The root cause is one broken agent
+### Why scores run low: one agent, and a decision that was tested
 
-Of the three panel agents, `client_communication` scores a mean of **0.67** with **33 of 60 zeros**, and never exceeds 6.0 for anyone. It also barely separates the levels it exists to measure — candidates whose archetype targets `high` average 2.29, `medium` 0.55, `low` 0.39. The other two dimensions separate cleanly.
+Of the three panel agents, `client_communication` scores a mean of **1.00**, versus 7.55 and 6.39 for the other two on candidates the corpus labels `advance`. It rarely exceeds 4.0 for anyone. The reason: most resumes never document client-facing work, and this persona reads that silence close to disqualifying rather than neutral — so it drags nearly every composite down about two points. That is why a 7.0 cutoff was far too high, why the arbiter kept overriding it upward, and why all remaining errors run the same direction.
 
-The final score is a mean of three. An agent scoring near zero for nearly everyone drags **every** candidate down about two points. That one fact explains the whole chain: why a 7.0 cutoff was far too high, why the arbiter kept overriding it upward, why all 22 errors ran the same direction, and why `production_light_ai` failed 0 for 7.
+**This was fixed and measured, then reverted.** A version telling the agent that silence scores mid-scale, not near-zero, was built and run against the full corpus. It worked on the agent's own terms — mean 1.00 → 3.34, 35 zeros → zero — but corpus accuracy fell, each version at its *own* best cutoffs: **0.880 → 0.796 macro-F1**. Kept the stricter version for accuracy.
 
-The rubric tells that agent absence "is not automatically disqualifying" — but contributing 0.0 to a mean *is* a penalty. The instruction and the arithmetic contradict each other. Fixing that comes before tuning cutoffs, since it moves the distribution the cutoffs would be fitted to.
+The honest caveat: the synthetic archetypes were generated with an intended `client_communication` level, so a harsh reading of silence correlates with the answer key on *this* corpus specifically. On a real applicant, the fairer version is probably the better judge — this comparison only says which one matches synthetic labels better. Full numbers in [docs/SCORE_SCALE.md](docs/SCORE_SCALE.md).
 
 The design decisions and their tradeoffs are in [PLAN.md](PLAN.md), including what's deliberately unfinished and why.
 

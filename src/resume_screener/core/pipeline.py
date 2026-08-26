@@ -77,6 +77,21 @@ ARBITER_MAX_TOKENS = 3000
 # The hand-written panel, paired with prompts/rubric.md. Used when no
 # GeneratedRubric is supplied, which keeps scripts/evaluate.py reproducible
 # against the corpus these were calibrated on.
+#
+# client_communication runs low for nearly everyone -- mean 1.00 vs 7.55
+# and 6.39 for the other two, on candidates the corpus labels `advance`.
+# Most resumes never document client-facing work, and this persona reads
+# that silence close to disqualifying rather than neutral, which drags
+# every composite down. A fairer version (silence -> mid-scale, not near-
+# zero) was built and measured: client_communication's own numbers
+# improved (mean 0.60 -> 3.34, zeros 35/60 -> 0/60) but corpus macro-F1
+# fell 0.880 -> 0.796 at each version's own best cutoffs. Reverted --
+# accuracy on the only evidence available (this corpus) was kept over a
+# more defensible reading of an individual resume. See docs/SCORE_SCALE.md
+# for the full numbers and the caveat that the archetypes were generated
+# with an intended client_communication level, so this persona's harshness
+# specifically correlates with the answer key -- a real applicant may be
+# judged more harshly here than the corpus comparison implies.
 _PANEL_PERSONAS = {
     "production_reality": "You judge whether the evidence describes systems "
     "that shipped and are used in production, versus research, coursework, "
