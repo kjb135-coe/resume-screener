@@ -348,7 +348,16 @@ async function loadResults() {
     return;
   }
   DATA = body;
-  renderStats(); renderFilters(); renderList(); emptyDetail();
+  renderStats();
+  renderFilters();
+
+  // Open on the top-ranked candidate rather than an empty panel. On first
+  // load the question is "what did it decide and why", and an empty half
+  // of the screen answers neither.
+  const first = DATA.candidates[0];
+  if (first) selected = first.file;
+  renderList();
+  first ? renderDetail(first) : emptyDetail();
 }
 
 /* ---------- rubric ---------- */

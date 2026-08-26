@@ -12,6 +12,7 @@ it's visible rather than silently blank.
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,10 +23,37 @@ EXCLUDE_DIRS = {
     "node_modules", ".mypy_cache", "dist", "build", ".idea", ".vscode",
 }
 EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".egg-info"}
-# Gitignored, so they are not part of the repo even though they are on disk.
-# .env in particular holds a real API key -- it must never be described,
-# listed, or otherwise echoed into a committed document.
-EXCLUDE_NAMES = {".DS_Store", ".env", ".env.local"}
+
+
+def is_ignored(paths: list[Path]) -> set[Path]:
+    """Ask git which of these it ignores.
+
+    Anything gitignored is not part of the repo even though it sits on
+    disk, so it does not belong in a document describing the repo. Asking
+    git beats maintaining a second exclude list here that silently drifts
+    out of sync with .gitignore -- and .env, which holds a real API key,
+    must never be echoed into a committed file by an oversight in that
+    list.
+
+    Returns an empty set outside a git checkout rather than failing.
+    """
+    if not paths:
+        return set()
+    try:
+        result = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            input="\n".join(str(p) for p in paths),
+            capture_output=True,
+            text=True,
+            cwd=REPO,
+            check=False,  # exit 1 just means "nothing ignored"
+        )
+    except (OSError, subprocess.SubprocessError):
+        return set()
+    # Exit 0 = some ignored, 1 = none ignored, 128 = not a git repo.
+    if result.returncode not in (0, 1):
+        return set()
+    return {Path(line) for line in result.stdout.splitlines() if line}
 
 DESCRIPTIONS: dict[str, str] = {
     # Top level
@@ -92,6 +120,9 @@ DESCRIPTIONS: dict[str, str] = {
     "data/labels.json": "Ground-truth label + archetype + target dimension levels per resume, written at generation time.",
     "data/eval_run.json": "Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.",
 
+    "docs/img": "Screenshots used by the README.",
+    "docs/img/candidates.png": "The candidates view, used in the README.",
+
     # docs/ (eval outputs)
     "docs/EVAL_RESULTS.md": "Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.",
     "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
@@ -131,12 +162,14 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
     lines: list[str] = []
     missing: list[str] = []
 
-    entries = [
+    candidates = [
         e for e in sorted(directory.iterdir(), key=lambda p: (p.is_file(), p.name.lower()))
-        if e.name not in EXCLUDE_DIRS and e.name not in EXCLUDE_NAMES
+        if e.name not in EXCLUDE_DIRS
         and e.suffix not in EXCLUDE_SUFFIXES
         and not e.name.endswith(".egg-info")
     ]
+    ignored = is_ignored(candidates)
+    entries = [e for e in candidates if e not in ignored]
 
     for index, entry in enumerate(entries):
         last = index == len(entries) - 1

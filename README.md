@@ -1,10 +1,105 @@
 # Resume Screener
 
-A multi-agent resume screening pipeline, exposed as an MCP server, a web UI, and a CLI over one shared core.
+An agent that reads a stack of resumes against a specific job posting, ranks them, and tells you which ones a human should look at first.
 
-Built as a working prototype of the "talent team reviews every resume by hand, no ATS" problem, using a cascade of models -- a cheap tier triages in bulk, escalation to more expensive tiers is triggered by inter-agent disagreement rather than a flat score cutoff.
+Built for the problem of a talent team reading every resume by hand with no ATS. It is not a filter that rejects people quietly. Every verdict comes with the evidence behind it, and anything the system isn't confident about gets handed back to a person rather than decided.
 
-The design decisions, and the reasoning and tradeoffs behind each one, are in [PLAN.md](PLAN.md) — including what is deliberately unfinished and why.
+![The candidates view: 60 resumes ranked, with each agent's score and reasoning](docs/img/candidates.png)
+
+That's 60 test resumes screened for **$0.93 total**, about a cent and a half each. 14 advance, 10 hold, 36 reject, and **33 flagged for a human**. Every score opens up into the reasoning that produced it.
+
+## How it works
+
+Each resume goes through three stages, and the expensive stage usually doesn't run.
+
+```
+  Resume
+    │
+    ▼
+  Extract        cheap model pulls out quoted evidence
+    │
+    ▼
+  Panel          3 agents score in parallel, one per dimension
+    │            8.0        9.0        6.0
+    │
+    ▼
+  Do they agree?
+    │
+    ├── yes ──▶  average the scores            (45% of candidates)
+    │
+    └── no  ──▶  arbiter reads all three       (55% of candidates)
+                 rationales and rules
+                          │
+                          ▼
+              ≥7 advance · ≥5 hold · else reject
+```
+
+Escalation is triggered by the panel disagreeing with each other, not by a score being near a cutoff. A candidate everyone agrees is strong costs three cheap calls. A candidate the panel splits on gets the expensive model, and gets flagged for a person.
+
+### Why three agents
+
+The count came from the posting, not from an experiment. This job description has three distinct requirement clusters, so there's one agent per cluster:
+
+| Agent | What it judges |
+|---|---|
+| `production_reality` | Shipped and running, or a demo that stopped at the prototype? The posting says "not demos or prototypes" three separate times. |
+| `technical_integration` | Real agentic work with memory, tools, and orchestration, or a skills list? |
+| `client_communication` | Evidence of explaining technical work to non-technical people. |
+
+Three also happens to be the smallest number that makes disagreement *readable*. With one agent there's no disagreement signal at all. With two you learn they differ but not which one is the outlier. With three you get a spread and a majority, so "two agreed, one dissented" is something you can act on. Each agent is another API call per resume, so cost scales with the count.
+
+It's now load-bearing: the escalation threshold is a spread across three scores, and more agents would widen that spread by chance alone and silently escalate more often. `core/rubric_gen.py` rejects any rubric that isn't exactly three.
+
+**Honest caveat:** the count was never tested. Two versus three versus five is still an open question in [PLAN.md §8](PLAN.md), and the "be skeptical of unbacked claims" instinct was folded into all three agents rather than made a fourth agent specifically to avoid prejudging it.
+
+## The rubric is written from the posting, not hardcoded
+
+Hand a job posting in and the system writes its own scoring standard first: three dimensions, each with the criteria the panel scores against and the brief for the agent that owns it.
+
+This matters because a panel is only as good as what it was told to look for. A generic "AI engineer" checklist scores every posting identically. A rubric derived from *this* posting notices what this posting actually repeats.
+
+To check it wasn't just pattern-matching to engineering roles, I ran it against a charge-nurse posting for a hospital emergency department. It produced dimensions on ACLS/PALS/TNCC certification, charge authority on an unsupervised night shift, and Joint Commission documentation compliance. Nothing leaked through from the engineering version. It also picked up the posting's "we are not looking for" section and treated outpatient-only experience as a negative signal rather than a neutral one.
+
+Two rules are enforced in code rather than trusted to the model:
+
+- **Exactly three dimensions**, for the reason above.
+- **Generation failure raises.** There is no silent fallback to the built-in rubric. Scoring one job's candidates against a different job's criteria is a wrong answer that looks like a right one.
+
+## Why MCP
+
+A talent team with no ATS shouldn't have to adopt a new app. They should be able to ask the AI client they already have.
+
+So this is an MCP server first. In Claude Desktop there is nothing to install and no UI to learn: paste the posting into the chat, ask it to rank a folder. The web page exists to look at results, not as the product.
+
+Five tools, one per action: `preview_rubric`, `screen_resume`, `rank_pool`, `explain_verdict`, `query_candidates`.
+
+**None of them takes a real-world action.** They read and report. Nothing can reject a candidate, send mail, or write to a system of record. That keeps a human on every hiring decision, and it means a prompt injection that survives out of a resume still has nothing to actuate.
+
+`preview_rubric` returns a `rubric_id` that `rank_pool` accepts, so the rubric a person reads and approves is the one that scores the pool. Generation isn't deterministic, which is exactly why that id exists.
+
+## Results, and what they're worth
+
+Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), [every candidate's reasoning](docs/CANDIDATE_REPORTS.md)):
+
+| Metric | Value |
+|---|---|
+| Macro-F1 | 0.601 |
+| Accuracy | 0.633 |
+| Cost | $0.93 for 60 ($0.015 each) |
+| Latency | p50 33.7s, p95 46.0s |
+| Flagged for a human | 33 / 60 |
+
+**The number that matters more than the headline: 6 of 60 verdicts change between two identical runs.** A single run can't support a macro-F1 quoted to three decimals, and can't tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and until it exists the architecture comparison below can't mean much.
+
+**Where it actually fails:** `hold` recall is 0.20. It separates strong from weak reliably and identifies the middle badly. That did not move across runs, so it's real rather than noise.
+
+Other things named rather than hidden:
+
+- The three-way architecture bake-off in [PLAN.md §8](PLAN.md) is unfinished. Only this design has been measured, so "the cascade beats one big call" is asserted, not shown.
+- `docs/LIMITATIONS.md` isn't written yet. The known blind spot, that disagreement-based escalation can't catch a panel which is unanimously and confidently wrong, is in [PLAN.md §4](PLAN.md) meanwhile.
+- Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [PLAN.md §3b](PLAN.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
+
+The design decisions and their tradeoffs are in [PLAN.md](PLAN.md), including what's deliberately unfinished and why.
 
 ## Quickstart
 
@@ -17,20 +112,25 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-The test suite is offline — it never calls an API, needs no key, and costs nothing:
+The test suite is offline. It never calls an API, needs no key, and costs nothing:
 
 ```bash
 pytest
+```
+
+Look at the recorded run in a browser. No API key needed, since it reads results from disk:
+
+```bash
+uvicorn resume_screener.adapters.api:app --reload
 ```
 
 Everything past this point calls the Anthropic API and costs money:
 
 ```bash
 cp .env.example .env    # then put your key in it
-export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-Write a rubric for a posting (one call, a few cents):
+Write a rubric for any posting (one call, a few cents):
 
 ```bash
 resume-screener rubric docs/job_description.md
@@ -42,91 +142,30 @@ Score one resume:
 resume-screener screen data/synthetic_resumes/quiet_builder__elena_vasquez.md docs/job_description.md
 ```
 
-Rank the whole corpus. This is 60 resumes, roughly $0.90 and a few minutes:
+Rank the whole corpus. 60 resumes, roughly $0.93 and a few minutes:
 
 ```bash
 resume-screener rank data/synthetic_resumes docs/job_description.md --top 10
 ```
 
-Add `-g` to any of `screen`/`rank` to score against a rubric written from the posting instead of the built-in one.
-
-## Seeing the results
-
-```bash
-uvicorn resume_screener.adapters.api:app --reload
-```
-
-The **Candidates** tab opens on the last recorded run — all 60 resumes ranked, split into advance / hold / reject, with the 33 that want a human eye flagged. Click any one to see each of the three agents' scores, confidences, and reasoning, the arbiter's ruling where the panel disagreed, and the resume itself.
-
-That view reads `data/eval_run.json` from disk. It costs nothing, needs no API key, and loads instantly. Re-run `scripts/evaluate.py` and restart the server to see a new run.
-
-There is deliberately no "screen this pool" button. That is a minutes-long, dollars-scale job, and it belongs behind the CLI or the MCP server, where whoever starts it knows they started it.
-
-## The rubric is written, not hardcoded
-
-Give it a job posting and it writes its own scoring standard: three dimensions, each with the criteria the panel scores against and the brief for the agent that owns it. Nothing is pinned to one role.
-
-That matters because the panel is only as good as what it was told to look for. A generic "AI engineer" checklist scores every posting the same way; a rubric derived from the posting can notice that *this* one says "not demos or prototypes" three times and weight production evidence accordingly.
-
-Two rules are enforced rather than left to the model (`core/rubric_gen.py`):
-
-- **Exactly three dimensions.** The escalation threshold is a score spread across a three-agent panel, so a fourth dimension would silently change what disagreement means without changing the threshold.
-- **Generation failure raises.** There is no fallback to the built-in rubric — scoring one job's candidates against another job's criteria is worse than a visible error.
-
-Preview it in the browser:
-
-```bash
-uvicorn resume_screener.adapters.api:app --reload
-```
-
-The **Rubric** tab takes a pasted posting and shows what the panel would be told to look for. That is the one live API call the page makes.
-
-In Claude Desktop there is nothing to build — the chat *is* the input. Paste the posting, call `preview_rubric`, read the rubric, then hand its `rubric_id` to `rank_pool` so the pool is scored against the rubric you actually approved. Generation isn't deterministic, which is exactly why the id exists.
-
-`scripts/evaluate.py` deliberately keeps using the hand-written rubric in `prompts/rubric.md`, so the published metrics stay comparable across runs.
+Add `-g` to `screen` or `rank` to score against a rubric written from the posting instead of the built-in one.
 
 ## Layout
 
 ```
 src/resume_screener/
-  core/         # ingest, the tiered cascade, rubric generation, models, the model-provider router
-  adapters/     # mcp_server.py, api.py, cli.py -- thin, all call the same core functions
+  core/         # ingest, the cascade, rubric generation, models, the provider router
+  adapters/     # mcp_server.py, api.py, cli.py -- thin, all call the same core
   prompts/      # the hand-written rubric, and the meta-prompt that writes new ones
 tests/          # offline, never calls an API
-data/synthetic_resumes/   # generated corpus, not real resumes
+data/synthetic_resumes/   # generated corpus, no real candidates
 docs/           # the target posting, eval results, per-candidate reports
 ```
 
-[STRUCTURE.md](STRUCTURE.md) is a generated map of every file with a one-line description.
+`core/` never imports from `adapters/`. That one-way dependency is what lets the MCP server, the CLI, and the web API stay thin and share behaviour. [STRUCTURE.md](STRUCTURE.md) maps every file with a one-line description.
 
-## Why MCP
-
-The actual end users here — a talent team with no ATS — shouldn't have to adopt a new app. They should be able to ask the AI client they already have. So the MCP server is the primary interface; the web page is a demo instrument for evaluators, not the production design. Full reasoning in [PLAN.md §2](PLAN.md).
-
-Five tools, one per action: `preview_rubric`, `screen_resume`, `rank_pool`, `explain_verdict`, `query_candidates`. None of them takes a real-world action -- they read and report. That boundary keeps a human on every hiring decision, and it means a prompt injection surviving out of a resume still has nothing to actuate.
+The 60 resumes are generated, not real. [docs/corpus_design.md](docs/corpus_design.md) covers the archetypes and how ground-truth labels were assigned.
 
 ## Local models
 
-An Ollama-backed provider exists behind the same `Model` interface used for Anthropic (`core/router.py`) and is tested against a mocked endpoint, but is not wired into the default cascade. The reason is hardware, not code — see [PLAN.md §6](PLAN.md). It is the on-prem / data-residency story rather than a live path.
-
-## Results, and what they're worth
-
-Measured on the 60-resume labeled corpus ([full results](docs/EVAL_RESULTS.md), [per-candidate reasoning](docs/CANDIDATE_REPORTS.md)):
-
-| Metric | Value |
-|---|---|
-| Macro-F1 | 0.601 |
-| Accuracy | 0.633 |
-| Cost | $0.93 for 60 resumes ($0.015 each) |
-| Latency | p50 33.7s, p95 46.0s |
-| Escalated to arbiter | 33/60 |
-
-The number that matters more than the headline: **6 of 60 verdicts change between two identical runs.** A single run therefore cannot support a macro-F1 quoted to three decimals, and cannot tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and it blocks the architecture comparison below from meaning anything.
-
-Where it actually fails: `hold` recall is 0.20. The system separates strong from weak reliably and identifies the middle badly. That is the honest weakness, and it did not move across runs.
-
-Other things named rather than hidden:
-
-- The three-way bake-off in [PLAN.md §8](PLAN.md) is unfinished. Only the panel-plus-arbiter arm has been measured, so "the cascade beats a single call" is asserted, not shown.
-- `docs/LIMITATIONS.md` isn't written yet. The known blind spot — disagreement-based escalation cannot catch a panel that is unanimously and confidently wrong — lives in [PLAN.md §4](PLAN.md) meanwhile.
-- Roughly 1 panel call in 180 still loses a score to malformed JSON. Those are flagged for human review, never silently scored zero. [PLAN.md §3b](PLAN.md) has the two parsing bugs that only running against the real API uncovered — including one that was fabricating confident zeros and not flagging them.
+An Ollama provider sits behind the same `Model` interface as Anthropic (`core/router.py`) and is tested against a mocked endpoint, but is not wired into the default path. The reason is hardware, not code ([PLAN.md §6](PLAN.md)). It's the on-prem and data-residency story rather than something running today.

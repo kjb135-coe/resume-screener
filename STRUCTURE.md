@@ -10,6 +10,8 @@ removing files rather than editing this by hand.
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
 │   └── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
 ├── docs/                        Design documents and the target job posting.
+│   ├── img/                         Screenshots used by the README.
+│   │   └── candidates.png               The candidates view, used in the README.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
