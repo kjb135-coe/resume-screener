@@ -133,10 +133,10 @@ class TestRecommendationCutoffs:
         "score,expected",
         [
             (9.0, Recommendation.ADVANCE),
-            (7.0, Recommendation.ADVANCE),
-            (6.9, Recommendation.HOLD),
-            (5.0, Recommendation.HOLD),
-            (4.9, Recommendation.REJECT),
+            (4.0, Recommendation.ADVANCE),
+            (3.9, Recommendation.HOLD),
+            (1.0, Recommendation.HOLD),
+            (0.9, Recommendation.REJECT),
         ],
     )
     def test_boundaries(self, score, expected):
@@ -155,14 +155,26 @@ class TestScreenOne:
         assert verdict.review_reason is None
 
     async def test_disagreeing_panel_escalates_to_arbiter(self):
-        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(2.0, "hold"))
         verdict = await screen_one(FIXTURE, JD, models)
 
         assert verdict.escalated
         assert len(models["arbiter"].calls) == 1
-        assert verdict.score == 5.0
+        assert verdict.score == 2.0
         assert verdict.recommendation == Recommendation.HOLD
         assert "disagreed" in verdict.review_reason
+
+    async def test_arbiter_recommendation_is_ignored_in_favour_of_the_cutoffs(self):
+        """One place maps a score to a verdict. Previously an escalated 6.5
+        could be `advance` because the arbiter said so while an unescalated
+        6.5 was `hold` -- same score, different answer, decided by whether
+        the panel happened to split.
+        """
+        models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(0.5, "advance"))
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert verdict.score == 0.5
+        assert verdict.recommendation == Recommendation.REJECT
 
     async def test_panel_spread_recorded(self):
         verdict = await screen_one(FIXTURE, JD, _models([9.0, 4.0, 3.5]))
@@ -469,16 +481,18 @@ class TestEscalationGuard:
         assert models["arbiter"].calls == [], "paid to resolve a settled verdict"
         assert verdict.recommendation == Recommendation.ADVANCE
 
-    async def test_guard_depends_on_where_the_cutoffs_sit(self):
-        """9.0/7.0/6.0 -- the case that motivated this -- still escalates at
-        the current 7.0/5.0 cutoffs, because 6.0 falls in `hold`. The guard
-        removes 7 of 33 escalations on the recorded run; the rest need the
-        cutoff correction in PLAN.md 3e. Pinned so the limit is not
-        mistaken for a fix.
+    async def test_the_case_that_motivated_the_guard(self):
+        """9.0/7.0/6.0 with a spread of 3.0. It escalated under the old
+        7.0/5.0 cutoffs because 6.0 fell in `hold`. With the swept cutoffs
+        all three mean `advance`, so no arbiter call is bought to resolve a
+        verdict that was never in doubt.
         """
-        models = _models([9.0, 7.0, 6.0], arbiter=arbiter_json(7.5, "advance"))
+        models = _models([9.0, 7.0, 6.0], arbiter=arbiter_json(7.5))
         verdict = await screen_one(FIXTURE, JD, models)
-        assert verdict.escalated
+
+        assert not verdict.escalated
+        assert models["arbiter"].calls == []
+        assert verdict.recommendation == Recommendation.ADVANCE
 
     async def test_wide_spread_across_buckets_still_escalates(self):
         models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
@@ -496,10 +510,10 @@ class TestEscalationGuard:
         "scores,expect_escalation",
         [
             ([9.0, 8.0, 7.0], False),   # all advance
-            ([4.0, 3.0, 2.0], False),   # all reject
-            ([6.5, 6.0, 5.5], False),   # all hold
-            ([7.5, 6.5, 4.0], True),    # advance / hold / reject
-            ([8.0, 4.5, 4.0], True),    # advance vs reject
+            ([0.9, 0.5, 0.0], False),   # all reject
+            ([3.9, 2.0, 1.0], False),   # all hold
+            ([9.0, 2.0, 0.5], True),    # advance / hold / reject
+            ([8.0, 3.0, 0.5], True),    # advance vs hold vs reject
         ],
     )
     async def test_escalates_only_when_buckets_differ(self, scores, expect_escalation):

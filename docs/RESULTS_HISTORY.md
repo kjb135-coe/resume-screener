@@ -12,6 +12,8 @@ is the record of how it got there.
 |---|---|---|---|---|---|
 | 1 | 2026-08-25 | 0.630 | 0.667 | $0.891 | First full run of the 60-resume corpus. Hand-written rubric, 7.0/5.0 cutoffs, spread > 2.0 escalation, Opus arbiter. |
 | 2 | 2026-08-26 | **0.601** | 0.633 | $0.925 | Two parsing fixes (PLAN §3b): a missing score no longer becomes a silent, unflagged 0.0; and an unterminated JSON response is now repaired instead of discarded. |
+| — | 2026-08-26 | *(void)* | — | — | Died 45/60 on an exhausted credit balance. Discarded, not recorded: the failures clustered in two archetypes, so the surviving class balance was skewed and its metrics were not comparable. `evaluate.py` now refuses to report quietly on a partial run. |
+| 3 | 2026-08-26 | **0.847** | **0.850** | $1.796 | Cutoffs 7.0/5.0 → **4.0/1.0** (swept). Arbiter returns a **score only**; `recommendation_from_score` owns every verdict. Arbiter model Opus → Sonnet. Escalation now also requires the agents to disagree on the verdict bucket. Cost priced per model for the first time. |
 
 ### Why run 2 went *down*
 
@@ -33,16 +35,44 @@ would want to compare. Until each configuration is run 3-5 times and
 reported as a spread, no single run supports a macro-F1 quoted to three
 decimals.
 
-## Changes made since run 2, not yet measured
+## Run 3 — what actually moved
 
-These are in the code now. **No eval run has been done against them**, so
-their effect is predicted, not measured. The next run is what settles it.
+The prediction from the offline sweep was macro-F1 ≈ 0.846-0.862. Measured:
+**0.847**. That is close enough to count as the sweep being validated,
+with the caveat that the cutoffs were fitted on this same corpus.
 
-| Change | Why | Expected effect |
+| | Run 2 | Run 3 |
 |---|---|---|
-| Cost priced per model (PLAN §3g) | `Usage.__add__` kept only the first model id, so every Verdict was labelled Haiku and the whole run was priced at Haiku rates. Reported cost was understated several-fold. | Reported cost rises sharply. Actual spend unchanged — it was always this. |
-| Arbiter Opus → Sonnet | The arbiter was ~57% of real spend while adjudicating between three rationales already written for it. | Cost roughly halves. Accuracy effect unknown; this is the one to watch. |
-| Escalation guard: spread > threshold **and** the agents disagree on bucket | Spread measures variance, not decision uncertainty. 9.0/7.0/6.0 clears the threshold but every score means the same verdict. | Escalations 33 → 26 at current cutoffs. No verdict can change, so accuracy should be flat. |
+| macro-F1 | 0.601 | **0.847** |
+| accuracy | 0.633 | **0.850** |
+| `advance` recall | 0.70 | 0.90 |
+| **`hold` recall** | **0.20** | **0.65** |
+| `reject` recall | 1.00 | 1.00 |
+| errors | 22 | **9** |
+| escalation rate | 55% | 47% |
+| parse failures | 1/180 | 4/180 |
+| archetypes at 100% | 4 of 9 | **6 of 9** |
+
+`hold` recall was the whole problem and it more than tripled. That is
+what the headline change actually is: the cutoffs were never the
+weakness of a class, they were the weakness of the *mapping*, and `hold`
+is the class a bad mapping destroys first because it is the one with a
+boundary on both sides.
+
+**What did not change:** all 9 remaining errors still run in the same
+direction — the model scoring below the label, never above. The bias is
+much smaller but it has not reversed or become symmetric.
+
+`production_light_ai` improved from 0/7 to 1/7. It is now the only
+archetype still failing badly, and with `adjacent_shipper` at 4/6 it
+accounts for 8 of the 9 remaining errors. Strong production history with
+shallow AI depth is the profile this rubric still cannot place.
+
+**Cost.** $1.796 for 60 resumes, about 3 cents each, and this is the
+first figure priced per model rather than billing everything at Haiku
+rates. It is not comparable to the "$0.93" in runs 1 and 2, which were
+wrong rather than cheaper. Against a corrected estimate of run 2 at
+roughly $4, moving the arbiter to Sonnet did close to halve real spend.
 
 ## Offline sweeps — analysis, not runs
 
@@ -80,18 +110,14 @@ Caveat: escalated candidates reuse the recorded arbiter verdict, which was
 produced under the old cutoffs. The comparison is directionally clear and
 not clean enough to act on alone.
 
-## The known root cause
+## `client_communication` — a correction
 
-`client_communication` is broken, and it is dragging everything else.
+An earlier version of this file called this agent "the root cause" and
+implied re-weighting it was the fix. **Half of that was wrong**, and the
+correction is worth keeping.
 
-| Agent | mean | median | zeros |
-|---|---|---|---|
-| production_reality | 3.23 | 1.0 | 14/60 |
-| technical_integration | 2.98 | 2.0 | 22/60 |
-| **client_communication** | **0.67** | **0.0** | **33/60** |
-
-It never scores above 6.0 for anyone, and it barely separates the classes
-it is supposed to:
+What is still true — it scores far lower than the other two and barely
+discriminates:
 
 | Archetype target | production_reality | technical_integration | client_communication |
 |---|---|---|---|
@@ -99,18 +125,31 @@ it is supposed to:
 | medium | 1.92 | 2.28 | **0.55** |
 | low | 0.85 | 0.24 | **0.39** |
 
-The other two discriminate cleanly. This one compresses everything toward
-zero and cannot tell `medium` from `low`.
+It never exceeded 6.0 for anyone and cannot tell `medium` from `low`.
+Because the final score is a mean of three, that pulled every candidate
+down roughly two points.
 
-Because the final score is a mean of three, an agent that scores near zero
-for almost everyone pulls **every** candidate down by roughly two points.
-That is why the 7.0 cutoff was far too high, why the arbiter kept
-overriding it upward, and why all errors ran one direction. One broken
-dimension explains the whole chain.
+**What was wrong:** the conclusion that re-weighting it would fix the
+accuracy. Tested offline across five aggregation schemes, each with
+cutoffs re-fitted:
 
-The rubric tells this agent that absence "is not automatically
-disqualifying" — but scoring 0.0 into a mean *is* a penalty. The dimension
-needs to either abstain, be weighted, or be scored on presence rather than
-on a 0-10 scale. Not yet decided, and it should be settled before chasing
-cutoffs, because fixing it moves the score distribution the cutoffs are
-being fitted to.
+| Aggregation | Best macro-F1 |
+|---|---|
+| equal (1,1,1), i.e. today | 0.846 |
+| weighted (2,2,1) | 0.846 |
+| weighted (3,3,1) | 0.861 |
+| drop it entirely | 0.843 |
+| treat it as a bonus | 0.861 |
+
+A 0.018 spread across every option, well inside the 10% run-to-run drift.
+**Re-weighting buys nothing once the cutoffs are right.** The depressed
+scores were never the problem in themselves; they only meant the cutoffs
+had to sit lower than someone eyeballing a 0-10 scale would guess.
+
+So the fix was the mapping, not the aggregation — and run 3 confirmed it
+at 0.847 with the aggregation left alone.
+
+The agent's poor discrimination is still a real defect worth fixing on
+its own merits: a dimension that cannot separate `high` from `medium`
+is not measuring anything. But that is a prompt problem, and it is worth
+much less than it looked.

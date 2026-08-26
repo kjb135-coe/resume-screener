@@ -45,11 +45,21 @@ log = logging.getLogger(__name__)
 
 RUBRIC = (Path(__file__).parent.parent / "prompts" / "rubric.md").read_text(encoding="utf-8")
 
-# Both of these are deliberately un-calibrated placeholders. They get swept
-# against the labeled corpus (PLAN.md section 8) rather than hand-tuned.
 DISAGREEMENT_THRESHOLD = 2.0  # spread across panel scores before escalating
-ADVANCE_CUTOFF = 7.0
-HOLD_CUTOFF = 5.0
+
+# Swept against the labeled corpus rather than hand-picked -- see
+# scripts/sweep_cutoffs.py and PLAN.md 3e. The previous 7.0/5.0 were
+# guesses, and they were badly wrong: every candidate labelled `advance`
+# scored at or above 4.0 and every `reject` at or below 1.0, so a 7.0 bar
+# was rejecting most of the people it was supposed to advance. All 22
+# errors in that run ran the same direction, downward.
+#
+# These are fitted on the same 60 resumes they are scored against, which
+# makes them an informed setting rather than a validated one. The plateau
+# is narrow on the advance side (3.1-3.3 on panel means), so treat this as
+# provisional until the corpus grows.
+ADVANCE_CUTOFF = 4.0
+HOLD_CUTOFF = 1.0
 
 # Caps simultaneous in-flight resumes. Each resume fans out to 1 extraction
 # + 3 panel calls, so 60 unbounded resumes would mean ~240 concurrent
@@ -353,12 +363,27 @@ async def _arbitrate(
     job_description: str,
     model: Model,
     rubric: GeneratedRubric | None = None,
-) -> tuple[float, Recommendation, str, Usage]:
+) -> tuple[float, str, Usage]:
+    """Resolve a split panel into one score.
+
+    The arbiter no longer returns a recommendation. It used to, and the
+    pipeline used it directly, which meant the verdict for a given score
+    depended on whether that candidate happened to escalate: an
+    unescalated 6.5 was mapped by the cutoffs, an escalated 6.5 was
+    whatever the arbiter said. Two candidates, same score, different
+    answers, decided by a coin flip they had no part in.
+
+    Now there is one place that turns a score into a verdict --
+    recommendation_from_score -- and the arbiter does the job it is
+    actually good at, which is reconciling three disagreeing scores into
+    one number.
+    """
     user = (
-        "The scoring panel disagreed on this candidate. Read their rationales, "
-        "resolve the disagreement, and give a final verdict.\n\n"
+        "The scoring panel disagreed on this candidate. Read their rationales "
+        "and resolve the disagreement into a single score.\n\n"
         f"Panel scores:\n{json.dumps([p.to_dict() for p in panel])}\n\n"
-        "Respond as JSON: {score (0-10), recommendation (advance|hold|reject), rationale}."
+        "Respond as JSON: {score (0-10), rationale}. Do not recommend a "
+        "hiring decision; score the evidence and the cutoffs will map it."
     )
     response = await model.complete(
         _panel_prefix(job_description, rubric), user, max_tokens=ARBITER_MAX_TOKENS
@@ -366,12 +391,8 @@ async def _arbitrate(
     data = _parse_json(response.text) or {}
 
     score = _coerce_float(data.get("score"), statistics.mean([p.score for p in panel]))
-    try:
-        recommendation = Recommendation(str(data.get("recommendation", "")).strip().lower())
-    except ValueError:
-        recommendation = recommendation_from_score(score)
     rationale = str(data.get("rationale") or "Arbiter returned no rationale.")
-    return score, recommendation, rationale, response.usage
+    return score, rationale, response.usage
 
 
 def recommendation_from_score(score: float) -> Recommendation:
@@ -431,13 +452,13 @@ async def screen_one(
     spread = max(scores) - min(scores) if len(scores) > 1 else 0.0
 
     if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores):
-        score, recommendation, rationale, arb_usage = await _arbitrate(
+        score, rationale, arb_usage = await _arbitrate(
             candidate, panel, job_description, models["arbiter"], rubric
         )
         return Verdict(
             candidate=candidate,
             score=score,
-            recommendation=recommendation,
+            recommendation=recommendation_from_score(score),
             rationale=rationale,
             panel_scores=panel,
             escalated=True,

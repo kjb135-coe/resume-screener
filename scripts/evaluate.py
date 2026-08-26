@@ -155,6 +155,31 @@ async def main() -> int:
 
     per_class = {c: prf(y_true, y_pred, c) for c in CLASSES}
     macro_f1 = statistics.mean(per_class[c][2] for c in CLASSES)
+    if not rows:
+        print(
+            "\nNo resume was scored successfully, so there is nothing to report.\n"
+            "The log above has the reason for each failure. A run that dies this "
+            "way most often means the API key is unusable -- an exhausted credit "
+            "balance returns HTTP 400 per request rather than failing up front, "
+            "so every resume fails individually and the batch looks like a "
+            "scoring problem instead of a billing one.",
+            file=sys.stderr,
+        )
+        return 1
+
+    if len(rows) < len(items):
+        # A partial run is not a smaller run. The failures are not random --
+        # they cluster wherever the batch stopped -- so the class balance is
+        # skewed and macro-F1 over the survivors is not comparable to a full
+        # run. Loud, because the number below still looks perfectly credible.
+        print(
+            f"\n!! PARTIAL RUN: {len(rows)} of {len(items)} resumes scored. "
+            f"{len(items) - len(rows)} failed -- see the log above.\n"
+            "!! Metrics below cover only the survivors and are NOT comparable "
+            "to a full run. Do not record them in docs/RESULTS_HISTORY.md.",
+            file=sys.stderr,
+        )
+
     accuracy = sum(1 for t, p in zip(y_true, y_pred) if t == p) / len(rows)
     escalated = sum(1 for v in verdicts if v.escalated)
     flagged = sum(1 for v in verdicts if v.review_reason is not None)
@@ -185,6 +210,15 @@ async def main() -> int:
     add(f"| Flagged for human review | {flagged}/{len(rows)} ({flagged / len(rows):.0%}) |")
     add(f"| Cost per resume | ${cost / len(rows):.4f} |")
     add(f"| Total cost | ${cost:.3f} |")
+    add("")
+    add("## Cost by model\n")
+    add("Priced per model that actually spent the tokens. This used to be "
+        "billed entirely at the first model in the cascade -- Haiku -- which "
+        "understated real spend several-fold.\n")
+    add("| Model | Cost | Share |")
+    add("|---|---|---|")
+    for model_id, amount in sorted(cost_by_model(verdicts).items(), key=lambda kv: -kv[1]):
+        add(f"| `{model_id}` | ${amount:.3f} | {amount / cost:.0%} |")
     add(f"| Latency p50 / p95 (model time) | {p50:.1f}s / {p95:.1f}s |")
     add(f"| Wall clock, whole batch | {wall_clock:.0f}s |")
 
@@ -242,6 +276,7 @@ async def main() -> int:
                 "latency_p50": p50,
                 "latency_p95": p95,
                 "wall_clock_s": wall_clock,
+                "cost_by_model": {k: round(v, 4) for k, v in cost_by_model(verdicts).items()},
                 "tokens": {
                     "input": sum(v.usage.input_tokens for v in verdicts),
                     "output": sum(v.usage.output_tokens for v in verdicts),

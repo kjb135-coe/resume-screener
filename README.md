@@ -30,7 +30,9 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 **Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 209 tests, all offline.
 
-**Known weakness:** macro-F1 is 0.601, and the reason is `hold` recall of 0.20. It separates strong from weak reliably and cannot identify the middle. That is measured, not estimated, and the sweep below points at the cause.
+**Measured:** macro-F1 **0.847**, accuracy 0.850 on 60 labelled resumes, ~3 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65.
+
+**Remaining weakness:** all 9 surviving errors still run one direction, the model scoring below the label. `production_light_ai` — strong production history, shallow AI depth — is 1 of 7.
 
 **Not built:** hosting, a guided walkthrough, `LIMITATIONS.md`, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md).
 
@@ -125,37 +127,34 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 
 | Metric | Value |
 |---|---|
-| Macro-F1 | 0.601 |
-| Accuracy | 0.633 |
-| Cost | $0.93 for 60 ($0.015 each) |
+| Macro-F1 | **0.847** |
+| Accuracy | 0.850 |
+| Cost | $1.80 for 60 (~3c each) |
 | Latency | p50 33.7s, p95 46.0s |
-| Flagged for a human | 33 / 60 |
+| Flagged for a human | 28 / 60 |
 
 **The number that matters more than the headline: 6 of 60 verdicts change between two identical runs.** A single run can't support a macro-F1 quoted to three decimals, and can't tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and until it exists the architecture comparison below can't mean much.
 
 **Where it actually fails:** `hold` recall is 0.20. It separates strong from weak reliably and identifies the middle badly. That did not move across runs, so it's real rather than noise.
 
-### The failure has a shape
+### Where it still fails
 
-The 60 resumes are generated from nine **archetypes** — candidate types with a target verdict and a target level on each dimension, assigned at generation time. That is where the ground-truth labels come from, and it is what makes the failure legible:
+| Archetype | Correct |
+|---|---|
+| `academic_researcher` `early_career` `keyword_stuffer` `production_generalist` `quiet_builder` `wrong_domain` | **100%** |
+| `demo_specialist` | 6/7 |
+| `adjacent_shipper` | 4/6 |
+| `production_light_ai` | **1/7** |
 
-| Archetype | Label | Correct |
-|---|---|---|
-| `production_generalist` · `academic_researcher` · `keyword_stuffer` · `wrong_domain` | advance / reject | **100%** |
-| `adjacent_shipper` | advance | 67% |
-| `demo_specialist` · `quiet_builder` | hold / advance | 43% |
-| `early_career` | hold | 17% |
-| `production_light_ai` | hold | **0%** (0 of 7) |
+Six of nine archetypes are perfect. Two archetypes account for 8 of the 9 remaining errors, and both describe the same profile: real production experience with shallow AI depth. That is the judgment call this rubric still gets wrong.
 
-Perfect on every unambiguous archetype, and progressively worse the more a candidate sits in the middle. `production_light_ai` — a real production engineer whose AI work is shallow — is rejected every single time.
+**Every one of those 9 errors runs the same direction** — the model scoring below the label, never above. That bias shrank a lot when the cutoffs were fixed, but it has not gone away.
 
-Two facts point at the same cause: **all 22 mismatches run in one direction**, the model scoring below the label, and the archetype it fails hardest on is the one strong on production but light on AI depth. The panel over-weights AI depth, and the 7.0/5.0 cutoffs are too harsh. That is a calibration problem with a known fix ([PLAN.md §8](PLAN.md) items 5 and 6, both unrun), not a mystery.
+The 60 resumes come from nine **archetypes**: candidate types with a target verdict and a target level per dimension, assigned at generation time. That is where ground-truth labels come from, and it is what makes a failure legible — without it, "macro-F1 0.847" would tell you nothing about *which* candidates it cannot judge. [docs/corpus_design.md](docs/corpus_design.md) has the specs.
 
-Having nine archetypes rather than one generic "bad resume" template is what makes that diagnosis possible. All three reject types fail for different reasons — shipped nothing, evidenced nothing, wrong field — so a screener cannot pass by pattern-matching. [docs/corpus_design.md](docs/corpus_design.md) has the full specs.
+### The cutoffs were the bug
 
-### The scores are better than the verdicts
-
-`scripts/sweep_cutoffs.py` re-thresholds the recorded scores — no API calls, instant, free ([full output](docs/CUTOFF_SWEEP.md)). It found that the score-to-verdict mapping is throwing away most of the signal.
+`scripts/sweep_cutoffs.py` re-thresholds recorded scores — no API calls, free ([output](docs/CUTOFF_SWEEP.md)). It found the score-to-verdict mapping was discarding most of the signal.
 
 | Label | lowest score | median | highest |
 |---|---|---|---|
@@ -163,9 +162,13 @@ Having nine archetypes rather than one generic "bad resume" template is what mak
 | hold | 0.0 | 2.5 | **4.5** |
 | reject | 0.0 | 0.3 | **1.0** |
 
-Every `advance` scored at or above 4.0. Every `reject` scored at or below 1.0. The panel ranks candidates well; the hand-picked 7.0/5.0 cutoffs sit in the wrong place. Re-thresholding at 4.0/1.0 takes macro-F1 from 0.601 to 0.862 on this run.
+Every `advance` scored ≥ 4.0. Every `reject` scored ≤ 1.0. The panel was ranking candidates correctly the whole time; the hand-picked 7.0/5.0 bar was rejecting most of the people it was meant to advance.
 
-That number is **not a result yet** — the cutoffs were fitted on the same 60 resumes they were scored against, and run-to-run drift is 10%. It is a strong reason to re-run the eval with new cutoffs, which is the next thing worth doing ([PLAN.md §3e](PLAN.md)).
+Moving to **4.0/1.0** took macro-F1 from 0.601 to **0.847**, with `hold` recall going 0.20 → 0.65. The sweep predicted 0.846; the run measured 0.847.
+
+Two things landed with it. The arbiter now returns a **score only** — previously an escalated 6.5 could be `advance` because the arbiter said so while an unescalated 6.5 was `hold`, the same score getting different answers depending on a coin flip. And escalation now requires the agents to disagree on the *verdict*, not merely to vary: a 9.0/7.0/6.0 panel has a wide spread but nothing an arbiter returns changes the outcome.
+
+Caveat worth keeping: those cutoffs were fitted on the same 60 resumes they are scored against. The plateau is narrow on the advance side, so treat 4.0/1.0 as informed rather than validated until the corpus grows.
 
 Other things named rather than hidden:
 

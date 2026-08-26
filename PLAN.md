@@ -416,6 +416,55 @@ score presence rather than a 0-10 level.
 moves the score distribution the cutoffs would be fitted to, so tuning
 cutoffs first means tuning them twice.
 
+### 3i. Run 3 — the cutoffs were the bug, and it is measured (2026-08-26)
+
+macro-F1 **0.601 → 0.847**, accuracy **0.633 → 0.850**, on the full 60.
+The offline sweep predicted 0.846; the run measured 0.847.
+
+Changes in this run, all landing together because they interact:
+
+- **Cutoffs 7.0/5.0 → 4.0/1.0**, swept rather than guessed (§3e).
+- **The arbiter returns a score only.** `recommendation_from_score` now
+  owns every verdict. Previously an escalated 6.5 could be `advance`
+  because the arbiter said so while an unescalated 6.5 was `hold` — the
+  same score getting a different answer depending on whether the panel
+  happened to split. One score, one mapping, one place.
+- **Arbiter Opus → Sonnet** (§3g).
+- **Escalation requires bucket disagreement**, not just spread (§3g).
+
+| | Run 2 | Run 3 |
+|---|---|---|
+| macro-F1 | 0.601 | **0.847** |
+| `hold` recall | **0.20** | **0.65** |
+| errors | 22 | 9 |
+| escalation | 55% | 47% |
+| archetypes at 100% | 4/9 | 6/9 |
+
+`hold` recall tripling is the real story. A miscalibrated mapping
+destroys the middle class first, because it is the only one with a
+boundary on both sides.
+
+**Still open.** All 9 remaining errors run the same direction, and
+`production_light_ai` (1/7) plus `adjacent_shipper` (4/6) account for 8
+of them — the same profile both times: real production history, shallow
+AI depth.
+
+**Correction to §3h.** That section called `client_communication` the
+root cause and implied re-weighting it was the fix. Half wrong. Tested
+across five aggregation schemes with cutoffs re-fitted each time, the
+spread was 0.843-0.861 — nothing, relative to run-to-run drift.
+Re-weighting buys nothing once the cutoffs are right. The low scores
+were never the problem in themselves; they only meant the cutoffs had to
+sit lower than a human eyeballing a 0-10 scale would guess. The agent's
+inability to separate `high` from `medium` is still a genuine defect,
+but a prompt-level one worth far less than it appeared.
+
+**A partial run was discarded.** An earlier attempt died 45/60 on an
+exhausted credit balance and scored 0.850 — a number that looked fine
+and was not comparable, because the failures clustered in two archetypes
+and skewed the class balance. `evaluate.py` now refuses to report
+quietly on a partial run and exits non-zero when nothing scored.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return
