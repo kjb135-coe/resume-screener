@@ -95,9 +95,9 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
     "src/resume_screener/adapters/mcp_server.py": "MCP server exposing five tools. The primary interface.",
     "src/resume_screener/adapters/cli.py": "Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.",
-    "src/resume_screener/adapters/api.py": "FastAPI backend: the recorded run's verdicts, plus live rubric generation. Does not screen.",
+    "src/resume_screener/adapters/api.py": "FastAPI backend: password gate, screening, reviewer decisions, resume PDFs, run stats.",
     "src/resume_screener/adapters/static": "Static assets for the web adapter.",
-    "src/resume_screener/adapters/static/index.html": "Two-tab page: candidates from the recorded run, and rubric preview. One file, no build step.",
+    "src/resume_screener/adapters/static/index.html": "The whole UI: login, screening, review queue, results. One file, no build step.",
     "src/resume_screener/prompts": "Prompt text kept out of code so it can be diffed and cached.",
     "src/resume_screener/prompts/rubric.md": "The hand-written rubric for docs/job_description.md. Default when no rubric is generated.",
     "src/resume_screener/prompts/rubric_generator.md": "Meta-prompt: the instructions for writing a rubric from a posting.",
@@ -118,6 +118,7 @@ DESCRIPTIONS: dict[str, str] = {
     # data/
     "data": "Generated corpus, its ground-truth labels, and the latest eval run.",
     "data/synthetic_resumes": "The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.",
+    "data/resume_pdfs": "Corpus resumes rendered to PDF by scripts/build_resume_pdfs.py, for the web viewer.",
     "data/labels.json": "Ground-truth label + archetype + target dimension levels per resume, written at generation time.",
     "data/eval_run.json": "Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.",
 
@@ -139,6 +140,7 @@ DESCRIPTIONS: dict[str, str] = {
     "scripts/generate_corpus.py": "Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.",
     "scripts/check_corpus.py": "Lints generated resumes for leaked or missing signals against their own archetype's constraints.",
     "scripts/evaluate.py": "Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.",
+    "scripts/build_resume_pdfs.py": "Renders every corpus resume to PDF with reportlab. Deterministic, no model calls.",
     "scripts/sweep_escalation.py": "Compares escalation policies on cost and pointless calls. No API calls.",
     "scripts/sweep_cutoffs.py": "Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.",
     "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
@@ -199,10 +201,11 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
 
         # Individually undescribed by design (see DESCRIPTIONS) -- 60
         # generated resumes with the same shape don't need 60 tree rows.
-        if entry.is_dir() and rel == "data/synthetic_resumes":
-            child_count = len(list(entry.iterdir()))
+        if entry.is_dir() and rel in ("data/synthetic_resumes", "data/resume_pdfs"):
+            child_count = len([c for c in entry.iterdir() if c.is_file()])
+            noun = "generated resumes" if rel.endswith("synthetic_resumes") else "rendered PDFs"
             sub_prefix = prefix + ("    " if last else "│   ")
-            lines.append(f"{sub_prefix}└── ({child_count} generated resumes, listed in data/labels.json)")
+            lines.append(f"{sub_prefix}└── ({child_count} {noun}, listed in data/labels.json)")
             continue
 
         if entry.is_dir():

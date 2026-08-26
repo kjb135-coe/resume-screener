@@ -334,7 +334,9 @@ async def _panel_agent(
         f"Your specific lens: {lens}\n\n"
         f"Candidate evidence:\n{evidence_json}\n\n"
         "Respond as JSON: {score (0-10), confidence (0-1), rationale}. "
-        "Keep the rationale to two sentences, quoting the evidence you relied on."
+        "The rationale must be ONE sentence that quotes verbatim the single "
+        "piece of resume evidence that decided your score. No preamble, no "
+        "summary of the resume, no second sentence."
     )
     response = await model.complete(
         _panel_prefix(job_description, rubric), user, max_tokens=PANEL_MAX_TOKENS
@@ -394,8 +396,11 @@ async def _arbitrate(
         "The scoring panel disagreed on this candidate. Read their rationales "
         "and resolve the disagreement into a single score.\n\n"
         f"Panel scores:\n{json.dumps([p.to_dict() for p in panel])}\n\n"
-        "Respond as JSON: {score (0-10), rationale}. Do not recommend a "
-        "hiring decision; score the evidence and the cutoffs will map it."
+        "Respond as JSON: {score (0-10), rationale}. The rationale must be "
+        "AT MOST TWO SENTENCES -- state what decided the score, quoting the "
+        "single most important piece of evidence. Do not restate each "
+        "panelist in turn. Do not recommend a hiring decision; score the "
+        "evidence and the cutoffs will map it."
     )
     response = await model.complete(
         _panel_prefix(job_description, rubric), user, max_tokens=ARBITER_MAX_TOKENS
@@ -460,7 +465,20 @@ async def screen_one(
     for _, panel_usage in panel_results:
         usage = usage + panel_usage
 
-    scores = [p.score for p in panel]
+    # A parse failure is missing data, not a score of zero. Averaging the
+    # placeholder 0.0 in fabricates a judgment no agent made: it drags the
+    # mean down, inflates the spread, and buys an arbiter call to resolve a
+    # "disagreement" with a value that was never an opinion. Observed on a
+    # real upload -- one failed agent turned 7.0/2.0 into a 7.0 spread and
+    # a 4.5 composite.
+    scored = [p for p in panel if not p.parse_failed]
+    if scored:
+        scores = [p.score for p in scored]
+    else:
+        # Every agent failed. There is nothing to average, and pretending
+        # otherwise would publish a confident 0.0 about a resume the panel
+        # never actually read. review_reason already flags this.
+        scores = [0.0]
     spread = max(scores) - min(scores) if len(scores) > 1 else 0.0
 
     if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores):

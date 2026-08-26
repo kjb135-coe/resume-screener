@@ -465,6 +465,58 @@ and was not comparable, because the failures clustered in two archetypes
 and skewed the class balance. `evaluate.py` now refuses to report
 quietly on a partial run and exits non-zero when nothing scored.
 
+### 3j. Reviewer workflow, PDFs, and an access gate — 2026-08-26
+
+**A parse failure was being scored as a zero.** `screen_one` averaged
+every panel score including the placeholder 0.0 left by an unreadable
+response. Caught on a real PDF upload: one agent failed, and the fake 0.0
+dragged a 7.0/2.0 panel to a 4.5 composite, manufactured a 7.0 "spread",
+and bought an arbiter call to resolve a disagreement with a value that
+was never an opinion. Failed agents are now excluded from the mean and
+the spread, still shown in the panel, and still flagged. If *every* agent
+fails the score is 0.0 and flagged, rather than pretending to average
+nothing.
+
+To be clear about the original cause: the PDF was fine. Three repeat runs
+of the same file parsed cleanly. This is the known intermittent Sonnet
+JSON failure (~2.2% per call, so ~6.5% odds across three agents), and the
+fix is about not letting one bad call fabricate a judgment.
+
+**Output length.** The arbiter now gets two sentences, panel agents one,
+and generated criteria are capped at 40 words with 25-word briefs. The
+old generated rubric ran ~150 words per dimension, which is more than
+anyone reads when there are three of them side by side. Verified live:
+the same nursing-adjacent posting now produces 30-37 word criteria and
+17-19 word briefs, and still catches the posting's exclusions.
+
+**The UI leads with the average, not the spread.** Each verdict says how
+it was reached — the mean of the agents that answered, and the cutoffs
+that mapped it. Spread is no longer surfaced as a headline number: it
+gates whether the arbiter runs and nothing a reader can act on, and
+leading with it made a wide spread look like a problem in itself. Review
+reasons name the actual scores ("the panel disagreed (9.0, 9.0, 2.0)")
+rather than an abstract spread figure.
+
+**Resume PDFs.** `scripts/build_resume_pdfs.py` renders all 60 with
+reportlab. **No model is involved** — it is a deterministic
+Markdown-to-PDF pass, so it costs nothing and reruns identically.
+reportlab is an optional `[pdf]` extra since only this script needs it.
+
+**Review queue.** Flagged candidates get their own tab: the panel notes,
+the resume as text and as PDF, and approve/reject with a note. Decisions
+are stored in `data/reviewer_decisions.json`, gitignored, and attached at
+read time rather than written over the model's output — the disagreement
+between human and model is the most useful data this produces, and
+overwriting the score would erase it.
+
+**Access gate.** A shared password (`APP_PASSWORD`, default `marco1`),
+implemented as middleware rather than per-route dependencies so a new
+endpoint is closed by default. Not authentication: there are no accounts,
+and it exists so a hosted link is not an open invoice, since every live
+screening call spends real money (PLAN 11, option 2). Compared with
+`hmac.compare_digest`, and a test asserts each new endpoint 401s
+anonymously.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return

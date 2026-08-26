@@ -51,6 +51,21 @@ JD = "We want an AI solutions engineer who ships agentic systems to production."
 
 @pytest.fixture
 def client() -> TestClient:
+    """A signed-in client.
+
+    Every endpoint except the login page sits behind the shared-password
+    middleware, so a fixture that skipped the login would only ever assert
+    that the gate returns 401.
+    """
+    c = TestClient(api.app)
+    response = c.post("/api/login", json={"password": api.ACCESS_PASSWORD})
+    assert response.status_code == 200, "test fixture failed to authenticate"
+    return c
+
+
+@pytest.fixture
+def anon() -> TestClient:
+    """A client that has not logged in."""
     return TestClient(api.app)
 
 
@@ -357,9 +372,15 @@ class TestSentenceSplitting:
 
 
 class TestBullets:
-    def test_at_most_two_bullets(self):
-        rationale = "One. Two. Three. Four."
-        assert len(bullets_from(rationale, RESUME)) == 2
+    def test_one_bullet_by_default(self):
+        """Three agents plus an arbiter is already four blocks of prose on
+        one screen. A reviewer working a queue reads the first line of each
+        or none of them.
+        """
+        assert len(bullets_from("One. Two. Three. Four.", RESUME)) == 1
+
+    def test_limit_is_still_configurable(self):
+        assert len(bullets_from("One. Two. Three. Four.", RESUME, limit=2)) == 2
 
     def test_quote_is_located_to_its_section(self):
         rationale = (
@@ -444,19 +465,27 @@ class TestBulletsOnTheRecordedRun:
 class TestReviewReason:
     def test_unreadable_response_takes_priority_over_escalation(self):
         reason = api._review_reason(
-            {"panel": [{"parse_failed": True}], "escalated": True, "panel_spread": 4.0}
+            {"panel": [{"parse_failed": True, "score": 0.0}],
+             "escalated": True, "panel_spread": 4.0}
         )
         assert "unreadable" in reason
 
-    def test_escalation_reports_the_spread(self):
-        reason = api._review_reason(
-            {"panel": [{"parse_failed": False}], "escalated": True, "panel_spread": 4.0}
-        )
-        assert "4.0" in reason
+    def test_escalation_names_the_scores_that_disagreed(self):
+        """"Spread of 4.0" is an abstraction; the scores themselves show a
+        reader which agent dissented."""
+        reason = api._review_reason({
+            "panel": [
+                {"parse_failed": False, "score": 9.0},
+                {"parse_failed": False, "score": 2.0},
+            ],
+            "escalated": True, "panel_spread": 7.0,
+        })
+        assert "9.0" in reason and "2.0" in reason
 
     def test_clean_agreeing_panel_needs_no_review(self):
         assert api._review_reason(
-            {"panel": [{"parse_failed": False}], "escalated": False, "panel_spread": 0.5}
+            {"panel": [{"parse_failed": False, "score": 7.0}],
+             "escalated": False, "panel_spread": 0.5}
         ) is None
 
 
@@ -660,3 +689,103 @@ class TestRubricForPosting:
         assert first is second
         assert len(calls) == 1
         api._rubric_by_fingerprint.clear()
+
+
+class TestAccessGate:
+    """The password is not authentication -- there are no accounts. It
+    exists so a hosted link is not an open invoice, since every live
+    screening call spends real money.
+    """
+
+    def test_api_is_closed_without_a_session(self, anon):
+        assert anon.get("/api/results").status_code == 401
+
+    def test_the_login_page_itself_is_reachable(self, anon):
+        assert anon.get("/").status_code == 200
+
+    def test_health_stays_open_for_uptime_checks(self, anon):
+        assert anon.get("/health").status_code == 200
+
+    def test_wrong_password_is_rejected(self, anon):
+        assert anon.post("/api/login", json={"password": "wrong"}).status_code == 401
+
+    def test_correct_password_opens_the_api(self, anon):
+        assert anon.post("/api/login", json={"password": api.ACCESS_PASSWORD}).status_code == 200
+        assert anon.get("/api/results").status_code == 200
+
+    def test_logout_closes_it_again(self, client):
+        assert client.get("/api/results").status_code == 200
+        client.post("/api/logout")
+        assert client.get("/api/results").status_code == 401
+
+    def test_new_endpoints_are_closed_by_default(self, anon):
+        """The gate is a middleware, not a per-route dependency, so a route
+        added without thinking about auth is unreachable rather than public.
+        """
+        for path in ("/api/stats", "/api/decisions", "/api/default-jd",
+                     "/api/resume-pdf/anything.md"):
+            assert anon.get(path).status_code == 401, path
+
+
+class TestDecisions:
+    @pytest.fixture(autouse=True)
+    def isolate(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(api, "DECISIONS_JSON", tmp_path / "decisions.json")
+
+    def test_records_and_returns_a_decision(self, client):
+        body = client.post("/api/decision", json={
+            "file": "x.md", "decision": "approve", "note": "strong",
+        }).json()
+        assert body["decisions"]["x.md"]["decision"] == "approve"
+        assert body["decisions"]["x.md"]["note"] == "strong"
+
+    def test_decision_survives_a_reread(self, client):
+        client.post("/api/decision", json={"file": "x.md", "decision": "reject"})
+        assert client.get("/api/decisions").json()["x.md"]["decision"] == "reject"
+
+    def test_clear_removes_it(self, client):
+        client.post("/api/decision", json={"file": "x.md", "decision": "approve"})
+        client.post("/api/decision", json={"file": "x.md", "decision": "clear"})
+        assert client.get("/api/decisions").json() == {}
+
+    def test_invalid_decision_is_refused(self, client):
+        response = client.post("/api/decision", json={"file": "x.md", "decision": "maybe"})
+        assert response.status_code == 422
+
+    def test_a_decision_never_overwrites_the_model_score(self, client):
+        """The value of a review queue is the disagreement between human and
+        model. Storing the decision on top of the score would erase it.
+        """
+        target = client.get("/api/results").json()["candidates"][0]
+        client.post("/api/decision", json={"file": target["file"], "decision": "reject"})
+
+        after = next(c for c in client.get("/api/results").json()["candidates"]
+                     if c["file"] == target["file"])
+        assert after["score"] == target["score"]
+        assert after["recommendation"] == target["recommendation"]
+        assert after["reviewer"]["decision"] == "reject"
+
+
+class TestResumePdf:
+    def test_serves_a_generated_pdf(self, client):
+        response = client.get("/api/resume-pdf/production_generalist__rafael_duarte.md")
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/pdf"
+        assert response.content[:4] == b"%PDF"
+
+    @pytest.mark.parametrize("attack", ["../../.env", "....//.env", "labels.json"])
+    def test_refuses_to_serve_anything_outside_the_pdf_directory(self, client, attack):
+        assert client.get(f"/api/resume-pdf/{attack}").status_code == 404
+
+
+class TestStats:
+    def test_reports_the_run_and_review_progress(self, client):
+        body = client.get("/api/stats").json()
+        assert body["run"]["n"] == 60
+        assert 0 <= body["run"]["macro_f1"] <= 1
+        assert set(body["verdicts"]) == {"advance", "hold", "reject"}
+        assert body["review"]["flagged"] >= body["review"]["reviewed"]
+
+    def test_archetype_breakdown_is_sorted_worst_first(self, client):
+        rows = client.get("/api/stats").json()["by_archetype"]
+        assert rows == sorted(rows, key=lambda r: r["accuracy"])

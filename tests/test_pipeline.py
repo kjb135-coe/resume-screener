@@ -568,3 +568,71 @@ class TestPerModelUsage:
         verdict = await screen_one(FIXTURE, JD, models)
 
         assert set(verdict.usage.by_model) == {"t", "p", "a"}
+
+
+class TestParseFailureIsNotAZero:
+    """A failed parse is missing data, not a score of zero.
+
+    Observed on a real PDF upload: one agent's response was unreadable, and
+    averaging its placeholder 0.0 with a 7.0 and a 2.0 produced a 4.5
+    composite and a 7.0 "spread" that bought an arbiter call. None of that
+    reflected a judgment any agent made.
+    """
+
+    BROKEN = "I'm sorry, I can't help with that."
+
+    def _mixed(self, good_scores: list[float]) -> dict:
+        responses = [panel_json(s) for s in good_scores] + [self.BROKEN]
+        return {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel(responses),
+            "arbiter": FakeModel([arbiter_json(5.0)]),
+        }
+
+    async def test_failed_agent_is_excluded_from_the_average(self):
+        models = self._mixed([8.0, 6.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        # mean of the two that answered, not (8 + 6 + 0) / 3
+        assert verdict.score == pytest.approx(7.0)
+
+    async def test_failed_agent_does_not_inflate_the_spread(self):
+        models = self._mixed([8.0, 6.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert verdict.panel_spread == pytest.approx(2.0)
+
+    async def test_failed_agent_does_not_buy_an_arbiter_call(self):
+        """The 0.0 used to manufacture a disagreement out of nothing."""
+        models = self._mixed([8.0, 7.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert not verdict.escalated
+        assert models["arbiter"].calls == []
+
+    async def test_the_failure_is_still_flagged_for_a_human(self):
+        """Excluding it must not also hide it."""
+        models = self._mixed([8.0, 6.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert verdict.review_reason is not None
+        assert "unreadable" in verdict.review_reason
+
+    async def test_the_failed_agent_still_appears_in_the_panel(self):
+        models = self._mixed([8.0, 6.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        failed = [p for p in verdict.panel_scores if p.parse_failed]
+        assert len(failed) == 1, "a reviewer needs to see that an agent failed"
+
+    async def test_every_agent_failing_does_not_publish_a_confident_zero(self):
+        models = {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel([self.BROKEN]),
+            "arbiter": FakeModel([arbiter_json(5.0)]),
+        }
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert verdict.score == 0.0
+        assert verdict.review_reason is not None
+        assert not verdict.escalated, "nothing to arbitrate between"

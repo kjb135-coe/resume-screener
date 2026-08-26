@@ -27,6 +27,10 @@ dev = [
 local = [
     "ollama>=0.4.0",
 ]
+# Only scripts/build_resume_pdfs.py needs this, and only once.
+pdf = [
+    "reportlab>=4.0.0",
+]
 
 [project.scripts]
 resume-screener = "resume_screener.adapters.cli:app"

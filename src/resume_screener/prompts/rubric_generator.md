@@ -38,17 +38,28 @@ Respond as JSON, and nothing else:
 ```json
 {
   "role_title": "short human-readable role name, from the posting",
-  "summary": "one or two sentences on what profile this posting wants, and what it does not want",
+  "summary": "ONE sentence: what profile this posting wants, and what it does not",
   "dimensions": [
     {
       "name": "snake_case_identifier",
       "title": "Short title case name",
-      "criteria": "2-4 sentences the panel reads as the scoring standard for this dimension. Quote the posting's own words where they are decisive. Say what scores low as well as what scores high.",
-      "lens": "2-3 sentences addressed directly to the single agent that owns this dimension, in the second person: 'You judge whether...'. This is that agent's whole brief."
+      "criteria": "AT MOST 40 WORDS. What separates a high score from a low one, quoting the posting's own decisive words. No 'high/mid/low scores show...' enumeration.",
+      "lens": "AT MOST 25 WORDS, second person: 'You judge whether...'. One instruction, not a checklist."
     }
   ]
 }
 ```
+
+## Length is a hard requirement, not a style note
+
+These strings are read by a human in a UI, next to two others just like
+them. A reader who has to work through 150 words per dimension to learn
+what the agent is looking for will not read any of them.
+
+Write the shortest text that would let a careful reader score a resume
+the same way you would. If a clause could be removed and a scorer would
+still reach the same answer, remove it. Do not pad with restatements of
+the posting; the agent is given the posting separately.
 
 `name` must be a valid snake_case identifier, unique across the three,
 and stable enough to read in a report — it is used as the agent's name

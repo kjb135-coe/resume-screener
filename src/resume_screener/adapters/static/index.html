@@ -6,630 +6,905 @@
 <title>Resume Screener</title>
 <style>
   :root {
-    --bg: #ffffff; --fg: #16181d; --muted: #5d6470; --line: #dfe3ea;
-    --panel: #f6f8fa; --accent: #2f5bd0; --err: #b3261e;
-    --advance: #1a7f4b; --hold: #9a6b00; --reject: #b3261e;
-    --advance-bg: #e6f4ec; --hold-bg: #fbf1da; --reject-bg: #fbe9e7;
+    --bg:#fbfbfa; --surface:#fff; --fg:#1c1c1a; --muted:#6b6b66; --faint:#96968f;
+    --line:#e6e5e1; --line-strong:#d5d4cf;
+    --accent:#2f5bd0; --accent-soft:#eef2fd;
+    --pass:#1a7f4b; --pass-bg:#e9f5ee;
+    --mid:#8a6410; --mid-bg:#fbf2df;
+    --fail:#a83226; --fail-bg:#fbecea;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(20,20,18,.05), 0 1px 8px rgba(20,20,18,.04);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #12141a; --fg: #e7e9ee; --muted: #99a1af; --line: #2a2f3a;
-      --panel: #1a1d25; --accent: #7d9bf0; --err: #f2857c;
-      --advance: #4ad18b; --hold: #e0b23c; --reject: #f2857c;
-      --advance-bg: #102b1e; --hold-bg: #2d2411; --reject-bg: #2e1714;
+      --bg:#141414; --surface:#1b1b1a; --fg:#eceae5; --muted:#9d9d96; --faint:#77776f;
+      --line:#2b2b29; --line-strong:#3a3a37;
+      --accent:#7f9df5; --accent-soft:#1c2438;
+      --pass:#57cf94; --pass-bg:#12291d;
+      --mid:#dfb352; --mid-bg:#2b2413;
+      --fail:#ef8377; --fail-bg:#2d1815;
+      --shadow:0 1px 2px rgba(0,0,0,.3);
     }
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--fg);
-    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--fg);
+    font:15px/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+    -webkit-font-smoothing:antialiased;
   }
-  header {
-    border-bottom: 1px solid var(--line); padding: 13px 22px;
-    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
-  }
-  h1 { font-size: 16px; margin: 0; font-weight: 700; }
-  header .tag { font-size: 12.5px; color: var(--muted); }
-  .runmeta { margin-left: auto; font-size: 12.5px; color: var(--muted); }
-  main { padding: 22px; max-width: 1400px; margin: 0 auto; }
-  [hidden] { display: none !important; }
+  [hidden]{display:none!important}
+  button{font:inherit;cursor:pointer}
+  h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.01em}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em}
 
-  /* ---------- step 1: the posting ---------- */
-  .step { margin-bottom: 26px; }
-  .steplabel {
-    font-size: 11.5px; text-transform: uppercase; letter-spacing: .7px;
-    color: var(--muted); font-weight: 700; margin-bottom: 8px;
+  /* ---------- login ---------- */
+  #login{min-height:100vh;display:grid;place-items:center;padding:24px}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:32px;max-width:380px;width:100%;box-shadow:var(--shadow);
   }
-  textarea {
-    width: 100%; min-height: 150px; padding: 13px; border-radius: 9px;
-    border: 1px solid var(--line); background: var(--panel); color: var(--fg);
-    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical;
+  .card h1{font-size:19px;margin-bottom:6px}
+  .card p{color:var(--muted);font-size:14px;margin:0 0 20px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+  input[type=password],input[type=text]{
+    font:inherit;padding:10px 12px;border:1px solid var(--line-strong);
+    border-radius:8px;background:var(--bg);color:var(--fg);width:100%;
   }
-  .go { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-  .go button {
-    background: var(--accent); color: #fff; border: 0; border-radius: 8px;
-    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  input:focus-visible,textarea:focus-visible,button:focus-visible{
+    outline:2px solid var(--accent);outline-offset:1px;
   }
-  .go button:disabled { opacity: .5; cursor: default; }
-  .go .ghost { background: none; color: var(--muted); border: 1px solid var(--line); }
-  .go select {
-    background: var(--panel); color: var(--fg); border: 1px solid var(--line);
-    border-radius: 8px; padding: 9px 11px; font-size: 13.5px;
+  .btn{
+    background:var(--accent);color:#fff;border:0;border-radius:8px;
+    padding:10px 18px;font-weight:600;font-size:14px;
   }
-  .status { font-size: 13px; color: var(--muted); }
-  .status.error { color: var(--err); }
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line-strong)}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn.pass{background:var(--pass)} .btn.fail{background:var(--fail)}
+  .btn.sm{padding:6px 12px;font-size:13px}
 
-  .bar { height: 5px; background: var(--panel); border-radius: 3px; overflow: hidden;
-         margin-top: 12px; border: 1px solid var(--line); }
-  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
-
-  /* ---------- step 2: criteria ---------- */
-  .dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
-  .dim { border: 1px solid var(--line); border-top: 3px solid var(--accent);
-         border-radius: 8px; padding: 14px 16px; background: var(--panel); }
-  .dim h4 { margin: 0 0 2px; font-size: 14.5px; }
-  .dim code { font-size: 11.5px; color: var(--muted); }
-  .dim p { margin: 9px 0 0; font-size: 13px; }
-  .dim .lens { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 9px; font-size: 12.5px; }
-  .dim .lens b { display: block; color: var(--muted); font-size: 10.5px;
-                 text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
-
-  /* ---------- step 3: results ---------- */
-  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  .stat { border: 1px solid var(--line); border-radius: 9px; padding: 9px 15px;
-          background: var(--panel); min-width: 104px; }
-  .stat b { display: block; font-size: 20px; line-height: 1.25; }
-  .stat span { font-size: 11.5px; color: var(--muted); }
-  .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 15px; }
-  .filters button {
-    border: 1px solid var(--line); background: var(--bg); color: var(--muted);
-    border-radius: 999px; padding: 5px 14px; font-size: 13px; cursor: pointer;
+  /* ---------- shell ---------- */
+  header{
+    position:sticky;top:0;z-index:20;background:var(--surface);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;
+    gap:18px;padding:0 20px;height:54px;
   }
-  .filters button[aria-pressed="true"] {
-    background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
+  header .brand{font-weight:650;font-size:15px;white-space:nowrap}
+  nav{display:flex;gap:2px;margin-left:6px}
+  nav button{
+    background:none;border:0;padding:7px 13px;border-radius:7px;
+    color:var(--muted);font-size:14px;font-weight:500;
   }
-  .split { display: grid; grid-template-columns: minmax(290px, 390px) 1fr; gap: 18px; align-items: start; }
-  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
-  .list { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
-  .row { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
-         padding: 11px 14px; background: var(--bg); border: 0;
-         border-bottom: 1px solid var(--line); cursor: pointer; color: var(--fg); font: inherit; }
-  .row:last-child { border-bottom: 0; }
-  .row:hover { background: var(--panel); }
-  .row[aria-current="true"] { background: var(--panel); box-shadow: inset 3px 0 0 var(--accent); }
-  .row .who { flex: 1; min-width: 0; }
-  .row .nm { font-weight: 600; font-size: 14px; }
-  .row .arch { font-size: 11.5px; color: var(--muted); text-transform: capitalize; }
-  .row .sc { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; }
-  .pill { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-          padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
-  .pill.advance { background: var(--advance-bg); color: var(--advance); }
-  .pill.hold    { background: var(--hold-bg);    color: var(--hold); }
-  .pill.reject  { background: var(--reject-bg);  color: var(--reject); }
-  .flag { font-size: 13px; color: var(--hold); }
+  nav button:hover{color:var(--fg)}
+  nav button[aria-selected=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  header .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+  header .meta{font-size:12.5px;color:var(--faint);white-space:nowrap}
+  .linkish{background:none;border:0;color:var(--muted);font-size:13px;padding:4px}
+  .linkish:hover{color:var(--fg);text-decoration:underline}
 
-  .detail { border: 1px solid var(--line); border-radius: 11px; padding: 20px 22px; background: var(--panel); }
-  .detail h2 { margin: 0 0 3px; font-size: 20px; }
-  .detail .sub { color: var(--muted); font-size: 13px; margin: 0 0 15px; text-transform: capitalize; }
-  .headline { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
-  .headline .big { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .truth { font-size: 12px; color: var(--muted); }
-  .notice { border-left: 3px solid var(--hold); background: var(--hold-bg); color: var(--fg);
-            padding: 10px 13px; border-radius: 0 7px 7px 0; font-size: 13.5px; margin-bottom: 15px; }
-  h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
-       margin: 19px 0 9px; font-weight: 700; }
-  .agent { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
-           margin-bottom: 9px; background: var(--bg); }
-  .agent .top { display: flex; align-items: baseline; gap: 9px; margin-bottom: 5px; flex-wrap: wrap; }
-  .agent code { font-size: 12px; color: var(--muted); }
-  .agent .n { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .agent .conf { font-size: 11.5px; color: var(--muted); }
-  .agent p { margin: 0; font-size: 13.5px; }
-  .bad { color: var(--err); font-size: 11.5px; font-weight: 600; }
-  .agent ul { margin: 0; padding-left: 17px; }
-  .agent li { font-size: 13.5px; margin-bottom: 7px; }
-  .agent li:last-child { margin-bottom: 0; }
-  .cites { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
-  .cite {
-    font-size: 11px; border: 1px solid var(--line); background: var(--bg);
-    color: var(--muted); border-radius: 999px; padding: 2px 9px; cursor: pointer;
-    font-family: inherit; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap;
+  main{max-width:1360px;margin:0 auto;padding:24px 20px 64px}
+  .lede{color:var(--muted);font-size:14px;margin:0 0 18px;max-width:70ch}
+
+  /* ---------- step 1 ---------- */
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:9px;
   }
-  .cite:hover { border-color: var(--accent); color: var(--accent); }
-  mark { background: rgba(224,178,60,.32); color: inherit; border-radius: 3px; padding: 0 2px; }
-  mark.on { background: rgba(224,178,60,.75); }
-  blockquote { margin: 0; padding: 11px 14px; border-left: 3px solid var(--accent);
-               background: var(--bg); border-radius: 0 7px 7px 0; font-size: 13.5px; white-space: pre-wrap; }
-  details.resume { margin-top: 18px; }
-  details.resume summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-  pre.resume { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px;
-               overflow-x: auto; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; margin-top: 10px; }
-  .empty { color: var(--muted); padding: 40px 0; text-align: center; }
+  section.step{margin-bottom:30px}
+  textarea{
+    width:100%;min-height:132px;padding:13px;border-radius:var(--radius);
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--fg);
+    font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;
+  }
+  .actions{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  select{
+    font:inherit;font-size:13.5px;padding:9px 11px;border-radius:8px;
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--fg);
+  }
+  label.upload{
+    display:inline-block;border:1px solid var(--line-strong);border-radius:8px;
+    padding:9px 16px;font-size:14px;font-weight:600;background:transparent;
+  }
+  label.upload:hover{border-color:var(--accent);color:var(--accent)}
+  label.upload.busy{opacity:.5;pointer-events:none}
+  .status{font-size:13px;color:var(--muted)}
+  .status.err{color:var(--fail)}
+  .bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:12px}
+  .bar>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+
+  /* ---------- criteria ---------- */
+  .criteria{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+  .crit{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 16px;box-shadow:var(--shadow);
+  }
+  .crit h4{font-size:14px;margin-bottom:3px}
+  .crit code{color:var(--faint);font-size:11.5px}
+  .crit p{margin:9px 0 0;font-size:13px;color:var(--fg)}
+  .crit .brief{
+    margin-top:10px;padding-top:9px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);
+  }
+  .crit .brief b{
+    display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:3px;font-weight:700;
+  }
+
+  /* ---------- stats ---------- */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:16px}
+  .tile{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 15px;box-shadow:var(--shadow);
+  }
+  .tile b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.2}
+  .tile span{font-size:11.5px;color:var(--muted)}
+  .tile.accent b{color:var(--accent)}
+
+  .panel-box{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;
+  }
+  .panel-box h3{font-size:14px;margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.03em;text-transform:uppercase}
+  tr:last-child td{border-bottom:0}
+  td.num{font-variant-numeric:tabular-nums;text-align:right}
+  .meter{height:6px;background:var(--line);border-radius:3px;overflow:hidden;min-width:80px}
+  .meter>div{height:100%;background:var(--accent)}
+
+  /* ---------- queue ---------- */
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .filters button{
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);
+    border-radius:999px;padding:5px 13px;font-size:13px;
+  }
+  .filters button:hover{color:var(--fg)}
+  .filters button[aria-pressed=true]{background:var(--fg);border-color:var(--fg);color:var(--bg);font-weight:600}
+  .split{display:grid;grid-template-columns:minmax(280px,340px) 1fr;gap:16px;align-items:start}
+  @media(max-width:920px){.split{grid-template-columns:1fr}}
+  .list{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;box-shadow:var(--shadow);max-height:74vh;overflow-y:auto;
+  }
+  .row{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+    padding:11px 14px;background:none;border:0;border-bottom:1px solid var(--line);
+    color:var(--fg);
+  }
+  .row:last-child{border-bottom:0}
+  .row:hover{background:var(--bg)}
+  .row[aria-current=true]{background:var(--accent-soft);box-shadow:inset 2px 0 0 var(--accent)}
+  .row .who{flex:1;min-width:0}
+  .row .nm{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .sub{font-size:11.5px;color:var(--faint);text-transform:capitalize}
+  .row .sc{font-variant-numeric:tabular-nums;font-weight:650;font-size:13.5px}
+  .chip{
+    font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:3px 7px;border-radius:5px;white-space:nowrap;
+  }
+  .chip.advance{background:var(--pass-bg);color:var(--pass)}
+  .chip.hold{background:var(--mid-bg);color:var(--mid)}
+  .chip.reject{background:var(--fail-bg);color:var(--fail)}
+  .chip.solid{background:var(--accent);color:#fff}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--mid);flex:none}
+  .dot.done{background:var(--pass)}
+
+  /* ---------- detail ---------- */
+  .detail{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px;box-shadow:var(--shadow);
+  }
+  .detail .top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .detail h2{font-size:20px}
+  .detail .sub{color:var(--muted);font-size:13px;text-transform:capitalize;margin-top:2px}
+  .score{display:flex;align-items:baseline;gap:9px;margin:14px 0 4px}
+  .score b{font-size:30px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .score .of{color:var(--faint);font-size:14px}
+  .how{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .flagbox{
+    background:var(--mid-bg);border-left:3px solid var(--mid);
+    padding:11px 14px;border-radius:0 8px 8px 0;font-size:13px;margin-bottom:16px;
+  }
+  .sechead{
+    font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--faint);margin:20px 0 9px;
+  }
+  .agent{border:1px solid var(--line);border-radius:9px;padding:12px 14px;margin-bottom:8px;background:var(--bg)}
+  .agent .hd{display:flex;align-items:baseline;gap:9px;margin-bottom:6px;flex-wrap:wrap}
+  .agent .n{font-weight:650;font-variant-numeric:tabular-nums;min-width:30px}
+  .agent .who2{font-size:12.5px;color:var(--muted)}
+  .agent .conf{font-size:11.5px;color:var(--faint);margin-left:auto}
+  .agent p{margin:0;font-size:13.5px}
+  .warn{color:var(--fail);font-size:11px;font-weight:700;letter-spacing:.04em}
+  .cites{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .cite{
+    font-size:11px;border:1px solid var(--line-strong);background:var(--surface);
+    color:var(--muted);border-radius:999px;padding:2px 9px;max-width:100%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .cite:hover{border-color:var(--accent);color:var(--accent)}
+  blockquote{
+    margin:0;padding:11px 14px;background:var(--bg);border-left:3px solid var(--accent);
+    border-radius:0 8px 8px 0;font-size:13.5px;
+  }
+  .decide{
+    display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:8px;
+    padding:14px;background:var(--bg);border:1px solid var(--line);border-radius:9px;
+  }
+  .decide input[type=text]{flex:1;min-width:170px}
+  .verdictline{font-size:13px;color:var(--muted);width:100%}
+  .verdictline b{color:var(--fg)}
+  details{margin-top:18px}
+  summary{cursor:pointer;color:var(--muted);font-size:13px;user-select:none}
+  summary:hover{color:var(--fg)}
+  pre.resume{
+    background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:14px;
+    overflow-x:auto;font-size:12.5px;line-height:1.6;white-space:pre-wrap;margin-top:10px;
+  }
+  mark{background:rgba(224,178,60,.3);color:inherit;border-radius:3px;padding:0 2px}
+  mark.on{background:rgba(224,178,60,.75)}
+  iframe.pdf{width:100%;height:min(78vh,900px);border:1px solid var(--line);border-radius:9px;margin-top:10px;background:#fff}
+  .empty{color:var(--faint);text-align:center;padding:44px 16px;font-size:14px}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Resume Screener</h1>
-  <span class="tag">Submit a posting. It writes the scoring criteria, then screens resumes against them.</span>
-  <div class="runmeta" id="runmeta"></div>
-</header>
-
-<main>
-  <!-- step 1 -->
-  <section class="step">
-    <div class="steplabel">Step 1 &middot; Job posting</div>
-    <textarea id="jd" spellcheck="false" placeholder="Paste a job posting…"></textarea>
-    <div class="go">
-      <button id="run">Screen resumes</button>
-      <select id="count" title="How many resumes to screen"></select>
-      <button class="ghost" id="criteria-only" title="One call, a few cents. No screening.">Criteria only</button>
-      <button class="ghost" id="reset">Reset to example</button>
-      <label class="ghost upload" id="upload-label" title="PDF, Word, Markdown or text. Nothing is stored.">
-        Upload a resume
-        <input type="file" id="upload" accept=".pdf,.docx,.md,.txt" hidden />
-      </label>
-      <span class="status" id="status"></span>
+<!-- ============ LOGIN ============ -->
+<div id="login" hidden>
+  <form class="card" id="login-form">
+    <h1>Resume Screener</h1>
+    <p>Enter the access password to continue.</p>
+    <div class="field">
+      <label for="pw">Password</label>
+      <input type="password" id="pw" autocomplete="current-password" />
     </div>
-    <div class="bar" id="barwrap" hidden><div id="bar"></div></div>
-  </section>
-
-  <!-- step 2 -->
-  <section class="step" id="step-criteria" hidden>
-    <div class="steplabel">Step 2 &middot; Scoring criteria written from that posting</div>
-    <div class="dims" id="dims"></div>
-  </section>
-
-  <!-- step 3 -->
-  <section class="step" id="step-results" hidden>
-    <div class="steplabel" id="results-label">Step 3 &middot; Results</div>
-    <div class="notice" id="ungraded-note" hidden></div>
-    <div class="stats" id="stats"></div>
-    <div class="filters" id="filters"></div>
-    <div class="split">
-      <div class="list" id="list"></div>
-      <div id="detail"></div>
+    <div class="actions">
+      <button class="btn" type="submit">Continue</button>
+      <span class="status err" id="login-status"></span>
     </div>
-  </section>
-</main>
+  </form>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" hidden>
+  <header>
+    <span class="brand">Resume Screener</span>
+    <nav>
+      <button id="tab-screen" aria-selected="true">Screen</button>
+      <button id="tab-queue" aria-selected="false">Review queue</button>
+      <button id="tab-stats" aria-selected="false">Results</button>
+    </nav>
+    <div class="right">
+      <span class="meta" id="headline"></span>
+      <button class="linkish" id="logout">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ---- SCREEN ---- -->
+    <div id="view-screen">
+      <p class="lede">Paste a job posting. The system writes three scoring criteria from it,
+        then screens resumes against those criteria and ranks them.</p>
+
+      <section class="step">
+        <div class="eyebrow">Step 1 — Job posting</div>
+        <textarea id="jd" spellcheck="false" placeholder="Paste the full job posting…"></textarea>
+        <div class="actions">
+          <button class="btn" id="run">Screen resumes</button>
+          <select id="count"></select>
+          <button class="btn ghost" id="criteria-only">Criteria only</button>
+          <button class="btn ghost" id="reset">Reset to example</button>
+          <label class="upload" id="upload-label">
+            Upload a resume
+            <input type="file" id="upload" accept=".pdf,.docx,.md,.txt" hidden />
+          </label>
+          <span class="status" id="status"></span>
+        </div>
+        <div class="bar" id="bar" hidden><div id="bar-fill"></div></div>
+      </section>
+
+      <section class="step" id="step-criteria" hidden>
+        <div class="eyebrow">Step 2 — Scoring criteria written from that posting</div>
+        <div class="criteria" id="criteria"></div>
+      </section>
+
+      <section class="step" id="step-results" hidden>
+        <div class="eyebrow" id="results-eyebrow">Step 3 — Results</div>
+        <div class="tiles" id="tiles"></div>
+        <div class="filters" id="filters"></div>
+        <div class="split">
+          <div class="list" id="list"></div>
+          <div id="detail"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ---- QUEUE ---- -->
+    <div id="view-queue" hidden>
+      <p class="lede">Candidates the system will not decide on its own. Read the notes,
+        open the resume, and record a verdict.</p>
+      <div class="tiles" id="queue-tiles"></div>
+      <div class="split">
+        <div class="list" id="queue-list"></div>
+        <div id="queue-detail"></div>
+      </div>
+    </div>
+
+    <!-- ---- STATS ---- -->
+    <div id="view-stats" hidden>
+      <p class="lede">The last full evaluation run, measured against the corpus's
+        ground-truth labels.</p>
+      <div id="stats-body"></div>
+    </div>
+  </main>
+</div>
 
 <script>
 const $ = (id) => document.getElementById(id);
-const FILTERS = [["all","All"],["advance","Advance"],["hold","Hold"],["reject","Reject"],["review","Needs review"]];
-let DATA = null, filter = "all", selected = null, polling = null;
+const CUTOFFS = { advance: 4.0, hold: 1.0 };
+let DATA = null, DECISIONS = {}, filter = "all", selected = null, qSelected = null, polling = null;
 
-function setStatus(text, isError) {
-  $("status").textContent = text;
-  $("status").className = isError ? "status error" : "status";
+/* ---------------- auth ---------------- */
+async function api(path, opts) {
+  const res = await fetch(path, opts);
+  if (res.status === 401) { showLogin(); throw new Error("auth"); }
+  return res;
 }
-function setBusy(busy) {
-  $("run").disabled = busy;
-  $("barwrap").hidden = !busy;
-  if (!busy) $("bar").style.width = "0%";
+function showLogin() { $("login").hidden = false; $("app").hidden = true; $("pw").focus(); }
+function showApp() { $("login").hidden = true; $("app").hidden = false; }
+
+$("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("login-status").textContent = "";
+  const res = await fetch("/api/login", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: $("pw").value }),
+  });
+  if (!res.ok) { $("login-status").textContent = "Wrong password."; return; }
+  $("pw").value = "";
+  showApp(); boot();
+});
+$("logout").addEventListener("click", async () => {
+  await fetch("/api/logout", { method: "POST" });
+  location.reload();
+});
+
+/* ---------------- tabs ---------------- */
+const VIEWS = { screen: "view-screen", queue: "view-queue", stats: "view-stats" };
+function showTab(which) {
+  for (const [k, id] of Object.entries(VIEWS)) {
+    $(id).hidden = k !== which;
+    $(`tab-${k}`).setAttribute("aria-selected", String(k === which));
+  }
+  if (which === "queue") renderQueue();
+  if (which === "stats") loadStats();
+}
+for (const k of Object.keys(VIEWS)) $(`tab-${k}`).addEventListener("click", () => showTab(k));
+
+/* ---------------- helpers ---------------- */
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const chip = (rec) => el("span", `chip ${rec}`, rec);
+
+/* How the verdict was reached, in the language the pipeline actually uses:
+   the average of the panel, mapped by the cutoffs. Spread is deliberately
+   not shown -- it no longer decides anything a reader can act on, it only
+   gates whether the arbiter ran, and leading with it made people think a
+   wide spread was itself a problem. */
+function howDecided(c) {
+  const scored = c.panel.filter((a) => !a.parse_failed);
+  const avg = scored.length ? scored.reduce((s, a) => s + a.score, 0) / scored.length : 0;
+  const dropped = c.panel.length - scored.length;
+  const basis = c.escalated
+    ? `Arbiter score after the panel split (panel average ${avg.toFixed(1)})`
+    : `Average of ${scored.length} agent score${scored.length === 1 ? "" : "s"} (${scored.map((a) => a.score.toFixed(1)).join(" · ")})`;
+  const note = dropped
+    ? ` — ${dropped} excluded as unreadable`
+    : "";
+  return `${basis}${note}. Cutoffs: ≥${CUTOFFS.advance} advance · ≥${CUTOFFS.hold} hold · below reject.`;
 }
 
-/* ---------- criteria ---------- */
+/* ---------------- criteria ---------------- */
 function renderCriteria(rubric) {
-  if (!rubric) { $("step-criteria").hidden = true; return; }
-  $("dims").replaceChildren(...rubric.dimensions.map((d, i) => {
-    const el = document.createElement("div"); el.className = "dim";
-    const h = document.createElement("h4"); h.textContent = `${i + 1}. ${d.title}`;
-    const code = document.createElement("code"); code.textContent = d.name;
-    const p = document.createElement("p"); p.textContent = d.criteria;
-    if (!d.criteria) p.hidden = true;
-    const lens = document.createElement("div"); lens.className = "lens";
-    const b = document.createElement("b"); b.textContent = "Agent brief";
-    const t = document.createElement("span"); t.textContent = d.lens;
-    lens.append(b, t);
-    el.append(h, code, p, lens);
-    return el;
+  if (!rubric) return;
+  $("criteria").replaceChildren(...rubric.dimensions.map((d, i) => {
+    const box = el("div", "crit");
+    box.append(el("h4", null, `${i + 1}. ${d.title}`), el("code", null, d.name),
+               el("p", null, d.criteria));
+    const brief = el("div", "brief");
+    brief.append(el("b", null, "Agent brief"), el("span", null, d.lens));
+    box.append(brief);
+    return box;
   }));
   $("step-criteria").hidden = false;
 }
 
-/* ---------- results ---------- */
+/* ---------------- results list ---------------- */
+const FILTERS = [["all","All"],["advance","Advance"],["hold","Hold"],["reject","Reject"],["review","Needs review"]];
 function visible() {
   if (!DATA) return [];
   if (filter === "all") return DATA.candidates;
   if (filter === "review") return DATA.candidates.filter((c) => c.needs_human_review);
   return DATA.candidates.filter((c) => c.recommendation === filter);
 }
-function renderStats() {
+function renderTiles() {
   const s = DATA.summary;
-  const tiles = [[s.advance,"Advance"],[s.hold,"Hold"],[s.reject,"Reject"],
-                 [s.needs_human_review,"Need a human"],[s.n,"Screened"]];
-  if (s.agreement != null) tiles.push([`${Math.round(s.agreement * 100)}%`, "Match labels"]);
-  $("stats").replaceChildren(...tiles.map(([n, label]) => {
-    const d = document.createElement("div"); d.className = "stat";
-    const b = document.createElement("b"); b.textContent = n;
-    const sp = document.createElement("span"); sp.textContent = label;
-    d.append(b, sp); return d;
+  $("tiles").replaceChildren(...[
+    [s.advance,"Advance"],[s.hold,"Hold"],[s.reject,"Reject"],
+    [s.needs_human_review,"Needs review"],[s.n,"Screened"],
+  ].map(([n,label]) => {
+    const t = el("div","tile"); t.append(el("b",null,n), el("span",null,label)); return t;
   }));
-  $("results-label").textContent = DATA.source === "recorded"
-    ? `Step 3 · Results — previously recorded run of all ${s.n}`
-    : `Step 3 · Results — ${s.n} screened just now`;
-
-  // The corpus is 60 AI-engineer resumes. Screened against an unrelated
-  // posting they will all correctly score near zero, and the labels say
-  // nothing about that posting, so accuracy is deliberately not reported.
-  const note = $("ungraded-note");
-  if (DATA.source === "live" && DATA.graded === false) {
-    note.textContent =
-      "These 60 resumes are AI-engineer resumes, and the ground-truth labels " +
-      "describe the bundled AI Solutions Engineer posting only. Against a " +
-      "different posting the verdicts can be perfectly correct while the " +
-      "labels say nothing about them, so no accuracy figure is shown. " +
-      "Expect most candidates to score low: that is the system working.";
-    note.hidden = false;
-  } else {
-    note.hidden = true;
-  }
-  $("runmeta").textContent = DATA.source === "recorded" && s.macro_f1 != null
-    ? `recorded run · macro-F1 ${s.macro_f1} · $${s.cost_total} for ${s.n}`
-    : "";
 }
 function renderFilters() {
-  $("filters").replaceChildren(...FILTERS.map(([key, label]) => {
-    const b = document.createElement("button");
-    const n = key === "all" ? DATA.candidates.length
-            : key === "review" ? DATA.summary.needs_human_review : DATA.summary[key];
-    b.textContent = `${label} (${n})`;
-    b.setAttribute("aria-pressed", String(filter === key));
-    b.addEventListener("click", () => { filter = key; renderList(); renderFilters(); });
+  $("filters").replaceChildren(...FILTERS.map(([key,label]) => {
+    const n = key==="all" ? DATA.candidates.length
+            : key==="review" ? DATA.summary.needs_human_review : DATA.summary[key];
+    const b = el("button", null, `${label} (${n ?? 0})`);
+    b.setAttribute("aria-pressed", String(filter===key));
+    b.addEventListener("click", () => { filter=key; renderFilters(); renderList(); });
     return b;
   }));
+}
+function candidateRow(c, onPick, current) {
+  const b = el("button","row");
+  b.setAttribute("aria-current", String(current === c.file));
+  const who = el("div","who");
+  who.append(el("div","nm",c.name), el("div","sub",(c.archetype||"uploaded").replace(/_/g," ")));
+  b.append(who, el("span","sc",c.score.toFixed(1)), chip(c.recommendation));
+  if (c.uploaded) b.append(el("span","chip solid","yours"));
+  if (c.needs_human_review) {
+    const d = el("span", `dot${DECISIONS[c.file] ? " done" : ""}`);
+    d.title = DECISIONS[c.file] ? `Reviewed: ${DECISIONS[c.file].decision}` : c.review_reason;
+    b.append(d);
+  }
+  b.addEventListener("click", () => onPick(c));
+  return b;
 }
 function renderList() {
   const rows = visible();
-  if (!rows.length) {
-    $("list").replaceChildren(Object.assign(document.createElement("div"),
-      { className: "empty", textContent: "No candidates in this group." }));
+  if (!rows.length) { $("list").replaceChildren(el("div","empty","Nothing in this group.")); return; }
+  $("list").replaceChildren(...rows.map((c) =>
+    candidateRow(c, (x) => { selected = x.file; renderList(); renderDetail(x, $("detail")); }, selected)));
+}
+
+/* ---------------- detail ---------------- */
+function renderDetail(c, mount, opts = {}) {
+  mount.className = "detail";
+  mount.replaceChildren();
+
+  const top = el("div","top");
+  const left = el("div");
+  left.append(el("h2",null,c.name), el("div","sub",(c.archetype||"uploaded resume").replace(/_/g," ")));
+  top.append(left, chip(c.recommendation));
+  mount.append(top);
+
+  const score = el("div","score");
+  score.append(el("b",null,c.score.toFixed(1)), el("span","of","/ 10"));
+  if (c.expected) {
+    score.append(el("span","of", c.matches_ground_truth
+      ? `matches label (${c.expected})` : `⚠ label says ${c.expected}`));
+  }
+  mount.append(score, el("div","how", howDecided(c)));
+
+  if (c.review_reason) mount.append(el("div","flagbox", c.review_reason));
+
+  mount.append(el("div","sechead","Panel"));
+  for (const a of c.panel) {
+    const box = el("div","agent");
+    const hd = el("div","hd");
+    hd.append(el("span","n",a.score.toFixed(1)), el("code","who2",a.agent));
+    if (a.parse_failed) hd.append(el("span","warn","UNREADABLE — EXCLUDED"));
+    else hd.append(el("span","conf",`confidence ${a.confidence.toFixed(2)}`));
+    box.append(hd);
+
+    const bullets = a.bullets && a.bullets.length ? a.bullets : null;
+    if (bullets) {
+      for (const b of bullets) {
+        box.append(el("p",null,b.text));
+        if (b.citations && b.citations.length) {
+          const cites = el("div","cites");
+          for (const cit of b.citations) {
+            const ch = el("button","cite",`§ ${cit.section}`);
+            ch.type = "button"; ch.title = cit.quote;
+            ch.addEventListener("click", () => jumpToQuote(cit.quote));
+            cites.append(ch);
+          }
+          box.append(cites);
+        }
+      }
+    } else {
+      box.append(el("p",null,a.rationale));
+    }
+    mount.append(box);
+  }
+
+  if (c.escalated) {
+    mount.append(el("div","sechead","Arbiter ruling"), el("blockquote",null,c.rationale));
+  }
+
+  if (opts.decide) mount.append(decisionBlock(c, mount));
+
+  const det = el("details"); det.id = "resume-details";
+  const n = (c.cited_quotes||[]).length;
+  det.append(el("summary",null, n ? `Resume text — ${n} cited line${n===1?"":"s"} highlighted` : "Resume text"));
+  const pre = el("pre","resume"); pre.id = "resume-body";
+  renderResume(pre, c.resume_text || "(not available)", c.cited_quotes || []);
+  det.append(pre);
+  mount.append(det);
+
+  if (!c.uploaded) {
+    const pdfDet = el("details");
+    pdfDet.append(el("summary",null,"Resume as PDF"));
+    const frame = document.createElement("iframe");
+    frame.className = "pdf"; frame.loading = "lazy";
+    frame.src = `/api/resume-pdf/${encodeURIComponent(c.file)}`;
+    pdfDet.append(frame);
+    mount.append(pdfDet);
+  }
+}
+
+function decisionBlock(c, mount) {
+  const wrap = el("div","decide");
+  const existing = DECISIONS[c.file];
+  const line = el("div","verdictline");
+  if (existing) {
+    line.append(document.createTextNode("Your verdict: "));
+    line.append(el("b",null,existing.decision));
+    if (existing.note) line.append(document.createTextNode(` — “${existing.note}”`));
+  } else {
+    line.textContent = `The system says ${c.recommendation}. Record your own verdict:`;
+  }
+  wrap.append(line);
+
+  const note = document.createElement("input");
+  note.type = "text"; note.placeholder = "Optional note"; note.value = existing?.note || "";
+
+  const send = async (decision) => {
+    try {
+      const res = await api("/api/decision", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: c.file, decision, note: note.value }),
+      });
+      DECISIONS = (await res.json()).decisions;
+      renderList();
+      if (!$("view-queue").hidden) renderQueue();
+      renderDetail(c, mount, { decide: true });
+    } catch (err) { if (err.message !== "auth") console.error(err); }
+  };
+
+  const approve = el("button","btn pass sm","Approve");
+  const reject = el("button","btn fail sm","Reject");
+  approve.addEventListener("click", () => send("approve"));
+  reject.addEventListener("click", () => send("reject"));
+  wrap.append(note, approve, reject);
+
+  if (existing) {
+    const clear = el("button","btn ghost sm","Clear");
+    clear.addEventListener("click", () => send("clear"));
+    wrap.append(clear);
+  }
+  return wrap;
+}
+
+/* ---------------- review queue ---------------- */
+function renderQueue() {
+  if (!DATA) return;
+  const flagged = DATA.candidates.filter((c) => c.needs_human_review);
+  const done = flagged.filter((c) => DECISIONS[c.file]).length;
+  $("queue-tiles").replaceChildren(...[
+    [flagged.length,"Flagged"],[done,"Reviewed"],[flagged.length-done,"Remaining"],
+  ].map(([n,l],i) => {
+    const t = el("div", i===2 ? "tile accent" : "tile");
+    t.append(el("b",null,n), el("span",null,l)); return t;
+  }));
+
+  if (!flagged.length) {
+    $("queue-list").replaceChildren(el("div","empty","Nothing needs review."));
+    $("queue-detail").replaceChildren(); $("queue-detail").className = "";
     return;
   }
-  $("list").replaceChildren(...rows.map((c) => {
-    const b = document.createElement("button"); b.className = "row";
-    b.setAttribute("aria-current", String(selected === c.file));
-    const who = document.createElement("div"); who.className = "who";
-    const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = c.name;
-    const ar = document.createElement("div"); ar.className = "arch";
-    ar.textContent = (c.archetype || "").replace(/_/g, " ");
-    who.append(nm, ar);
-    const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = c.score.toFixed(1);
-    const pill = document.createElement("span");
-    pill.className = `pill ${c.recommendation}`; pill.textContent = c.recommendation;
-    b.append(who, sc, pill);
-    if (c.uploaded) {
-      const up = document.createElement("span");
-      up.className = "uploaded-badge"; up.textContent = "yours";
-      b.append(up);
-    }
-    if (c.needs_human_review) {
-      const f = document.createElement("span");
-      f.className = "flag"; f.textContent = "⚑"; f.title = c.review_reason;
-      b.append(f);
-    }
-    b.addEventListener("click", () => { selected = c.file; renderList(); renderDetail(c); });
-    return b;
-  }));
+  const pick = (x) => {
+    qSelected = x.file;
+    $("queue-list").replaceChildren(...flagged.map((c) => candidateRow(c, pick, qSelected)));
+    renderDetail(x, $("queue-detail"), { decide: true });
+  };
+  if (!qSelected || !flagged.some((c) => c.file === qSelected)) qSelected = flagged[0].file;
+  $("queue-list").replaceChildren(...flagged.map((c) => candidateRow(c, pick, qSelected)));
+  const current = flagged.find((c) => c.file === qSelected) || flagged[0];
+  renderDetail(current, $("queue-detail"), { decide: true });
 }
-/* Highlight every cited line inside the resume.
 
-   Quotes are matched on collapsed whitespace, because the model quotes the
-   words and the resume wraps them across lines. Matching the raw string
-   would silently fail on any quote that spans a newline -- which is most
-   of the interesting ones. */
-function renderResume(pre, text, quotes) {
-  pre.replaceChildren();
-  const norm = (s) => s.replace(/\s+/g, " ").trim();
+/* ---------------- stats ---------------- */
+async function loadStats() {
+  const body = $("stats-body");
+  let res, d;
+  try { res = await api("/api/stats"); d = await res.json(); }
+  catch (err) { if (err.message !== "auth") console.error(err); return; }
+  if (!res.ok) { body.replaceChildren(el("div","empty", d.error || "No stats.")); return; }
+  body.replaceChildren();
 
-  // Map each character of the collapsed text back to its original index.
-  const map = [];
-  let collapsed = "";
-  let pendingSpace = false;
-  for (let i = 0; i < text.length; i++) {
-    if (/\s/.test(text[i])) { pendingSpace = collapsed.length > 0; continue; }
-    if (pendingSpace) { collapsed += " "; map.push(i); pendingSpace = false; }
-    collapsed += text[i]; map.push(i);
+  const tiles = el("div","tiles");
+  for (const [v,l,acc] of [
+    [d.run.macro_f1,"Macro-F1",true],[d.run.accuracy,"Accuracy",false],
+    [`$${d.run.cost_total}`,"Total cost",false],[`$${d.run.cost_per_resume}`,"Per resume",false],
+    [`${d.run.latency_p50}s`,"Latency p50",false],
+    [`${Math.round(d.run.escalation_rate*100)}%`,"Escalated",false],
+  ]) {
+    const t = el("div", acc ? "tile accent" : "tile");
+    t.append(el("b",null,v), el("span",null,l)); tiles.append(t);
+  }
+  body.append(tiles);
+
+  const verdicts = el("div","panel-box");
+  verdicts.append(el("h3",null,"Verdicts and review progress"));
+  const vt = el("div","tiles");
+  for (const [v,l] of [
+    [d.verdicts.advance,"Advance"],[d.verdicts.hold,"Hold"],[d.verdicts.reject,"Reject"],
+    [d.review.flagged,"Flagged"],[d.review.reviewed,"Reviewed by you"],
+    [d.review.agreed_with_model,"You agreed"],[d.review.overridden,"You overrode"],
+  ]) { const t=el("div","tile"); t.append(el("b",null,v), el("span",null,l)); vt.append(t); }
+  verdicts.append(vt);
+  body.append(verdicts);
+
+  const costs = Object.entries(d.run.cost_by_model || {});
+  if (costs.length) {
+    const box = el("div","panel-box");
+    box.append(el("h3",null,"Cost by model"));
+    const tb = document.createElement("table");
+    tb.append(rowOf("th", ["Model","Cost","Share"]));
+    for (const [m,amt] of costs.sort((a,b)=>b[1]-a[1])) {
+      tb.append(rowOf("td", [m, `$${amt.toFixed(3)}`,
+        `${Math.round(amt / d.run.cost_total * 100)}%`], [false,true,true]));
+    }
+    box.append(tb); body.append(box);
   }
 
+  const perClass = Object.entries(d.run.per_class || {});
+  if (perClass.length) {
+    const box = el("div","panel-box");
+    box.append(el("h3",null,"Per class"));
+    const tb = document.createElement("table");
+    tb.append(rowOf("th", ["Class","Precision","Recall","F1"]));
+    for (const [c,v] of perClass) {
+      tb.append(rowOf("td", [c, v.precision.toFixed(2), v.recall.toFixed(2), v.f1.toFixed(2)],
+        [false,true,true,true]));
+    }
+    box.append(tb); body.append(box);
+  }
+
+  if ((d.by_archetype||[]).length) {
+    const box = el("div","panel-box");
+    box.append(el("h3",null,"Accuracy by archetype"));
+    const tb = document.createElement("table");
+    tb.append(rowOf("th", ["Archetype","Correct",""]));
+    for (const r of d.by_archetype) {
+      const tr = document.createElement("tr");
+      tr.append(el("td",null,r.archetype.replace(/_/g," ")));
+      tr.append(el("td","num",`${r.correct}/${r.total}`));
+      const bar = el("div","meter");
+      const fill = el("div"); fill.style.width = `${r.accuracy*100}%`;
+      bar.append(fill);
+      const cell = document.createElement("td"); cell.append(bar);
+      tr.append(cell); tb.append(tr);
+    }
+    box.append(tb); body.append(box);
+  }
+}
+function rowOf(tag, values, numeric = []) {
+  const tr = document.createElement("tr");
+  values.forEach((v, i) => {
+    const cell = document.createElement(tag);
+    if (numeric[i]) cell.className = "num";
+    cell.textContent = v;
+    tr.append(cell);
+  });
+  return tr;
+}
+
+/* ---------------- resume highlighting ---------------- */
+function renderResume(pre, text, quotes) {
+  pre.replaceChildren();
+  const norm = (s) => s.replace(/\s+/g," ").trim();
+  const map = []; let collapsed = ""; let pending = false;
+  for (let i=0;i<text.length;i++) {
+    if (/\s/.test(text[i])) { pending = collapsed.length>0; continue; }
+    if (pending) { collapsed += " "; map.push(i); pending = false; }
+    collapsed += text[i]; map.push(i);
+  }
   const spans = [];
   for (const q of quotes) {
     let needle = norm(q);
-    if (needle.includes("...") || needle.includes("\u2026")) {
-      needle = needle.split(/\.\.\.|\u2026/).reduce((a, b) => (b.trim().length > a.length ? b.trim() : a), "");
+    if (needle.includes("...") || needle.includes("…")) {
+      needle = needle.split(/\.\.\.|…/).reduce((a,b)=>(b.trim().length>a.length?b.trim():a),"");
     }
     if (needle.length < 15) continue;
     const at = collapsed.indexOf(needle);
     if (at === -1) continue;
-    spans.push([map[at], map[Math.min(at + needle.length - 1, map.length - 1)] + 1, q]);
+    spans.push([map[at], map[Math.min(at+needle.length-1, map.length-1)]+1, q]);
   }
-  spans.sort((a, b) => a[0] - b[0]);
-
+  spans.sort((a,b)=>a[0]-b[0]);
   let cursor = 0;
-  for (const [from, to, q] of spans) {
-    if (from < cursor) continue;  // overlapping citations: keep the first
-    pre.append(document.createTextNode(text.slice(cursor, from)));
-    const m = document.createElement("mark");
-    m.textContent = text.slice(from, to);
-    m.dataset.quote = q;
-    pre.append(m);
-    cursor = to;
+  for (const [from,to,q] of spans) {
+    if (from < cursor) continue;
+    pre.append(document.createTextNode(text.slice(cursor,from)));
+    const m = el("mark",null,text.slice(from,to)); m.dataset.quote = q;
+    pre.append(m); cursor = to;
   }
   pre.append(document.createTextNode(text.slice(cursor)));
 }
-
 function jumpToQuote(quote) {
-  const det = document.getElementById("resume-details");
-  const body = document.getElementById("resume-body");
+  const det = $("resume-details"), body = $("resume-body");
   if (!det || !body) return;
   det.open = true;
   const marks = [...body.querySelectorAll("mark")];
-  const target = marks.find((m) => m.dataset.quote === quote) || marks[0];
+  const target = marks.find((m)=>m.dataset.quote===quote) || marks[0];
   if (!target) return;
-  marks.forEach((m) => m.classList.remove("on"));
+  marks.forEach((m)=>m.classList.remove("on"));
   target.classList.add("on");
-  target.scrollIntoView({ behavior: "smooth", block: "center" });
+  target.scrollIntoView({behavior:"smooth", block:"center"});
 }
 
-function renderDetail(c) {
-  const el = $("detail"); el.className = "detail"; el.replaceChildren();
-  const h = document.createElement("h2"); h.textContent = c.name;
-  const sub = document.createElement("p"); sub.className = "sub";
-  sub.textContent = (c.archetype || "").replace(/_/g, " ");
-  const head = document.createElement("div"); head.className = "headline";
-  const big = document.createElement("span"); big.className = "big";
-  big.textContent = `${c.score.toFixed(1)} / 10`;
-  const pill = document.createElement("span");
-  pill.className = `pill ${c.recommendation}`; pill.textContent = c.recommendation;
-  head.append(big, pill);
-  if (c.matches_ground_truth != null) {
-    const truth = document.createElement("span"); truth.className = "truth";
-    truth.textContent = c.matches_ground_truth
-      ? `matches ground truth (${c.expected})` : `⚠ ground truth says ${c.expected}`;
-    head.append(truth);
-  }
-  el.append(h, sub, head);
-  if (c.needs_human_review) {
-    const n = document.createElement("div"); n.className = "notice";
-    n.textContent = c.review_reason; el.append(n);
-  }
-  const ph = document.createElement("h3");
-  ph.textContent = `Panel — 3 agents, spread ${c.panel_spread.toFixed(1)}`;
-  el.append(ph);
-  for (const a of c.panel) {
-    const box = document.createElement("div"); box.className = "agent";
-    const top = document.createElement("div"); top.className = "top";
-    const n = document.createElement("span"); n.className = "n"; n.textContent = a.score.toFixed(1);
-    const code = document.createElement("code"); code.textContent = a.agent;
-    const conf = document.createElement("span"); conf.className = "conf";
-    conf.textContent = `confidence ${a.confidence.toFixed(2)}`;
-    top.append(n, code, conf);
-    if (a.parse_failed) {
-      const bad = document.createElement("span"); bad.className = "bad";
-      bad.textContent = "UNREADABLE RESPONSE"; top.append(bad);
-    }
-    box.append(top);
-
-    // Two bullets max, each carrying the resume sections it cites. A
-    // reviewer's first question about AI feedback is whether it actually
-    // read this resume; a chip that jumps to the quoted line answers it.
-    const bullets = a.bullets && a.bullets.length ? a.bullets : null;
-    if (bullets) {
-      const ul = document.createElement("ul");
-      for (const b of bullets) {
-        const li = document.createElement("li");
-        li.textContent = b.text;
-        if (b.citations && b.citations.length) {
-          const cites = document.createElement("div"); cites.className = "cites";
-          for (const cit of b.citations) {
-            const chip = document.createElement("button");
-            chip.className = "cite"; chip.type = "button";
-            chip.textContent = `§ ${cit.section}`;
-            chip.title = cit.quote;
-            chip.addEventListener("click", () => jumpToQuote(cit.quote));
-            cites.append(chip);
-          }
-          li.append(cites);
-        }
-        ul.append(li);
-      }
-      box.append(ul);
-    } else {
-      const p = document.createElement("p"); p.textContent = a.rationale;
-      box.append(p);
-    }
-    el.append(box);
-  }
-  const rh = document.createElement("h3");
-  rh.textContent = c.escalated ? "Arbiter ruling" : "Combined reasoning";
-  const q = document.createElement("blockquote"); q.textContent = c.rationale;
-  el.append(rh, q);
-  const det = document.createElement("details"); det.className = "resume";
-  det.id = "resume-details";
-  const sm = document.createElement("summary");
-  sm.textContent = c.cited_quotes && c.cited_quotes.length
-    ? `Full resume — ${c.cited_quotes.length} cited line${c.cited_quotes.length === 1 ? "" : "s"} highlighted`
-    : "Full resume";
-  const pre = document.createElement("pre"); pre.className = "resume"; pre.id = "resume-body";
-  renderResume(pre, c.resume_text || "(resume file not found)", c.cited_quotes || []);
-  det.append(sm, pre); el.append(det);
-}
-
-function showResult(result) {
-  DATA = result;
-  filter = "all";
+/* ---------------- results plumbing ---------------- */
+function showResult(result, label) {
+  DATA = result; filter = "all";
   selected = DATA.candidates.length ? DATA.candidates[0].file : null;
   renderCriteria(DATA.rubric);
-  renderStats(); renderFilters(); renderList();
-  if (DATA.candidates.length) renderDetail(DATA.candidates[0]);
+  renderTiles(); renderFilters(); renderList();
+  if (DATA.candidates.length) renderDetail(DATA.candidates[0], $("detail"));
+  if (label) $("results-eyebrow").textContent = label;
   $("step-results").hidden = false;
 }
+function setStatus(text, isErr) {
+  $("status").textContent = text || "";
+  $("status").className = isErr ? "status err" : "status";
+}
+function setBusy(on) {
+  $("run").disabled = on; $("criteria-only").disabled = on;
+  $("bar").hidden = !on; if (!on) $("bar-fill").style.width = "0";
+}
 
-/* ---------- upload ---------- */
+async function poll(jobId) {
+  let res, body;
+  try { res = await api(`/api/screen/${jobId}`); body = await res.json(); }
+  catch { clearInterval(polling); polling=null; setBusy(false); return; }
+  if (!res.ok) { clearInterval(polling); polling=null; setBusy(false); setStatus(body.error||"Failed.",true); return; }
+  if (body.progress) {
+    const { done, total } = body.progress;
+    $("bar-fill").style.width = `${(done/total)*100}%`;
+    setStatus(`Screening ${done} of ${total}…`);
+  }
+  if (body.status === "done") {
+    clearInterval(polling); polling=null; setBusy(false); setStatus("");
+    showResult(body.result, "Step 3 — Results");
+  } else if (body.status === "error") {
+    clearInterval(polling); polling=null; setBusy(false); setStatus(body.error||"Failed.",true);
+  }
+}
 
-/* Screen one uploaded resume against the posting currently in the box.
+async function runScreen(criteriaOnly) {
+  const jd = $("jd").value.trim();
+  if (!jd) { setStatus("Paste a job posting first.", true); return; }
+  setBusy(true);
+  setStatus(criteriaOnly ? "Writing the criteria…" : "Starting…");
+  try {
+    if (criteriaOnly) {
+      const res = await api("/api/rubric", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ job_description: jd }),
+      });
+      const body = await res.json();
+      setBusy(false);
+      if (!res.ok) { setStatus(body.error||"Failed.",true); return; }
+      renderCriteria(body);
+      setStatus("Criteria only. Press Screen resumes to score against them.");
+      return;
+    }
+    const res = await api("/api/screen", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ job_description: jd, count: Number($("count").value) }),
+    });
+    const body = await res.json();
+    if (!res.ok) { setBusy(false); setStatus(body.error||"Failed.",true); return; }
+    if (body.status === "done") {
+      setBusy(false); setStatus(body.cached ? "Served from a previous run — no new cost." : "");
+      showResult(body.result, "Step 3 — Results"); return;
+    }
+    polling = setInterval(() => poll(body.job_id), 1200);
+  } catch (err) {
+    setBusy(false);
+    if (err.message !== "auth") setStatus(err.message, true);
+  }
+}
+$("run").addEventListener("click", () => runScreen(false));
+$("criteria-only").addEventListener("click", () => runScreen(true));
 
-   The result is prepended to whatever list is on screen and selected, so
-   an uploaded resume is ranked among the corpus rather than shown off to
-   one side. It carries no ground-truth label, because nobody wrote one
-   for a real person's resume. */
+/* ---------------- upload ---------------- */
 async function uploadResume(file) {
   if (!file) return;
   const jd = $("jd").value.trim();
   if (!jd) { setStatus("Paste a job posting first.", true); return; }
-
   $("upload-label").classList.add("busy");
-  setStatus(`Screening ${file.name}\u2026 a few seconds.`);
+  setStatus(`Screening ${file.name}…`);
   try {
     const form = new FormData();
-    form.append("file", file);
-    form.append("job_description", jd);
-    const res = await fetch("/api/screen-upload", { method: "POST", body: form });
+    form.append("file", file); form.append("job_description", jd);
+    const res = await api("/api/screen-upload", { method:"POST", body: form });
     const body = await res.json();
-    if (!res.ok) { setStatus(body.error || `Upload failed (${res.status}).`, true); return; }
-
+    if (!res.ok) { setStatus(body.error || "Upload failed.", true); return; }
     const c = body.candidate;
     if (!DATA) DATA = { candidates: [], summary: {}, rubric: body.criteria };
-    DATA.candidates = [c, ...DATA.candidates.filter((x) => x.file !== c.file)];
-    DATA.summary = {
-      ...DATA.summary,
-      n: DATA.candidates.length,
-      advance: DATA.candidates.filter((x) => x.recommendation === "advance").length,
-      hold: DATA.candidates.filter((x) => x.recommendation === "hold").length,
-      reject: DATA.candidates.filter((x) => x.recommendation === "reject").length,
-      needs_human_review: DATA.candidates.filter((x) => x.needs_human_review).length,
-    };
-    filter = "all";
-    selected = c.file;
+    DATA.candidates = [c, ...DATA.candidates.filter((x)=>x.file!==c.file)];
+    const cs = DATA.candidates;
+    DATA.summary = { ...DATA.summary, n: cs.length,
+      advance: cs.filter(x=>x.recommendation==="advance").length,
+      hold: cs.filter(x=>x.recommendation==="hold").length,
+      reject: cs.filter(x=>x.recommendation==="reject").length,
+      needs_human_review: cs.filter(x=>x.needs_human_review).length };
+    filter = "all"; selected = c.file;
     if (body.criteria) renderCriteria(body.criteria);
-    renderStats(); renderFilters(); renderList(); renderDetail(c);
+    renderTiles(); renderFilters(); renderList(); renderDetail(c, $("detail"));
     $("step-results").hidden = false;
-    setStatus(`${c.name}: ${c.score}/10, ${c.recommendation}.`);
-    document.getElementById("detail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setStatus(`${c.name}: ${c.score.toFixed(1)} / 10, ${c.recommendation}.`);
+    $("detail").scrollIntoView({ behavior:"smooth", block:"start" });
   } catch (err) {
-    setStatus(`Upload failed: ${err.message}`, true);
+    if (err.message !== "auth") setStatus(`Upload failed: ${err.message}`, true);
   } finally {
     $("upload-label").classList.remove("busy");
     $("upload").value = "";
   }
 }
-
 $("upload").addEventListener("change", (e) => uploadResume(e.target.files[0]));
 
-/* ---------- run ---------- */
-async function poll(jobId) {
-  const res = await fetch(`/api/screen/${jobId}`);
-  const body = await res.json();
-  if (!res.ok) {
-    clearInterval(polling); polling = null; setBusy(false);
-    setStatus(body.error || "Run failed.", true);
-    return;
-  }
-  if (body.rubric) renderCriteria(body.rubric);
-  const p = body.progress || { done: 0, total: 1 };
-  if (body.stage === "rubric") {
-    setStatus("Writing the scoring criteria…");
-    $("bar").style.width = "8%";
-  } else {
-    setStatus(`Screening resumes… ${p.done} of ${p.total}`);
-    $("bar").style.width = `${10 + (p.done / p.total) * 90}%`;
-  }
-  if (body.status === "done" && body.result) {
-    clearInterval(polling); polling = null;
-    setBusy(false); setStatus("");
-    showResult(body.result);
-  }
-}
-
-async function run() {
-  const jd = $("jd").value.trim();
-  if (!jd) { setStatus("Paste a job posting first.", true); return; }
-  if (polling) { clearInterval(polling); polling = null; }
-
-  setBusy(true);
-  setStatus("Starting…");
-  $("step-results").hidden = true;
-  $("step-criteria").hidden = true;
-
-  try {
-    const res = await fetch("/api/screen", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ job_description: jd, count: Number($("count").value) }),
-    });
-    const body = await res.json();
-    if (!res.ok && res.status !== 202) {
-      setBusy(false); setStatus(body.error || `Request failed (${res.status}).`, true); return;
-    }
-    if (body.status === "done" && body.result) {
-      setBusy(false);
-      setStatus(body.cached ? "Served from a previous run of this posting. No new API calls." : "");
-      showResult(body.result);
-      return;
-    }
-    polling = setInterval(() => poll(body.job_id), 1200);
-    poll(body.job_id);
-  } catch (err) {
-    setBusy(false); setStatus(`Could not reach the server: ${err.message}`, true);
-  }
-}
-
-/* ---------- boot ---------- */
-async function boot() {
-  const [jdRes, resultsRes] = await Promise.all([
-    fetch("/api/default-jd"), fetch("/api/results"),
-  ]);
-  const jd = await jdRes.json();
-  $("jd").value = jd.job_description;
-
-  const counts = [6, 12, 18, 24].filter((n) => n <= jd.max_count);
-  $("count").replaceChildren(...counts.map((n) => {
-    const o = document.createElement("option");
-    o.value = n; o.textContent = `${n} resumes · ~$${(n * 0.0155).toFixed(2)}`;
-    if (n === jd.default_count) o.selected = true;
-    return o;
-  }));
-
-  const results = await resultsRes.json();
-  if (resultsRes.ok) showResult(results);
-}
-
-/* The cheap look: criteria only, no screening. A few cents against ~$0.19,
-   for someone deciding whether a posting is even set up right. */
-async function criteriaOnly() {
-  const jd = $("jd").value.trim();
-  if (!jd) { setStatus("Paste a job posting first.", true); return; }
-  $("criteria-only").disabled = true;
-  $("step-criteria").hidden = true;
-  setStatus("Writing the scoring criteria…");
-  try {
-    const res = await fetch("/api/rubric", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ job_description: jd }),
-    });
-    const data = await res.json();
-    if (!res.ok) { setStatus(data.error || `Request failed (${res.status}).`, true); return; }
-    renderCriteria(data);
-    setStatus("Criteria only. Press Screen resumes to score against them.");
-  } catch (err) {
-    setStatus(`Could not reach the server: ${err.message}`, true);
-  } finally {
-    $("criteria-only").disabled = false;
-  }
-}
-
-$("run").addEventListener("click", run);
-$("criteria-only").addEventListener("click", criteriaOnly);
 $("reset").addEventListener("click", async () => {
-  const jd = await (await fetch("/api/default-jd")).json();
-  $("jd").value = jd.job_description;
-  setStatus("");
-});
-$("jd").addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run();
+  try {
+    const res = await api("/api/default-jd");
+    $("jd").value = (await res.json()).job_description;
+    setStatus("");
+  } catch (err) { if (err.message !== "auth") console.error(err); }
 });
 
-boot();
+/* ---------------- boot ---------------- */
+async function boot() {
+  try {
+    const [jdRes, resultsRes, decRes] = await Promise.all([
+      api("/api/default-jd"), api("/api/results"), api("/api/decisions"),
+    ]);
+    const jd = await jdRes.json();
+    $("jd").value = jd.job_description;
+    $("count").replaceChildren(...[6, jd.default_count, 18, jd.max_count]
+      .filter((v,i,a)=>v && a.indexOf(v)===i)
+      .map((v) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = `${v} resumes · ~$${(v*0.016).toFixed(2)}`;
+        if (v === jd.default_count) o.selected = true;
+        return o;
+      }));
+
+    DECISIONS = await decRes.json();
+    const results = await resultsRes.json();
+    if (resultsRes.ok) {
+      showResult(results, "Step 3 — Results from the last recorded run of all 60");
+      $("headline").textContent =
+        `recorded run · ${results.summary.n} screened · macro-F1 ${results.summary.macro_f1}`;
+    }
+  } catch (err) {
+    if (err.message !== "auth") console.error(err);
+  }
+}
+
+(async () => {
+  const res = await fetch("/api/results");
+  if (res.status === 401) { showLogin(); return; }
+  showApp(); boot();
+})();
 </script>
 </body>
 </html>

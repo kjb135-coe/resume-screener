@@ -31,17 +31,20 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hmac
 import json
 import logging
+import os
 import re
 import shutil
 import tempfile
 import uuid
 from collections import defaultdict
+from datetime import UTC, datetime
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
@@ -65,6 +68,17 @@ RUN_JSON = REPO / "data" / "eval_run.json"
 LABELS_JSON = REPO / "data" / "labels.json"
 RESUME_DIR = REPO / "data" / "synthetic_resumes"
 DEFAULT_JD_PATH = REPO / "docs" / "job_description.md"
+
+RESUME_PDF_DIR = REPO / "data" / "resume_pdfs"
+DECISIONS_JSON = REPO / "data" / "reviewer_decisions.json"
+
+# Shared-secret gate. Not authentication -- there are no accounts, and
+# every viewer is the same anonymous reviewer. It exists so a hosted demo
+# link is not an open invoice: every live screening call costs money, and
+# an ungated public page with an API key behind it is a page anyone can
+# spend from. See PLAN.md 11.
+ACCESS_PASSWORD = os.environ.get("APP_PASSWORD", "marco1")
+SESSION_COOKIE = "rs_session"
 
 DEFAULT_SAMPLE = 12
 MAX_SAMPLE = 24
@@ -96,9 +110,12 @@ def _review_reason(prediction: dict) -> str | None:
     if any(agent.get("parse_failed") for agent in prediction["panel"]):
         return "At least one scoring agent returned an unreadable response."
     if prediction["escalated"]:
+        values = ", ".join(
+            f"{a['score']:.1f}" for a in prediction["panel"] if not a.get("parse_failed")
+        )
         return (
-            f"The scoring panel disagreed (spread of {prediction['panel_spread']:.1f} "
-            "points); an arbiter resolved it, but a human should confirm."
+            f"The panel disagreed ({values}); an arbiter resolved it, "
+            "but a human should confirm."
         )
     return None
 
@@ -237,8 +254,13 @@ def _locate(quote: str, sections: list[tuple[str, str]]) -> str | None:
     return None
 
 
-def bullets_from(rationale: str, resume_text: str, limit: int = 2) -> list[dict]:
+def bullets_from(rationale: str, resume_text: str, limit: int = 1) -> list[dict]:
     """Turn an agent's prose into at most `limit` bullets with citations.
+
+    One bullet by default: three agents plus an arbiter on one screen is
+    already four blocks of prose, and a reviewer scanning a queue reads the
+    first line of each or none of them. The panel prompt asks for a single
+    sentence, so this is normally the whole rationale rather than a crop.
 
     The panel is prompted to quote the evidence it relied on, so the
     quotes are already in the prose. Pulling them out and locating them in
@@ -541,6 +563,204 @@ class ScreenRequest(BaseModel):
     count: int = Field(default=DEFAULT_SAMPLE, ge=1, le=MAX_SAMPLE)
 
 
+# --------------------------------------------------------------------------
+# access gate, reviewer decisions, resume PDFs
+# --------------------------------------------------------------------------
+
+def _session_token() -> str:
+    """Derived from the password, so changing the password logs everyone out."""
+    return hashlib.sha256(f"rs::{ACCESS_PASSWORD}".encode()).hexdigest()[:32]
+
+
+def is_authorised(request: Request) -> bool:
+    return hmac.compare_digest(request.cookies.get(SESSION_COOKIE, ""), _session_token())
+
+
+PUBLIC_PATHS = {"/health", "/api/login", "/login", "/", "/favicon.ico"}
+
+
+@app.middleware("http")
+async def require_password(request: Request, call_next):
+    """Gate everything except the login page and the health check.
+
+    A middleware rather than a per-route dependency because the failure
+    mode that matters is a *new* endpoint being added without the guard.
+    Default-closed means forgetting to annotate a route makes it
+    inaccessible, which someone notices immediately, instead of making it
+    public, which nobody notices at all.
+    """
+    path = request.url.path
+    if path in PUBLIC_PATHS or path.startswith("/static"):
+        return await call_next(request)
+    if is_authorised(request):
+        return await call_next(request)
+    return JSONResponse({"error": "Not authorised.", "login_required": True}, status_code=401)
+
+
+class LoginRequest(BaseModel):
+    password: str = Field(min_length=1, max_length=200)
+
+
+@app.post("/api/login")
+async def post_login(request: LoginRequest) -> JSONResponse:
+    # compare_digest rather than ==, so the check does not leak the
+    # password's length or prefix through response timing.
+    if not hmac.compare_digest(request.password, ACCESS_PASSWORD):
+        return JSONResponse({"error": "Wrong password."}, status_code=401)
+    response = JSONResponse({"ok": True})
+    response.set_cookie(
+        SESSION_COOKIE, _session_token(),
+        httponly=True, samesite="lax", max_age=60 * 60 * 24 * 7,
+    )
+    return response
+
+
+@app.post("/api/logout")
+async def post_logout() -> JSONResponse:
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(SESSION_COOKIE)
+    return response
+
+
+def load_decisions() -> dict[str, dict]:
+    if DECISIONS_JSON.exists():
+        try:
+            return json.loads(DECISIONS_JSON.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            log.warning("reviewer_decisions.json is malformed; starting empty")
+    return {}
+
+
+def save_decisions(decisions: dict[str, dict]) -> None:
+    DECISIONS_JSON.write_text(json.dumps(decisions, indent=2, sort_keys=True), encoding="utf-8")
+
+
+class DecisionRequest(BaseModel):
+    file: str = Field(min_length=1, max_length=300)
+    decision: str = Field(pattern="^(approve|reject|clear)$")
+    note: str = Field(default="", max_length=2000)
+
+
+@app.post("/api/decision")
+async def post_decision(request: DecisionRequest) -> JSONResponse:
+    """Record a human's verdict on a flagged candidate.
+
+    Stored separately from the model's output rather than overwriting it.
+    The point of the review queue is to compare the two: a decision file
+    that silently replaced the score would destroy the only record of
+    where the model and a person disagreed, which is the most useful data
+    this thing produces.
+    """
+    decisions = load_decisions()
+    if request.decision == "clear":
+        decisions.pop(request.file, None)
+    else:
+        decisions[request.file] = {
+            "decision": request.decision,
+            "note": request.note.strip(),
+            "at": datetime.now(UTC).isoformat(timespec="seconds"),
+        }
+    save_decisions(decisions)
+    return JSONResponse({"ok": True, "decisions": decisions})
+
+
+@app.get("/api/decisions")
+async def get_decisions() -> JSONResponse:
+    return JSONResponse(load_decisions())
+
+
+@app.get("/api/resume-pdf/{filename}", response_model=None)
+async def get_resume_pdf(filename: str) -> FileResponse | JSONResponse:
+    """Serve a candidate's resume as a PDF.
+
+    `Path(filename).name` strips any directory component, so a crafted
+    `../../.env` resolves to `.env` and then fails the suffix check below
+    rather than escaping the corpus directory.
+    """
+    stem = Path(filename).name.rsplit(".", 1)[0]
+    pdf = RESUME_PDF_DIR / f"{stem}.pdf"
+    if not pdf.is_file() or pdf.parent != RESUME_PDF_DIR:
+        return JSONResponse(
+            {"error": "No PDF for that candidate. Run scripts/build_resume_pdfs.py."},
+            status_code=404,
+        )
+    return FileResponse(pdf, media_type="application/pdf", filename=f"{stem}.pdf")
+
+
+@app.get("/api/stats")
+async def get_stats() -> JSONResponse:
+    """Run-level numbers for the results page, plus reviewer progress."""
+    try:
+        run = load_recorded_run()
+    except FileNotFoundError:
+        return JSONResponse({"error": "No recorded run yet."}, status_code=404)
+
+    raw = json.loads(RUN_JSON.read_text(encoding="utf-8"))
+    candidates = run["candidates"]
+    decisions = load_decisions()
+    flagged = [c for c in candidates if c["needs_human_review"]]
+    reviewed = [c for c in flagged if c["file"] in decisions]
+
+    agreed = sum(
+        1
+        for c in flagged
+        if c["file"] in decisions
+        and decisions[c["file"]]["decision"]
+        == ("approve" if c["recommendation"] == "advance" else "reject")
+    )
+
+    return JSONResponse(
+        {
+            "run": {
+                "tag": raw.get("tag"),
+                "n": raw.get("n"),
+                "macro_f1": round(raw.get("macro_f1", 0), 3),
+                "accuracy": round(raw.get("accuracy", 0), 3),
+                "cost_total": round(raw.get("cost_total", 0), 3),
+                "cost_per_resume": round(raw.get("cost_per_resume", 0), 4),
+                "latency_p50": round(raw.get("latency_p50", 0), 1),
+                "latency_p95": round(raw.get("latency_p95", 0), 1),
+                "escalation_rate": round(raw.get("escalation_rate", 0), 3),
+                "cost_by_model": raw.get("cost_by_model") or {},
+                "model_ids": raw.get("model_ids") or {},
+                "per_class": raw.get("per_class") or {},
+            },
+            "verdicts": {
+                "advance": run["summary"]["advance"],
+                "hold": run["summary"]["hold"],
+                "reject": run["summary"]["reject"],
+            },
+            "review": {
+                "flagged": len(flagged),
+                "reviewed": len(reviewed),
+                "remaining": len(flagged) - len(reviewed),
+                "agreed_with_model": agreed,
+                "overridden": len(reviewed) - agreed,
+            },
+            "by_archetype": _accuracy_by_archetype(candidates),
+        }
+    )
+
+
+def _accuracy_by_archetype(candidates: list[dict]) -> list[dict]:
+    buckets: dict[str, list[bool]] = defaultdict(list)
+    for c in candidates:
+        if c.get("expected"):
+            buckets[c["archetype"]].append(bool(c["matches_ground_truth"]))
+    return sorted(
+        (
+            {
+                "archetype": name,
+                "correct": sum(hits),
+                "total": len(hits),
+                "accuracy": round(sum(hits) / len(hits), 3),
+            }
+            for name, hits in buckets.items()
+        ),
+        key=lambda row: row["accuracy"],
+    )
+
+
 @app.get("/", include_in_schema=False)
 async def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
@@ -565,7 +785,14 @@ async def get_default_jd() -> dict:
 async def get_results() -> JSONResponse:
     """The recorded 60-resume run. Reads a file, so it is free and instant."""
     try:
-        return JSONResponse(load_recorded_run())
+        run = load_recorded_run()
+        decisions = load_decisions()
+        # Attached at read time rather than baked into the cached run, so a
+        # reviewer's decision shows up without invalidating the cache or
+        # touching the model's recorded output.
+        for candidate in run["candidates"]:
+            candidate["reviewer"] = decisions.get(candidate["file"])
+        return JSONResponse(run)
     except FileNotFoundError:
         return JSONResponse(
             {"error": "No recorded run found. Run scripts/evaluate.py first."},

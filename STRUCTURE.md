@@ -5,6 +5,8 @@ removing files rather than editing this by hand.
 
 ```
 ├── data/                        Generated corpus, its ground-truth labels, and the latest eval run.
+│   ├── resume_pdfs/                 Corpus resumes rendered to PDF by scripts/build_resume_pdfs.py, for the web viewer.
+│   │   └── (60 rendered PDFs, listed in data/labels.json)
 │   ├── synthetic_resumes/           The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.
 │   │   └── (60 generated resumes, listed in data/labels.json)
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
@@ -30,6 +32,7 @@ removing files rather than editing this by hand.
 │   └── synthetic_corpus_sources.md  Public resume datasets surveyed, and why the corpus is generated instead.
 ├── scripts/                     Developer utilities. Not part of the installed package.
 │   ├── archetypes.py                The 9 archetype specs (label, per-dimension targets, must-include/avoid) that generate_corpus.py writes from.
+│   ├── build_resume_pdfs.py         Renders every corpus resume to PDF with reportlab. Deterministic, no model calls.
 │   ├── check_corpus.py              Lints generated resumes for leaked or missing signals against their own archetype's constraints.
 │   ├── evaluate.py                  Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.
 │   ├── generate_candidate_report.py Builds CANDIDATE_REPORTS.md from the last evaluate.py run.
@@ -41,9 +44,9 @@ removing files rather than editing this by hand.
 │   └── resume_screener/             The installable package.
 │       ├── adapters/                    Thin translation layers over core. No scoring logic lives here.
 │       │   ├── static/                      Static assets for the web adapter.
-│       │   │   └── index.html                   Two-tab page: candidates from the recorded run, and rubric preview. One file, no build step.
+│       │   │   └── index.html                   The whole UI: login, screening, review queue, results. One file, no build step.
 │       │   ├── __init__.py                  Package marker.
-│       │   ├── api.py                       FastAPI backend: the recorded run's verdicts, plus live rubric generation. Does not screen.
+│       │   ├── api.py                       FastAPI backend: password gate, screening, reviewer decisions, resume PDFs, run stats.
 │       │   ├── cli.py                       Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.
 │       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.

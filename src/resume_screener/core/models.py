@@ -95,9 +95,14 @@ class Verdict:
                 "incomplete. Scores based on it are less reliable."
             )
         if self.escalated:
+            # Name the scores rather than the spread. "Spread of 7.0" is an
+            # abstraction a reader has to decode; "9.0, 9.0 and 2.0" is the
+            # disagreement itself, and makes obvious which agent dissented.
+            scored = [p for p in self.panel_scores if not p.parse_failed]
+            values = ", ".join(f"{p.score:.1f}" for p in scored)
             return (
-                f"The scoring panel disagreed (spread of {self.panel_spread:.1f} "
-                "points); an arbiter resolved it, but a human should confirm."
+                f"The panel disagreed ({values}); an arbiter resolved it, "
+                "but a human should confirm."
             )
         return None
 
