@@ -12,3 +12,6 @@ venv/
 node_modules/
 dist/
 build/
+
+# Local drafts, not part of the deliverable
+EMAIL_DRAFT.md
