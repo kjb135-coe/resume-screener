@@ -16,6 +16,7 @@ from resume_screener.core.pipeline import (
     rubric_for,
     screen_one,
 )
+from resume_screener.core.router import Usage
 from resume_screener.core.rubric_gen import parse_rubric
 from tests.fakes import (
     EXTRACTION_JSON,
@@ -447,3 +448,109 @@ class TestRankAll:
         await rank_all(str(tmp_path), JD, models, max_concurrent=3)
         # 20 resumes still all screened despite the cap
         assert len(models["triage"].calls) == 20
+
+
+class TestEscalationGuard:
+    """Spread measures variance; the guard measures decision uncertainty.
+
+    A panel of 9/7/6 has spread 3.0 and clears the threshold, but every one
+    of those scores means "advance" -- no arbiter ruling changes the answer,
+    so the call is pure cost. 7 of 33 escalations in the recorded run were
+    this case.
+    """
+
+    async def test_wide_spread_but_unanimous_verdict_does_not_escalate(self):
+        # 2.5 spread, clears DISAGREEMENT_THRESHOLD, but 9.0/8.0/7.0 are all
+        # >= ADVANCE_CUTOFF so no ruling could change the answer.
+        models = _models([9.5, 8.0, 7.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert not verdict.escalated
+        assert models["arbiter"].calls == [], "paid to resolve a settled verdict"
+        assert verdict.recommendation == Recommendation.ADVANCE
+
+    async def test_guard_depends_on_where_the_cutoffs_sit(self):
+        """9.0/7.0/6.0 -- the case that motivated this -- still escalates at
+        the current 7.0/5.0 cutoffs, because 6.0 falls in `hold`. The guard
+        removes 7 of 33 escalations on the recorded run; the rest need the
+        cutoff correction in PLAN.md 3e. Pinned so the limit is not
+        mistaken for a fix.
+        """
+        models = _models([9.0, 7.0, 6.0], arbiter=arbiter_json(7.5, "advance"))
+        verdict = await screen_one(FIXTURE, JD, models)
+        assert verdict.escalated
+
+    async def test_wide_spread_across_buckets_still_escalates(self):
+        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert verdict.escalated
+        assert len(models["arbiter"].calls) == 1
+
+    async def test_narrow_spread_never_escalates(self):
+        models = _models([7.0, 7.5, 7.2])
+        verdict = await screen_one(FIXTURE, JD, models)
+        assert not verdict.escalated
+
+    @pytest.mark.parametrize(
+        "scores,expect_escalation",
+        [
+            ([9.0, 8.0, 7.0], False),   # all advance
+            ([4.0, 3.0, 2.0], False),   # all reject
+            ([6.5, 6.0, 5.5], False),   # all hold
+            ([7.5, 6.5, 4.0], True),    # advance / hold / reject
+            ([8.0, 4.5, 4.0], True),    # advance vs reject
+        ],
+    )
+    async def test_escalates_only_when_buckets_differ(self, scores, expect_escalation):
+        models = _models(scores, arbiter=arbiter_json(6.0, "hold"))
+        verdict = await screen_one(FIXTURE, JD, models)
+        assert verdict.escalated is expect_escalation
+
+
+class TestPerModelUsage:
+    """Cost was priced at whichever model ran first -- Haiku, always, since
+    extraction leads the cascade. Every Sonnet and Opus token was billed at
+    Haiku rates, understating a real run several-fold.
+    """
+
+    def test_single_call_records_its_own_model(self):
+        usage = Usage(input_tokens=100, output_tokens=20, model_id="claude-opus-5")
+        assert usage.by_model == {
+            "claude-opus-5": {
+                "input_tokens": 100,
+                "output_tokens": 20,
+                "cache_creation_input_tokens": 0,
+                "cache_read_input_tokens": 0,
+            }
+        }
+
+    def test_addition_keeps_models_apart(self):
+        haiku = Usage(input_tokens=100, output_tokens=10, model_id="claude-haiku-4-5-20251001")
+        opus = Usage(input_tokens=50, output_tokens=800, model_id="claude-opus-5")
+        total = haiku + opus
+
+        assert set(total.by_model) == {"claude-haiku-4-5-20251001", "claude-opus-5"}
+        assert total.by_model["claude-opus-5"]["output_tokens"] == 800
+        assert total.by_model["claude-haiku-4-5-20251001"]["output_tokens"] == 10
+
+    def test_same_model_twice_accumulates(self):
+        one = Usage(input_tokens=10, output_tokens=5, model_id="claude-sonnet-5")
+        total = one + one
+        assert total.by_model["claude-sonnet-5"]["input_tokens"] == 20
+
+    def test_scalar_totals_still_agree_with_the_split(self):
+        total = (
+            Usage(input_tokens=100, output_tokens=10, model_id="a")
+            + Usage(input_tokens=50, output_tokens=800, model_id="b")
+        )
+        assert total.input_tokens == sum(m["input_tokens"] for m in total.by_model.values())
+        assert total.output_tokens == sum(m["output_tokens"] for m in total.by_model.values())
+
+    async def test_a_verdict_carries_every_tier_it_used(self):
+        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        for name, tier in (("triage", "t"), ("panel", "p"), ("arbiter", "a")):
+            models[name]._model_id = tier
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert set(verdict.usage.by_model) == {"t", "p", "a"}

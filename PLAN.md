@@ -354,6 +354,68 @@ takes an action, so the worst an injected instruction can do is argue for
 its own score, and every verdict is advisory with a human in the loop.
 Worth stating rather than assuming.
 
+### 3g. Cost accounting, arbiter tier, escalation guard — 2026-08-26
+
+**The cost figures were wrong.** `Usage.__add__` kept `self.model_id or
+other.model_id`, and in `screen_one` usage starts from the Haiku
+extraction call. So every Verdict was labelled Haiku, and
+`estimate_cost` priced Sonnet panel calls and Opus arbiter calls at Haiku
+rates. Opus output is 15x Haiku output; the reported ~$0.93 per run was
+understating several-fold. `Usage.by_model` now splits tokens by the
+model that spent them, and evaluate.py prices each separately.
+
+This surfaced because real spend was visibly outrunning the documented
+figure. Worth noting how it hid: the number looked plausible, was derived
+from genuine API usage fields, and was wrong anyway.
+
+**Arbiter moved Opus → Sonnet.** By the corrected accounting it was ~57%
+of run cost while running on 55% of candidates. The job is adjudicating
+between three rationales already written for it — reading and choosing,
+not fresh analysis. Opus stays on the `rubric` slot, which runs once per
+batch and sets the standard everything else is judged against.
+
+**Escalation now requires decision uncertainty, not just variance.**
+Escalating on spread alone pays to resolve disagreements that cannot
+change the answer: 9.0/7.0/6.0 has spread 3.0 and clears the threshold,
+but under sane cutoffs all three mean `advance`. `_verdict_is_in_doubt`
+adds the second condition — the agents must disagree on which *bucket*
+the candidate falls in. 7 of 33 escalations on the recorded run were
+provably pointless by this test.
+
+Honest limit, pinned by a test: at the current 7.0/5.0 cutoffs a 6.0 is
+`hold`, so the two candidates that motivated this (9/7/6 and 8/9/6) still
+escalate. The guard removes 7 of 33; the rest needs the cutoff correction
+in §3e. The two changes are entangled and should land together.
+
+### 3h. The root cause: `client_communication` is broken
+
+| Agent | mean | median | zeros |
+|---|---|---|---|
+| production_reality | 3.23 | 1.0 | 14/60 |
+| technical_integration | 2.98 | 2.0 | 22/60 |
+| **client_communication** | **0.67** | **0.0** | **33/60** |
+
+It never exceeds 6.0 for anyone, and it does not separate the levels it
+exists to separate — candidates whose archetype targets `high` average
+2.29, `medium` 0.55, `low` 0.39. The other two dimensions discriminate
+cleanly (high 5.63/6.33 vs low 0.85/0.24).
+
+The final score is a mean of three. An agent scoring near zero for almost
+everyone drags **every** candidate down about two points. That single
+fact explains the entire chain in §3c-i, §3e and §3f: why 7.0 was far too
+high a cutoff, why the arbiter kept overriding it upward, why every error
+ran one direction, and why `production_light_ai` failed 0/7.
+
+The rubric tells this agent absence "is not automatically disqualifying",
+but contributing 0.0 to a mean *is* a penalty — the instruction and the
+arithmetic contradict each other. Options: let the dimension abstain and
+average over the agents that scored, weight it below the other two, or
+score presence rather than a 0-10 level.
+
+**Not decided, and it should be settled before the cutoffs.** Fixing it
+moves the score distribution the cutoffs would be fitted to, so tuning
+cutoffs first means tuning them twice.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return

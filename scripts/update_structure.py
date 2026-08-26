@@ -125,6 +125,8 @@ DESCRIPTIONS: dict[str, str] = {
 
     # docs/ (eval outputs)
     "docs/EVAL_RESULTS.md": "Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.",
+    "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
+    "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
     "docs/CUTOFF_SWEEP.md": "Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.",
     "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
 
@@ -135,6 +137,7 @@ DESCRIPTIONS: dict[str, str] = {
     "scripts/generate_corpus.py": "Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.",
     "scripts/check_corpus.py": "Lints generated resumes for leaked or missing signals against their own archetype's constraints.",
     "scripts/evaluate.py": "Scores the pipeline against the labeled corpus. Writes EVAL_RESULTS.md and eval_run.json.",
+    "scripts/sweep_escalation.py": "Compares escalation policies on cost and pointless calls. No API calls.",
     "scripts/sweep_cutoffs.py": "Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.",
     "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
 }

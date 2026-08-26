@@ -99,7 +99,12 @@ def default_models() -> dict[str, Model]:
     return {
         "triage": AnthropicModel("claude-haiku-4-5-20251001", api_key),
         "panel": AnthropicModel("claude-sonnet-5", api_key),
-        "arbiter": AnthropicModel("claude-opus-5", api_key),
+        # Sonnet, not Opus. The arbiter adjudicates between three
+        # rationales already written for it -- reading and choosing,
+        # not fresh analysis. Measured on the recorded run it was ~57%
+        # of total spend while running on 55% of candidates, because
+        # Opus output is 15x Haiku and 5x Sonnet. See PLAN.md 3g.
+        "arbiter": AnthropicModel("claude-sonnet-5", api_key),
         # Writing the rubric sets the standard every later score is judged
         # against, and it runs once per batch rather than once per resume.
         # It is the cheapest place in the cascade to buy the best model.
@@ -377,6 +382,24 @@ def recommendation_from_score(score: float) -> Recommendation:
     return Recommendation.REJECT
 
 
+def _verdict_is_in_doubt(scores: list[float]) -> bool:
+    """Could an arbiter ruling actually change the verdict?
+
+    Only if the agents do not already agree on which bucket the candidate
+    falls in. A panel of 9.0/7.0/6.0 has a spread of 3.0 and escalates
+    under the threshold alone, but all three of those scores mean
+    "advance" -- there is no ruling the arbiter could return that changes
+    the answer, so the call is pure cost.
+
+    Measured on the recorded run: 7 of 33 escalations were this case,
+    including two candidates where every agent scored 6.0 or higher.
+
+    Spread measures variance. This measures decision uncertainty, which is
+    the thing actually worth paying to resolve. Both must hold.
+    """
+    return len({recommendation_from_score(s) for s in scores}) > 1
+
+
 async def screen_one(
     resume_path: str,
     job_description: str,
@@ -407,7 +430,7 @@ async def screen_one(
     scores = [p.score for p in panel]
     spread = max(scores) - min(scores) if len(scores) > 1 else 0.0
 
-    if spread > DISAGREEMENT_THRESHOLD:
+    if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores):
         score, recommendation, rationale, arb_usage = await _arbitrate(
             candidate, panel, job_description, models["arbiter"], rubric
         )

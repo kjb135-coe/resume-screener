@@ -173,6 +173,16 @@ Other things named rather than hidden:
 - `docs/LIMITATIONS.md` isn't written yet. The known blind spot, that disagreement-based escalation can't catch a panel which is unanimously and confidently wrong, is in [PLAN.md §4](PLAN.md) meanwhile.
 - Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [PLAN.md §3b](PLAN.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
 
+Every measured run, what changed before it, and why the number moved is tracked in [docs/RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md).
+
+### The root cause is one broken agent
+
+Of the three panel agents, `client_communication` scores a mean of **0.67** with **33 of 60 zeros**, and never exceeds 6.0 for anyone. It also barely separates the levels it exists to measure — candidates whose archetype targets `high` average 2.29, `medium` 0.55, `low` 0.39. The other two dimensions separate cleanly.
+
+The final score is a mean of three. An agent scoring near zero for nearly everyone drags **every** candidate down about two points. That one fact explains the whole chain: why a 7.0 cutoff was far too high, why the arbiter kept overriding it upward, why all 22 errors ran the same direction, and why `production_light_ai` failed 0 for 7.
+
+The rubric tells that agent absence "is not automatically disqualifying" — but contributing 0.0 to a mean *is* a penalty. The instruction and the arithmetic contradict each other. Fixing that comes before tuning cutoffs, since it moves the distribution the cutoffs would be fitted to.
+
 The design decisions and their tradeoffs are in [PLAN.md](PLAN.md), including what's deliberately unfinished and why.
 
 ## Quickstart

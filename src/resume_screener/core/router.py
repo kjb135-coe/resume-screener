@@ -18,6 +18,13 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
+_TOKEN_FIELDS = (
+    "input_tokens",
+    "output_tokens",
+    "cache_creation_input_tokens",
+    "cache_read_input_tokens",
+)
+
 
 @dataclass
 class Usage:
@@ -30,7 +37,35 @@ class Usage:
     latency_s: float = 0.0
     model_id: str = ""
 
+    by_model: dict[str, dict[str, int]] = field(default_factory=dict)
+    """Tokens split by the model that actually spent them.
+
+    The scalar fields above collapse a cascade into one number, and
+    `model_id` keeps only the first model seen. That was silently wrong for
+    cost: a Verdict accumulates Haiku extraction, Sonnet panel calls and an
+    Opus arbiter call, ends up labelled `haiku`, and gets priced entirely at
+    Haiku rates -- understating a real run several-fold, because Opus output
+    costs 15x Haiku output.
+
+    Splitting here rather than at the reporting layer means the split
+    survives every `+` in the pipeline, which is the only place that knows
+    which model ran.
+    """
+
+    def __post_init__(self) -> None:
+        if not self.by_model and self.model_id and any(
+            getattr(self, f) for f in _TOKEN_FIELDS
+        ):
+            self.by_model = {self.model_id: {f: getattr(self, f) for f in _TOKEN_FIELDS}}
+
     def __add__(self, other: Usage) -> Usage:
+        merged: dict[str, dict[str, int]] = {}
+        for source in (self.by_model, other.by_model):
+            for model, counts in source.items():
+                target = merged.setdefault(model, dict.fromkeys(_TOKEN_FIELDS, 0))
+                for field_name, value in counts.items():
+                    target[field_name] = target.get(field_name, 0) + value
+
         return Usage(
             input_tokens=self.input_tokens + other.input_tokens,
             output_tokens=self.output_tokens + other.output_tokens,
@@ -40,6 +75,7 @@ class Usage:
             + other.cache_read_input_tokens,
             latency_s=self.latency_s + other.latency_s,
             model_id=self.model_id or other.model_id,
+            by_model=merged,
         )
 
 

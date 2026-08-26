@@ -59,24 +59,39 @@ def prf(y_true: list[str], y_pred: list[str], cls: str) -> tuple[float, float, f
 
 
 def estimate_cost(verdicts: list[Verdict]) -> float:
-    """Rough dollars from real token counts.
+    """Real measured cost, priced per model that actually spent the tokens.
 
-    Approximate: Usage is summed per verdict across tiers that use
-    different models, so the model_id recorded is the first tier's. Good
-    enough for relative comparison between configurations, which is what
-    the number is for -- not for billing.
+    Earlier this priced a whole Verdict at whichever model ran first --
+    Haiku, always, since extraction leads the cascade. Every Sonnet panel
+    call and every Opus arbiter call was billed at Haiku rates, which
+    understated a run several-fold. Usage.by_model exists to fix that.
     """
-    total = 0.0
-    for v in verdicts:
-        u = v.usage
-        rates = PRICING.get(u.model_id) or PRICING["claude-sonnet-5"]
-        total += (
-            u.input_tokens * rates["in"]
-            + u.output_tokens * rates["out"]
-            + u.cache_read_input_tokens * rates["cache_read"]
-            + u.cache_creation_input_tokens * rates["cache_write"]
-        ) / 1_000_000
-    return total
+    cost = 0.0
+    for verdict in verdicts:
+        for model_id, counts in verdict.usage.by_model.items():
+            rates = PRICING.get(model_id) or PRICING["claude-sonnet-5"]
+            cost += (
+                counts.get("input_tokens", 0) / 1e6 * rates["in"]
+                + counts.get("output_tokens", 0) / 1e6 * rates["out"]
+                + counts.get("cache_read_input_tokens", 0) / 1e6 * rates["cache_read"]
+                + counts.get("cache_creation_input_tokens", 0) / 1e6 * rates["cache_write"]
+            )
+    return cost
+
+
+def cost_by_model(verdicts: list[Verdict]) -> dict[str, float]:
+    """Same arithmetic, kept split so the expensive tier is visible."""
+    out: dict[str, float] = {}
+    for verdict in verdicts:
+        for model_id, counts in verdict.usage.by_model.items():
+            rates = PRICING.get(model_id) or PRICING["claude-sonnet-5"]
+            out[model_id] = out.get(model_id, 0.0) + (
+                counts.get("input_tokens", 0) / 1e6 * rates["in"]
+                + counts.get("output_tokens", 0) / 1e6 * rates["out"]
+                + counts.get("cache_read_input_tokens", 0) / 1e6 * rates["cache_read"]
+                + counts.get("cache_creation_input_tokens", 0) / 1e6 * rates["cache_write"]
+            )
+    return out
 
 
 async def main() -> int:
