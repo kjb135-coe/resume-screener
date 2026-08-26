@@ -51,6 +51,82 @@ class TestParsing:
         assert _parse_json('[{"a": 1}]', expect="array") == [{"a": 1}]
 
 
+class TestUnterminatedJsonRecovery:
+    """Measured live on 2026-08-25: the panel model intermittently ends its
+    turn (stop_reason 'end_turn', ~324 of 4000 tokens used) having closed
+    its final string but never emitted the closing brace. 5 of 180 panel
+    calls in the recorded eval run were discarded that way, each becoming
+    a spurious 0.0. The score was in the text the whole time.
+    """
+
+    def test_recovers_a_missing_closing_brace(self):
+        assert _parse_json('{"score": 8, "confidence": 0.7, "rationale": "Solid."') == {
+            "score": 8,
+            "confidence": 0.7,
+            "rationale": "Solid.",
+        }
+
+    def test_recovers_a_response_cut_off_mid_string(self):
+        parsed = _parse_json('{"score": 6, "rationale": "Shipped to produc')
+        assert parsed["score"] == 6
+        assert parsed["rationale"].startswith("Shipped to produc")
+
+    def test_recovers_nested_structures(self):
+        parsed = _parse_json('{"a": {"b": [1, 2, {"c": "d"')
+        assert parsed == {"a": {"b": [1, 2, {"c": "d"}]}}
+
+    def test_recovers_arrays(self):
+        assert _parse_json('[{"a": 1}, {"a": 2', expect="array") == [{"a": 1}, {"a": 2}]
+
+    def test_does_not_trip_on_a_brace_inside_a_string(self):
+        """rfind finds the brace inside the string first. The repair path
+        has to notice the real structure is still open.
+        """
+        assert _parse_json('{"rationale": "he wrote } on the board"') == {
+            "rationale": "he wrote } on the board"
+        }
+
+    def test_escaped_quote_does_not_end_the_string_early(self):
+        parsed = _parse_json(r'{"rationale": "they said \"shipped\" repeatedly')
+        assert parsed["rationale"] == 'they said "shipped" repeatedly'
+
+    def test_dangling_escape_is_dropped(self):
+        parsed = _parse_json(r'{"rationale": "ends mid escape \\')
+        assert parsed["rationale"].startswith("ends mid escape")
+
+    def test_mismatched_brackets_are_not_forced_to_parse(self):
+        """Repair is for unfinished output, not for wrong output."""
+        assert _parse_json('{"a": [1, 2}') is None
+
+    def test_well_formed_json_is_untouched(self):
+        assert _parse_json('{"score": 7, "rationale": "fine"}') == {
+            "score": 7,
+            "rationale": "fine",
+        }
+
+    def test_raw_newline_inside_a_string_is_tolerated(self):
+        """Models put literal newlines in long rationales. Rejecting the
+        whole response over one throws away a usable score.
+        """
+        parsed = _parse_json('{"score": 7, "rationale": "line one\nline two"}')
+        assert parsed["score"] == 7
+        assert "line two" in parsed["rationale"]
+
+    def test_raw_newline_in_an_unterminated_string(self):
+        parsed = _parse_json('{"score": 7, "rationale": "line one\nline two')
+        assert parsed["score"] == 7
+
+    @pytest.mark.parametrize("tail", [r"\u", r"\u0", r"\u00", r"\u201"])
+    def test_partial_unicode_escape_at_the_cut_is_dropped(self, tail):
+        parsed = _parse_json('{"score": 5, "rationale": "cut mid escape ' + tail)
+        assert parsed["score"] == 5
+        assert parsed["rationale"].startswith("cut mid escape")
+
+    def test_complete_unicode_escape_survives(self):
+        parsed = _parse_json(r'{"rationale": "café shipped')
+        assert parsed["rationale"] == "café shipped"
+
+
 class TestRecommendationCutoffs:
     @pytest.mark.parametrize(
         "score,expected",
@@ -215,6 +291,83 @@ class TestRubricFor:
         assert len(models["rubric"].calls) == 1
         assert models["panel"].calls == [], "writing a rubric must not score anyone"
 
+
+
+class TestScoreShapedLikeSomethingElse:
+    """Regression: observed live on 2026-08-25.
+
+    Asked to score one dimension, the panel model sometimes answers for
+    ALL of them at once, keyed by dimension name. That is valid JSON with
+    no top-level "score". Reading it as 0.0 would reject a candidate on a
+    number no agent ever assigned -- and because the parse "succeeded",
+    the verdict would not be flagged for review. Silent and wrong is the
+    worst combination available, so this must surface as a parse failure.
+    """
+
+    ALL_DIMENSIONS_AT_ONCE = json.dumps(
+        {
+            "Production Reality": {"score": 1, "confidence": 0.85, "rationale": "x"},
+            "Integration Depth": {"score": 0, "confidence": 0.85, "rationale": "y"},
+            "Client Communication": {"score": 0, "confidence": 0.9, "rationale": "z"},
+        }
+    )
+
+    async def test_per_dimension_answer_is_flagged_not_scored_as_zero(self):
+        models = {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel([self.ALL_DIMENSIONS_AT_ONCE]),
+            "arbiter": FakeModel([arbiter_json(5.0)]),
+        }
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert all(p.parse_failed for p in verdict.panel_scores)
+        assert verdict.review_reason is not None
+        assert "unreadable" in verdict.review_reason
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            '{"confidence": 0.9, "rationale": "no score key at all"}',
+            '{"score": null, "confidence": 0.9}',
+            '{"score": "not a number"}',
+            '{"score": true}',
+        ],
+    )
+    async def test_unusable_score_values_are_parse_failures(self, payload):
+        models = {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel([payload]),
+            "arbiter": FakeModel([arbiter_json(5.0)]),
+        }
+        verdict = await screen_one(FIXTURE, JD, models)
+        assert all(p.parse_failed for p in verdict.panel_scores)
+
+    async def test_a_genuine_zero_is_not_a_parse_failure(self):
+        """The other half of the contract: 0.0 is a legitimate score, and
+        must stay distinguishable from a missing one.
+        """
+        models = _models([0.0, 0.0, 0.0])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert not any(p.parse_failed for p in verdict.panel_scores)
+        assert verdict.score == 0.0
+        assert verdict.review_reason is None
+
+
+class TestGeneratedRubricPromptShape:
+    """The generated rubric shares one cached prefix across three agents,
+    so it cannot name which dimension the reader owns. It must therefore
+    tell them to score exactly one -- the ambiguity here is what produced
+    the bug above.
+    """
+
+    def test_markdown_asks_for_one_dimension_not_all_of_them(self):
+        rubric = parse_rubric(json.loads(rubric_json()))
+        md = rubric.markdown
+
+        assert "assigned exactly ONE" in md
+        assert "Do not return one entry per dimension" in md
+        assert "Score the candidate 0-10 on each" not in md
 
 
 class TestFallbacks:

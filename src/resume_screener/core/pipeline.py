@@ -25,6 +25,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import statistics
 from pathlib import Path
 
@@ -120,23 +121,99 @@ def _personas_for(rubric: GeneratedRubric | None) -> dict[str, str]:
     return _PANEL_PERSONAS if rubric is None else rubric.personas
 
 
+# A \u escape the model never finished emitting, at the very end of a cut
+# fragment. Anchored to the end so a complete é mid-string is untouched.
+_RE_PARTIAL_ESCAPE = re.compile(r"\\u[0-9a-fA-F]{0,3}$")
+
+
+def _close_unterminated(fragment: str) -> str | None:
+    """Add the closers an unfinished JSON fragment is missing.
+
+    Returns None if the fragment is already balanced (nothing to repair)
+    or is too broken to repair safely.
+
+    This exists because of a measured, intermittent model behaviour: the
+    response ends with `stop_reason="end_turn"` and well under the token
+    budget, having closed its final string but never emitted the closing
+    brace. Roughly 3% of panel calls in the recorded eval run were thrown
+    away that way, each becoming a spurious 0.0. The score is right there
+    in the text -- refusing to read it is a self-inflicted wound.
+    """
+    stack: list[str] = []
+    in_string = False
+    escaped = False
+
+    for char in fragment:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+        if char == '"':
+            in_string = True
+        elif char in "{[":
+            stack.append(char)
+        elif char in "}]" and (
+            not stack or (stack.pop(), char) not in (("{", "}"), ("[", "]"))
+        ):
+            return None  # mismatched, not merely unfinished
+
+    if not stack and not in_string:
+        return None
+
+    repaired = fragment[:-1] if escaped else fragment
+    if in_string:
+        # A cut can land inside a \uXXXX escape, leaving something like
+        # "\u12" that no amount of closing braces will make parseable.
+        repaired = _RE_PARTIAL_ESCAPE.sub("", repaired)
+        repaired += '"'
+    repaired += "".join("}" if opener == "{" else "]" for opener in reversed(stack))
+    return repaired
+
+
 def _parse_json(text: str, *, expect: str = "object") -> dict | list | None:
     """Best-effort extraction of a JSON value from a model response.
 
     Returns None rather than raising -- callers decide what a failed parse
     means for their tier, since 'the model returned junk' is a real runtime
     condition, not an exceptional one.
+
+    Tries the well-formed reading first, then repairs an unterminated one.
+    A repaired value can be missing fields the model never got to emit, so
+    callers must still validate what they actually need -- _panel_agent
+    treats a missing score as a failure rather than a zero.
     """
     open_c, close_c = ("{", "}") if expect == "object" else ("[", "]")
-    start, end = text.find(open_c), text.rfind(close_c)
-    if start == -1 or end == -1 or end < start:
+    start = text.find(open_c)
+    if start == -1:
         log.warning("No JSON %s found in model response: %.200s", expect, text)
         return None
-    try:
-        return json.loads(text[start : end + 1])
-    except json.JSONDecodeError:
-        log.warning("Malformed JSON in model response: %.200s", text)
-        return None
+
+    # strict=False tolerates raw newlines and tabs inside strings. Models
+    # emit them in long rationales, and rejecting the whole response over
+    # an unescaped newline throws away a perfectly good score.
+    end = text.rfind(close_c)
+    if end > start:
+        try:
+            return json.loads(text[start : end + 1], strict=False)
+        except json.JSONDecodeError:
+            pass  # fall through to repair -- a closer may sit inside a string
+
+    repaired = _close_unterminated(text[start:])
+    if repaired is not None:
+        try:
+            value = json.loads(repaired, strict=False)
+        except json.JSONDecodeError:
+            pass
+        else:
+            log.info("Recovered an unterminated JSON %s from the model.", expect)
+            return value
+
+    log.warning("Malformed JSON in model response: %.200s", text)
+    return None
 
 
 def _coerce_float(value, default: float) -> float:
@@ -144,6 +221,21 @@ def _coerce_float(value, default: float) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _maybe_float(value) -> float | None:
+    """float(value), or None if it isn't a number at all.
+
+    Distinct from _coerce_float because for a panel score the difference
+    between "the model said 0" and "the model said nothing usable" is
+    load-bearing -- see _panel_agent.
+    """
+    if isinstance(value, bool):  # bools are ints; a True score is not a score
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 async def extract_candidate(
@@ -210,12 +302,31 @@ async def _panel_agent(
         _panel_prefix(job_description, rubric), user, max_tokens=PANEL_MAX_TOKENS
     )
     data = _parse_json(response.text) or {}
+    if not isinstance(data, dict):
+        data = {}
+
+    # A missing score must not become a confident-looking 0.0. The failure
+    # this guards against is real and observed: asked for one dimension,
+    # the model sometimes answers for all of them at once, keyed by
+    # dimension name. That parses as valid JSON with no top-level "score",
+    # so scoring it 0.0 would silently reject a candidate on a number no
+    # agent ever assigned -- and, because the parse "succeeded", would not
+    # flag the verdict for human review.
+    score_value = _maybe_float(data.get("score"))
+    if score_value is None:
+        log.warning(
+            "Panel agent %s returned no usable score (truncated=%s): %.200s",
+            name,
+            response.truncated,
+            response.text,
+        )
+
     score = RubricScore(
         agent_name=name,
-        score=_coerce_float(data.get("score"), 0.0),
+        score=score_value if score_value is not None else 0.0,
         confidence=_coerce_float(data.get("confidence"), 0.0),
         rationale=str(data.get("rationale") or "No rationale returned."),
-        parse_failed=not data,
+        parse_failed=score_value is None,
     )
     return score, response.usage
 

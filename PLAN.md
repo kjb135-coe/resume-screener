@@ -106,6 +106,54 @@ scores the pool. Generation is not deterministic — without the id,
 re-generating at screening time would quietly score against a rubric
 nobody approved.
 
+### 3b. Panel response parsing — two real bugs, found by running it (2026-08-25)
+
+Both were found only once the pipeline ran against the live API. Neither
+was visible offline, and one of them was silently corrupting scores.
+
+**Bug 1 — a missing score became a confident 0.0.** Asked to score its
+one assigned dimension, the panel model sometimes answered for *all
+three at once*, keyed by dimension name. That is valid JSON with no
+top-level `score`, so `_parse_json` succeeded, `parse_failed` stayed
+`False`, and `_coerce_float(None, 0.0)` produced a 0.0 that no agent had
+assigned. Because the parse "succeeded", `review_reason` stayed `None` —
+so a candidate could be rejected on a fabricated zero **and not be
+flagged for human review**. Silent and wrong, the worst combination.
+
+Two fixes: the generated rubric no longer says "score each of the three
+dimensions" (that instruction fought the single-lens user turn and
+caused the behaviour), and a missing or non-numeric score is now a parse
+failure rather than a zero. A genuine 0.0 is still a genuine 0.0 — the
+tests pin both halves.
+
+**Bug 2 — usable scores were being thrown away.** Intermittently the
+model ends its turn (`stop_reason="end_turn"`, ~324 of 4000 tokens used)
+having closed its final string but never emitted the closing brace.
+`_parse_json` located the JSON with `rfind("}")`, found nothing, and
+discarded a complete score. **5 of 180 panel calls in the recorded eval
+run were lost this way**, each becoming a spurious 0.0 that dragged its
+candidate's average down.
+
+`_parse_json` now falls back to closing an unfinished fragment: it
+tracks string state and bracket depth, drops a partial `\uXXXX` escape
+at the cut, and parses with `strict=False` so a raw newline in a long
+rationale doesn't reject the whole response. Mismatched brackets are
+still refused — the repair is for *unfinished* output, not wrong output.
+
+Measured effect on a live 24-call sample: parse failures fell from 4 to
+1. The remaining case is an unescaped `"` inside a rationale, which
+cannot be repaired without guessing where the string ends — it is
+correctly flagged for review instead.
+
+**Worth doing next:** the durable fix for all of this is structured
+output (tool-use / JSON schema) rather than parsing free text. That
+would make every repair above unnecessary. Not done yet.
+
+**Note on the recorded metrics:** `docs/EVAL_RESULTS.md` (macro-F1
+0.630) was produced *before* both fixes, with those 5 lost calls
+included. The next eval run should be expected to differ, and the
+current numbers should not be quoted as if they reflect this code.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return
@@ -165,10 +213,18 @@ run, both untrue for a while by then.
 - `adapters/api.py` + `adapters/static/index.html` — the rubric-preview
   page. Deliberately scoped to previewing a rubric; it does not screen.
 - `prompts/rubric.md`, `prompts/rubric_generator.md`.
-- **107 offline tests**, none of which touch the network.
+- **130 offline tests**, none of which touch the network.
 - The 60-resume synthetic corpus, its labels, and a real eval run:
   macro-F1 0.630, accuracy 0.667, $0.89 for 60 resumes. Written up in
-  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md`.
+  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md` — but see §3b,
+  those numbers predate the parsing fixes and are now stale.
+- The live path has actually been exercised end to end: rubrics
+  generated from both the target posting and an unrelated non-technical
+  one (a charge-nurse req, which produced nursing dimensions with no
+  leakage from the AI rubric), plus 8 resumes screened against a
+  generated rubric, 6 of 8 matching ground truth. Both misses were
+  hold→reject, consistent with `hold` recall being the known weak class
+  (0.2 in the recorded run) rather than a regression.
 
 **Still does not exist:**
 - `adapters/cli.py` — zero code. The `resume-screener` console script in
@@ -306,16 +362,22 @@ can be measured until those 60 resumes and their labels exist.
 
 ## 10. Immediate next decision needed
 
-The corpus, the eval, and generated rubrics (§3a) are all done. The two
-things now most worth doing, in order:
+The corpus, the eval, and generated rubrics (§3a) are all done. In order:
 
-1. **`LIMITATIONS.md`.** §4 names a real blind spot — disagreement-based
+1. **Re-run the eval.** The published macro-F1 0.630 predates the §3b
+   parsing fixes and included 5 panel calls lost to a bug. Every other
+   number in this plan is compared against it, so it should be
+   regenerated before anything else is measured or quoted.
+2. **`LIMITATIONS.md`.** §4 names a real blind spot — disagreement-based
    escalation cannot catch a panel that is unanimously and confidently
    wrong — and it is currently written down only here, in a planning
    doc. For a tool that advises on hiring, that belongs somewhere a
-   reader will actually find it.
-2. **The rest of the §8 bake-off.** Only panel+arbiter has been
+   reader will actually find it. §3b's residual failure mode (an
+   unescaped quote still costs a score, ~4% of calls) belongs there too.
+3. **Structured output for the panel.** §3b's repairs are patches over
+   free-text JSON. Tool-use or a JSON schema would remove the failure
+   class rather than mitigate it.
+4. **The rest of the §8 bake-off.** Only panel+arbiter has been
    measured, so the claim that the cascade beats a single call is
-   currently asserted rather than shown. Macro-F1 0.630 is not a strong
-   enough number to leave that untested — the honest possibility is that
+   currently asserted rather than shown — the honest possibility is that
    a single-pass baseline matches it for less money.

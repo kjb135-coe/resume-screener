@@ -23,7 +23,9 @@ EXCLUDE_DIRS = {
 }
 EXCLUDE_SUFFIXES = {".pyc", ".pyo", ".egg-info"}
 # Gitignored, so they are not part of the repo even though they are on disk.
-EXCLUDE_NAMES = {".DS_Store"}
+# .env in particular holds a real API key -- it must never be described,
+# listed, or otherwise echoed into a committed document.
+EXCLUDE_NAMES = {".DS_Store", ".env", ".env.local"}
 
 DESCRIPTIONS: dict[str, str] = {
     # Top level

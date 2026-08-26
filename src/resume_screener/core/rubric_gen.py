@@ -101,9 +101,14 @@ class GeneratedRubric:
             "",
             self.summary,
             "",
-            f"Score the candidate 0-10 on each of the {len(self.dimensions)} dimensions",
-            "below, and report a confidence (0-1) alongside each score, not",
-            "just the score itself.",
+            f"The {len(self.dimensions)} dimensions below are the full scoring",
+            "standard for this role. They are listed here so you understand what",
+            "the other dimensions cover and do not double-count them.",
+            "",
+            "You are assigned exactly ONE of them. Score only your assigned",
+            "dimension, 0-10, and report a confidence (0-1) alongside it. Return",
+            "a single score object. Do not return one entry per dimension, and do",
+            "not key your answer by dimension name.",
             "",
         ]
         for i, dim in enumerate(self.dimensions, start=1):
