@@ -34,6 +34,8 @@ DESCRIPTIONS: dict[str, str] = {
     "STRUCTURE.md": "This file. Auto-generated map of the repo.",
     "pyproject.toml": "Package metadata, dependencies, pytest and ruff config.",
     ".gitignore": "Excludes venv, caches, .env, and generated databases.",
+    ".env.example": "Template for .env. Names the one key needed; holds no secret.",
+    "LICENSE": "MIT.",
 
     # docs/
     "docs": "Design documents and the target job posting.",
@@ -63,7 +65,7 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/core/rubric_gen.py": "Writes the rubric and the three panel personas from any job posting. Validated, not trusted.",
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
     "src/resume_screener/adapters/mcp_server.py": "MCP server exposing five tools. The primary interface.",
-    "src/resume_screener/adapters/cli.py": "Terminal entry point. Not written yet.",
+    "src/resume_screener/adapters/cli.py": "Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.",
     "src/resume_screener/adapters/api.py": "FastAPI backend: paste a posting, read the generated rubric. Does not screen.",
     "src/resume_screener/adapters/static": "Static assets for the web adapter.",
     "src/resume_screener/adapters/static/index.html": "The rubric-preview page. One file, no build step, no external assets.",
@@ -80,6 +82,7 @@ DESCRIPTIONS: dict[str, str] = {
     "tests/test_router.py": "Response text-block extraction (thinking-block bug regression) and Usage accumulation.",
     "tests/test_rubric_gen.py": "Rubric validation: dimension count, identifier names, and failing loud on junk.",
     "tests/test_api.py": "Web adapter: the rubric endpoint and every error surface it can show.",
+    "tests/test_cli.py": "Terminal adapter, including that the advertised console script still imports.",
     "tests/fixtures": "Static inputs for tests.",
     "tests/fixtures/sample_resume.md": "One well-formed resume used across pipeline tests.",
 

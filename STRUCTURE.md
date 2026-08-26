@@ -34,6 +34,7 @@ removing files rather than editing this by hand.
 │       │   │   └── index.html                   The rubric-preview page. One file, no build step, no external assets.
 │       │   ├── __init__.py                  Package marker.
 │       │   ├── api.py                       FastAPI backend: paste a posting, read the generated rubric. Does not screen.
+│       │   ├── cli.py                       Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.
 │       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.
 │       │   ├── __init__.py                  Package marker.
@@ -54,12 +55,15 @@ removing files rather than editing this by hand.
 │   ├── __init__.py                  Package marker.
 │   ├── fakes.py                     Scripted Model implementation so tests are free, deterministic, and key-less.
 │   ├── test_api.py                  Web adapter: the rubric endpoint and every error surface it can show.
+│   ├── test_cli.py                  Terminal adapter, including that the advertised console script still imports.
 │   ├── test_mcp_server.py           Tool registration, session lifecycle, and the preview-to-screen rubric handoff.
 │   ├── test_pipeline.py             Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.
 │   ├── test_query.py                SQL safety, aggregate handling, and the two query primitives.
 │   ├── test_router.py               Response text-block extraction (thinking-block bug regression) and Usage accumulation.
 │   └── test_rubric_gen.py           Rubric validation: dimension count, identifier names, and failing loud on junk.
+├── .env.example                 Template for .env. Names the one key needed; holds no secret.
 ├── .gitignore                   Excludes venv, caches, .env, and generated databases.
+├── LICENSE                      MIT.
 ├── PLAN.md                      Living status doc — what's settled, what's built, what's open.
 ├── pyproject.toml               Package metadata, dependencies, pytest and ruff config.
 ├── README.md                    Front door: what this is, how to run it, why MCP.

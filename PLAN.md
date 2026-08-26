@@ -149,10 +149,43 @@ correctly flagged for review instead.
 output (tool-use / JSON schema) rather than parsing free text. That
 would make every repair above unnecessary. Not done yet.
 
-**Note on the recorded metrics:** `docs/EVAL_RESULTS.md` (macro-F1
-0.630) was produced *before* both fixes, with those 5 lost calls
-included. The next eval run should be expected to differ, and the
-current numbers should not be quoted as if they reflect this code.
+### 3c. Re-run after the fixes, and what it exposed (2026-08-25)
+
+Re-ran the full corpus on the fixed code. The mechanical goal was met:
+**parse failures fell from 5/180 to 1/180.**
+
+Headline metrics moved *down*, and the honest reading is that this is
+noise rather than a regression:
+
+| | Before | After |
+|---|---|---|
+| Macro-F1 | 0.630 | **0.601** |
+| Accuracy | 0.667 | 0.633 |
+| Lost panel calls | 5/180 | **1/180** |
+| Cost | $0.891 | $0.925 |
+
+Tracing it candidate by candidate: **6 of 60 verdicts changed between
+the two runs, and only 1 of those 6 was a candidate that had suffered a
+parse failure.** That one moved `hold -> advance` against a ground-truth
+label of `advance` — the fix working exactly as designed, recovering a
+score that had been a spurious 0.0. The other 5 flips involved
+candidates whose calls parsed cleanly both times. They moved because the
+model is nondeterministic, not because anything changed in the code.
+
+**The real finding is methodological.** A 10% verdict drift between
+identical runs means a single run cannot support a macro-F1 quoted to
+three decimals, and cannot distinguish a 0.03 change from noise. Every
+comparison in §8 — the whole three-way bake-off, the +5-point bar for
+keeping the cascade — is built on single runs, so none of it can
+currently resolve differences smaller than its own variance.
+
+Before the bake-off means anything, the eval needs to report variance:
+run each arm 3-5 times and report a spread, not a point estimate. That
+is now the blocking item for §8, ahead of building the other two arms.
+
+`hold` recall is unchanged and remains the genuine weakness (0.20 in
+both runs). The system reliably separates strong from weak, and
+reliably fails to identify the middle.
 
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
@@ -213,11 +246,15 @@ run, both untrue for a while by then.
 - `adapters/api.py` + `adapters/static/index.html` — the rubric-preview
   page. Deliberately scoped to previewing a rubric; it does not screen.
 - `prompts/rubric.md`, `prompts/rubric_generator.md`.
-- **130 offline tests**, none of which touch the network.
+- `adapters/cli.py` — `rubric`, `screen`, `rank`. The `resume-screener`
+  console script in pyproject.toml now resolves; it previously pointed at
+  a module that did not exist, so the documented command raised
+  ImportError on a fresh install.
+- **143 offline tests**, none of which touch the network.
 - The 60-resume synthetic corpus, its labels, and a real eval run:
-  macro-F1 0.630, accuracy 0.667, $0.89 for 60 resumes. Written up in
-  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md` — but see §3b,
-  those numbers predate the parsing fixes and are now stale.
+  macro-F1 0.601, accuracy 0.633, $0.93 for 60 resumes. Written up in
+  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md`. Read §3c before
+  quoting that number — run-to-run drift is larger than it looks.
 - The live path has actually been exercised end to end: rubrics
   generated from both the target posting and an unrelated non-technical
   one (a charge-nurse req, which produced nursing dimensions with no
@@ -364,10 +401,11 @@ can be measured until those 60 resumes and their labels exist.
 
 The corpus, the eval, and generated rubrics (§3a) are all done. In order:
 
-1. **Re-run the eval.** The published macro-F1 0.630 predates the §3b
-   parsing fixes and included 5 panel calls lost to a bug. Every other
-   number in this plan is compared against it, so it should be
-   regenerated before anything else is measured or quoted.
+1. **Give the eval a variance estimate.** §3c found 10% verdict drift
+   between two identical runs. Until each configuration is run several
+   times and reported as a spread, the §8 bake-off cannot resolve the
+   differences it exists to measure, and no macro-F1 here should be read
+   to three decimals. This now blocks item 4.
 2. **`LIMITATIONS.md`.** §4 names a real blind spot — disagreement-based
    escalation cannot catch a panel that is unanimously and confidently
    wrong — and it is currently written down only here, in a planning
