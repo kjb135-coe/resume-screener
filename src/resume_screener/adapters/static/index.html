@@ -156,6 +156,7 @@
   .meter>div{height:100%;background:var(--accent)}
 
   /* ---------- queue ---------- */
+  .scale-note{font-size:12.5px;color:var(--muted);margin:-4px 0 14px;max-width:78ch;line-height:1.5}
   .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
   .filters button{
     border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);
@@ -314,6 +315,7 @@
       <section class="step" id="step-results" hidden>
         <div class="eyebrow" id="results-eyebrow">Step 3 — Results</div>
         <div class="tiles" id="tiles"></div>
+        <p class="scale-note" id="scale-note"></p>
         <div class="filters" id="filters"></div>
         <div class="split">
           <div class="list" id="list"></div>
@@ -443,6 +445,16 @@ function renderTiles() {
     const t = el("div","tile"); t.append(el("b",null,n), el("span",null,label)); return t;
   }));
 }
+function renderScaleNote() {
+  const note = $("scale-note");
+  if (!note) return;
+  note.textContent =
+    `Scores run low by design: one of the three agents finds evidence for its `
+    + `dimension in few resumes, so composites sit below where a 0-10 scale `
+    + `suggests. ≥${CUTOFFS.advance} is advance, ≥${CUTOFFS.hold} is hold. `
+    + `Raising the scale was tested and cost accuracy — see docs/SCORE_SCALE.md.`;
+}
+
 function renderFilters() {
   $("filters").replaceChildren(...FILTERS.map(([key,label]) => {
     const n = key==="all" ? DATA.candidates.length
@@ -488,6 +500,12 @@ function renderDetail(c, mount, opts = {}) {
 
   const score = el("div","score");
   score.append(el("b",null,c.score.toFixed(1)), el("span","of","/ 10"));
+  // Show the bar next to the number. A reader seeing "5.5 / 10 — advance"
+  // otherwise has no way to know 5.5 is a good score here. The scale runs
+  // low because one agent scores near zero for almost everyone
+  // (docs/SCORE_SCALE.md); the honest fix is to show where the line is,
+  // not to move the number to where an intuition expects the line.
+  score.append(el("span","of", `advance line ${CUTOFFS.advance.toFixed(1)}`));
   if (c.expected) {
     score.append(el("span","of", c.matches_ground_truth
       ? `matches label (${c.expected})` : `⚠ label says ${c.expected}`));
@@ -757,7 +775,7 @@ function showResult(result, label) {
   DATA = result; filter = "all";
   selected = DATA.candidates.length ? DATA.candidates[0].file : null;
   renderCriteria(DATA.rubric);
-  renderTiles(); renderFilters(); renderList();
+  renderTiles(); renderScaleNote(); renderFilters(); renderList();
   if (DATA.candidates.length) renderDetail(DATA.candidates[0], $("detail"));
   if (label) $("results-eyebrow").textContent = label;
   $("step-results").hidden = false;

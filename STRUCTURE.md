@@ -11,6 +11,7 @@ removing files rather than editing this by hand.
 │   │   └── (60 generated resumes, listed in data/labels.json)
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
 │   ├── eval_run__all-haiku-panel-sonnet-arbiter.json A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
+│   ├── eval_run__recalibrated.json  A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   └── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
@@ -22,8 +23,10 @@ removing files rather than editing this by hand.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
 │   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).
+│   ├── EVAL_RESULTS__recalibrated.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
-│   └── RESULTS_HISTORY.md           Every measured run, what changed before it, and why the number moved.
+│   ├── RESULTS_HISTORY.md           Every measured run, what changed before it, and why the number moved.
+│   └── SCORE_SCALE.md               Why a strong candidate scores 6 not 8, and the measured cost of fixing it.
 ├── research/                    Background research with citations, gathered before design decisions were made.
 │   ├── ats_scoring_criteria.md      How real ATS and AI screeners score resumes in 2026; gaps in our rubric.
 │   ├── cascade_architecture_research.md Whether the tiered-cascade design has real support. Honest answer: partial.

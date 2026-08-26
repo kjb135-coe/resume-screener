@@ -103,6 +103,35 @@ which is the honest finding: nothing reached an unreviewed decision, but
 "59 of 60 need a human" is not automation with a discount, it's manual
 review with extra steps. **Not adopted.**
 
+### Recalibrated scale — 2026-08-26, not adopted
+
+Tested whether the 0-10 scale could be made to mean what a reader
+expects, with 7+ as the advance line. Full reasoning in
+[SCORE_SCALE.md](SCORE_SCALE.md).
+
+Added explicit score anchors to the rubric and told
+`client_communication` that silence is a 3-4 rather than a 0.
+
+It worked on its own terms: that agent went from mean 0.60 / max 4.0 /
+35 zeros to mean 3.34 / max 7.0 / **zero** zeros, and `advance`
+composites rose 5.51 → 6.37.
+
+| Scoring | Best cutoffs | macro-F1 |
+|---|---|---|
+| Original | 3.7 / 0.9 | **0.880** |
+| Recalibrated | 6.1 / 3.1 | 0.796 |
+| Recalibrated, drop `client_comm` | 5.6 / 3.1 | 0.756 |
+
+Each at its own best cutoffs, so this is not a cutoff artifact.
+**Reverted.** And 7+ as the advance line is not reachable regardless:
+even after recalibration the best line the sweep finds is 5.6-6.2.
+
+The caveat worth keeping: the archetypes were generated with an intended
+`client_communication` level, so an agent that punishes silence harshly
+correlates with the answer key. The fairer agent is probably better on
+real applicants and measurably worse on this corpus, and the corpus is
+the only evidence there is.
+
 ## Offline sweeps — analysis, not runs
 
 Neither of these called an API. Both re-derive decisions from scores

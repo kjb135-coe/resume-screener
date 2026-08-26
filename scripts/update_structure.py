@@ -127,6 +127,7 @@ DESCRIPTIONS: dict[str, str] = {
 
     # docs/ (eval outputs)
     "docs/EVAL_RESULTS.md": "Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.",
+    "docs/SCORE_SCALE.md": "Why a strong candidate scores 6 not 8, and the measured cost of fixing it.",
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
     "docs/CUTOFF_SWEEP.md": "Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.",

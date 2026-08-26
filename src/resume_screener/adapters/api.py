@@ -295,6 +295,37 @@ def bullets_from(rationale: str, resume_text: str, limit: int = 1) -> list[dict]
     return out
 
 
+RULING_MAX_CHARS = 420
+
+
+def shorten_ruling(text: str, limit: int = 2, max_chars: int = RULING_MAX_CHARS) -> str:
+    """The arbiter's ruling, capped at `limit` sentences and `max_chars`.
+
+    The prompt now asks for two sentences and new runs comply. Runs
+    recorded before that prompt existed carry rulings that restate every
+    panelist in turn, and those are what the page shows today. Capping at
+    the display layer fixes the archive without paying to re-score it.
+
+    The character budget is not redundant with the sentence cap. These
+    rulings quote the resume heavily, and `_split_sentences` deliberately
+    refuses to break inside a quotation -- so a ruling can be *one*
+    sentence and still run 992 characters. Sentence-capping alone bounded
+    nothing on the worst offenders.
+    """
+    text = (text or "").strip()
+    if len(text) <= max_chars:
+        return text
+
+    kept = " ".join(_split_sentences(text)[:limit]).strip() or text
+    if len(kept) <= max_chars:
+        return kept
+
+    # Still over budget: cut at the last word boundary that fits, so the
+    # ruling ends on a whole word rather than mid-quote.
+    clipped = kept[:max_chars].rsplit(" ", 1)[0].rstrip(" ,;:-—")
+    return f"{clipped}…"
+
+
 def _attach_bullets(candidate: dict) -> dict:
     """Give every panel entry its bullets, and collect quotes for highlighting."""
     resume_text = candidate.get("resume_text", "")
@@ -380,7 +411,9 @@ def load_recorded_run() -> dict:
                 "panel_spread": round(prediction["panel_spread"], 1),
                 "needs_human_review": reason is not None,
                 "review_reason": reason,
-                "rationale": prediction["rationale"],
+                "rationale": shorten_ruling(prediction["rationale"])
+                if prediction["escalated"]
+                else prediction["rationale"],
                 "panel": prediction["panel"],
                 "resume_text": resume_path.read_text(encoding="utf-8")
                 if resume_path.exists()
@@ -476,7 +509,9 @@ def _verdict_to_dict(verdict: Verdict, labels: dict, *, graded: bool) -> dict:
         "panel_spread": round(verdict.panel_spread, 1),
         "needs_human_review": verdict.review_reason is not None,
         "review_reason": verdict.review_reason,
-        "rationale": verdict.rationale,
+        "rationale": shorten_ruling(verdict.rationale)
+        if verdict.escalated
+        else verdict.rationale,
         "panel": [p.to_dict() for p in verdict.panel_scores],
         "resume_text": verdict.candidate.raw_text,
     }
