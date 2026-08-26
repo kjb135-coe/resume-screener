@@ -265,6 +265,95 @@ grounded citation, ~5.8 highlighted lines each, 64% of bullets cite
 something. The 36% that don't are mostly negative findings ("no evidence
 mentions client engagement"), which have nothing to point at by nature.
 
+### 3e. Cutoff sweep — run 2026-08-26, and it changes the picture
+
+`scripts/sweep_cutoffs.py` re-thresholds the scores already in
+`data/eval_run.json`. No API calls, instant, free. Full output in
+`docs/CUTOFF_SWEEP.md`.
+
+**The subtlety that makes this non-trivial.** `screen_one` does not
+derive the recommendation from the cutoffs for every candidate. When the
+panel disagrees, the arbiter returns its own recommendation and *that* is
+what the pipeline uses — 33 of 60 candidates, and on 17 of them the
+arbiter's verdict differs from what the cutoffs would say, always more
+generously. So a sweep that just applies cutoffs to all 60 scores is
+measuring a different pipeline. Both policies are reported separately.
+
+| Policy | Current 7.0/5.0 | Best | Best cutoffs |
+|---|---|---|---|
+| respect-arbiter (what editing the constants does today) | 0.601 | **0.646** | 7.0 / 1.0 |
+| uniform (arbiter returns only a score) | 0.342 | **0.862** | 4.0 / 1.0 |
+
+The second row is the finding. Score distributions by true label:
+
+| Label | min | median | max |
+|---|---|---|---|
+| advance | **4.0** | 6.5 | 8.0 |
+| hold | 0.0 | 2.5 | **4.5** |
+| reject | 0.0 | 0.3 | **1.0** |
+
+Every `advance` scored at or above 4.0. Every `reject` scored at or below
+1.0. **The panel's scores were always good — the 7.0/5.0 mapping was
+discarding the signal.** That is structural separation, not a knife-edge
+fit, which is why this is more believable than a typical same-data
+optimisation.
+
+Confusion at uniform 4.0/1.0: advance 20/20, hold 13/20, reject 19/20.
+
+**What this implies, stated carefully.** Two changes are on the table and
+they are not the same size:
+
+1. Move `ADVANCE_CUTOFF`/`HOLD_CUTOFF` to 7.0/1.0. Small, safe, +0.045.
+2. Stop having the arbiter return its own recommendation, and re-threshold
+   at 4.0/1.0. Large, and a real design change — the arbiter would resolve
+   the *score* and the cutoffs would own the verdict. Worth ~+0.26 over
+   today if it holds up.
+
+Neither has been applied. Both need a fresh eval run to confirm, because
+the cutoffs were chosen on the same 60 resumes they are scored against
+and §3c measured 10% verdict drift between identical runs. **Do not quote
+0.862 as a result.** It is an upper bound that says "this is worth
+testing", not a measurement.
+
+Reading this next to §3c-i: the arbiter has been quietly compensating for
+miscalibrated cutoffs. That explains why the errors all run one direction,
+and why `production_light_ai` fails 0/7 — those candidates score in the
+1.3–4.5 band that 5.0 wrongly calls reject.
+
+### 3f. Resume upload — built 2026-08-26
+
+`POST /api/screen-upload` takes a PDF, Word, Markdown or text file plus a
+posting, screens that one resume, and drops it into the ranked list beside
+the corpus. `core/ingest.py` already handled all four formats; this is the
+web path to it. Verified end to end against a real PDF and a real .docx.
+
+Deliberate choices:
+
+- **Nothing is persisted.** The file goes to a temp directory, is read,
+  and the directory is removed in a `finally`. It is somebody's actual
+  resume; keeping a copy on a demo server is not ours to decide. A test
+  asserts the temp directory is gone afterwards.
+- **No ground truth is invented.** An uploaded resume has no label, so
+  `expected` and `matches_ground_truth` are null rather than guessed.
+  Scoring a real person against the synthetic answer key would report a
+  fictional accuracy.
+- **One rubric per posting, cached by fingerprint.** Five uploads against
+  one posting must be judged by *identical* criteria. Regenerating per
+  upload would score each candidate by a slightly different standard,
+  which is precisely the unfairness this project exists to avoid.
+- **The bundled posting keeps the hand-written rubric**, so an uploaded
+  resume stays comparable to the recorded 60.
+- **Refusals are specific**: unsupported type (415), empty (400), over
+  2 MB (413), and — the useful one — a file that extracts to under 40
+  words (422), which catches scanned or image-only PDFs. Scoring those
+  would produce a confident zero about a resume nobody could read.
+
+**Security note.** An uploaded resume is untrusted input and could contain
+text aimed at the model. It cannot make anything happen: no tool here
+takes an action, so the worst an injected instruction can do is argue for
+its own score, and every verdict is advisory with a human in the loop.
+Worth stating rather than assuming.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return
@@ -465,35 +554,114 @@ can be measured until those 60 resumes and their labels exist.
 
 ## 9. Not started at all
 
-- The CLI adapter (`adapters/cli.py`), still referenced by the
-  `resume-screener` console script in pyproject.toml.
-- `ARCHITECTURE.md`, `LIMITATIONS.md`.
+- `ARCHITECTURE.md`, `LIMITATIONS.md`. LIMITATIONS is the more urgent:
+  §4 names a real blind spot that lives only in this planning doc.
 - The single-pass and flat-ensemble arms of the §8 bake-off.
 - An uncached eval run to quantify the caching saving (§5).
-- Demo recordings (MCP-in-Claude-Desktop clip, web UI walkthrough).
-- Deployment of the web UI anywhere reachable.
-- Exact timeline — mentioned once as "right now," then explicitly
-  paused for deeper planning; never re-confirmed.
+- **Walkthrough mode** (§11) — planned below, not built.
+- **Hosting.** Nothing is deployed. See §11 for the one blocker that
+  actually matters, which is the API key rather than the hosting.
+- Demo recordings.
 
-## 10. Immediate next decision needed
+## 10. Where this actually stands — 2026-08-26
 
-The corpus, the eval, and generated rubrics (§3a) are all done. In order:
+**Working and verified end to end:** the cascade, generated rubrics, the
+MCP server (5 tools), the CLI (3 commands), the web app (submit a posting
+→ criteria → screened results → grounded reasoning), resume upload for
+PDF/Word/Markdown/text, and a 60-resume labelled eval. 209 offline tests.
 
-1. **Give the eval a variance estimate.** §3c found 10% verdict drift
-   between two identical runs. Until each configuration is run several
-   times and reported as a spread, the §8 bake-off cannot resolve the
-   differences it exists to measure, and no macro-F1 here should be read
-   to three decimals. This now blocks item 4.
-2. **`LIMITATIONS.md`.** §4 names a real blind spot — disagreement-based
-   escalation cannot catch a panel that is unanimously and confidently
-   wrong — and it is currently written down only here, in a planning
-   doc. For a tool that advises on hiring, that belongs somewhere a
-   reader will actually find it. §3b's residual failure mode (an
-   unescaped quote still costs a score, ~4% of calls) belongs there too.
-3. **Structured output for the panel.** §3b's repairs are patches over
-   free-text JSON. Tool-use or a JSON schema would remove the failure
-   class rather than mitigate it.
-4. **The rest of the §8 bake-off.** Only panel+arbiter has been
-   measured, so the claim that the cascade beats a single call is
-   currently asserted rather than shown — the honest possibility is that
-   a single-pass baseline matches it for less money.
+**The honest headline:** macro-F1 0.601, and the reason it is that low is
+`hold` recall of 0.20 — the system separates strong from weak reliably
+and cannot identify the middle.
+
+**The best-supported next move, in order:**
+
+1. **Act on the cutoff sweep (§3e).** This is now the highest-value item
+   and costs one eval run. Two options: the safe constant change
+   (+0.045), or the design change where the arbiter stops returning its
+   own recommendation and cutoffs own the verdict (potentially ~+0.26).
+   Either way it needs a fresh run to confirm, because the cutoffs were
+   fit on the same 60 resumes.
+2. **Give the eval a variance estimate.** §3c measured 10% verdict drift
+   between identical runs. Several differences being compared are smaller
+   than that. Until each configuration is run 3-5 times and reported as a
+   spread, neither the bake-off nor the sweep result can be trusted to
+   the precision they are currently quoted at.
+3. **`LIMITATIONS.md`.** Cheap, and the one document a careful reader
+   will look for.
+
+Items 1 and 2 are entangled: doing 1 without 2 risks chasing noise, and
+2 makes 1 conclusive. Doing both is roughly $4 of eval runs.
+
+## 11. Walkthrough mode and hosting — planned, not built
+
+### What it is for
+
+The repo currently assumes a reader who will clone it. A hosted link
+assumes the opposite: someone clicks, has ninety seconds, and will not
+read a README first. Walkthrough mode is a guided path through the app
+for that person.
+
+### Proposed shape
+
+A dismissible overlay driven by a small step list, each step pointing at
+an element already on the page and explaining what it is. No new
+screens — it narrates the real UI rather than duplicating it, so it
+cannot drift out of sync with the product.
+
+| Step | Anchors on | The point being made |
+|---|---|---|
+| 1 | The posting box | Any posting works. Nothing is hardcoded to one role. |
+| 2 | The three criteria cards | The agent wrote these from *your* posting. Show the nursing example as proof. |
+| 3 | The stats row | 60 resumes, ranked, 33 flagged for a human. |
+| 4 | A candidate row | Click through to one verdict. |
+| 5 | The panel bullets | Two bullets per agent, every quote traced to a resume section. Click a chip and watch it highlight. |
+| 6 | The review flag | Disagreement escalates to a human. Nothing here is auto-rejected. |
+| 7 | The upload button | Try your own resume. Nothing is stored. |
+| 8 | The honest slide | macro-F1 0.601, `hold` recall 0.20, and what is being done about it. |
+
+Step 8 is not decoration. A walkthrough that ends on a win reads like a
+pitch; one that ends on a known weakness reads like engineering, and that
+is the actual differentiator for this audience.
+
+### Open questions before building
+
+- **Auto-play or click-through?** Auto-play demos well unattended;
+  click-through respects someone who wants to poke at it. Probably
+  click-through with an obvious "next".
+- **Does it replay a recorded run or make live calls?** Recorded, almost
+  certainly — a walkthrough that costs money per visitor is a walkthrough
+  that gets turned off.
+- **Where does it live?** A `?tour=1` query param keeps it out of the way
+  for anyone who does not want it, and gives a link that starts the tour.
+
+### Hosting — the real blocker is the key, not the host
+
+Deploying this is easy. Deploying it *safely* is the question, and it has
+nothing to do with which platform:
+
+- **The API key would sit on a public server**, and every "Screen
+  resumes" or "Upload" click spends real money. An unauthenticated public
+  page with a live key on it is an open invoice.
+- **Uploads become a data question.** Nothing is persisted today (§3f),
+  which is the right default and should stay true in any hosted build.
+
+Options, cheapest to most work:
+
+1. **Recorded-only build.** Ship the app with live calls disabled: the
+   recorded run, the criteria, the reasoning, the walkthrough, all
+   working. No key on the server, no spend, nothing to abuse. Loses live
+   posting submission and upload.
+2. **Keep live calls, add a gate.** A shared password or a link token,
+   plus a hard per-day spend cap. Preserves the whole demo for a handful
+   of known viewers.
+3. **Live and open with rate limits.** Most work, most risk. Not worth it
+   for an audience of three interviewers.
+
+**Recommendation: option 2**, with option 1 as the fallback if a spend
+cap turns out to be awkward. The two features worth protecting are
+exactly the two that cost money, and the audience is small enough that a
+gate costs them nothing.
+
+None of this is built. It needs a decision on option 1 vs 2 first,
+because that decides whether the hosted build even needs a key.

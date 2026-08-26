@@ -34,21 +34,25 @@ import hashlib
 import json
 import logging
 import re
+import shutil
+import tempfile
 import uuid
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from resume_screener.core.ingest import load_resume_text
 from resume_screener.core.models import Verdict
 from resume_screener.core.pipeline import (
     default_models,
     hand_written_personas,
     rank_paths,
     rubric_for,
+    screen_one,
 )
 from resume_screener.core.router import Usage
 from resume_screener.core.rubric_gen import GeneratedRubric, RubricGenerationError
@@ -120,6 +124,8 @@ def _quoted_spans(text: str) -> list[str]:
         found += [(m.start(), m.group(1).strip()) for m in pattern.finditer(text)]
     found.sort()
     return [quote for _, quote in found if quote]
+
+
 _HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 _ABBREVIATION = re.compile(
     r"(?:e\.g|i\.e|etc|vs|approx|no|fig|cf|Dr|Mr|Mrs|Ms|Inc|Ltd|Jr|Sr|Ph\.D)\.$",
@@ -571,6 +577,146 @@ async def get_results() -> JSONResponse:
             {"error": f"data/eval_run.json is malformed ({exc}). Re-run scripts/evaluate.py."},
             status_code=500,
         )
+
+
+_rubric_by_fingerprint: dict[str, GeneratedRubric | None] = {}
+
+
+def rubric_view(rubric: GeneratedRubric | None) -> dict:
+    """The criteria as the page shows them, generated or hand-written."""
+    if rubric is None:
+        return _hand_written_rubric_view()
+    return rubric.to_dict()
+
+
+async def rubric_for_posting(job_description: str) -> GeneratedRubric | None:
+    """The criteria for a posting, reusing whatever this posting already has.
+
+    Returns a GeneratedRubric, or None meaning "use the hand-written
+    rubric". Raises RubricGenerationError if the model returns something
+    unusable, and RuntimeError if there is no API key.
+
+    Caching on the posting fingerprint matters for uploads specifically:
+    screening five resumes against one posting should write the criteria
+    once, not five times, and all five must be judged against *identical*
+    criteria. Regenerating per upload would quietly score each candidate
+    by a slightly different standard, which is exactly the unfairness this
+    whole project is supposed to avoid.
+    """
+    fingerprint = jd_fingerprint(job_description)
+    if fingerprint in _rubric_by_fingerprint:
+        return _rubric_by_fingerprint[fingerprint]
+
+    if fingerprint == jd_fingerprint(default_job_description()):
+        # The bundled posting is the one prompts/rubric.md was written for,
+        # and is what the recorded eval measured. Generating a fresh rubric
+        # for it would make an uploaded resume incomparable to the 60.
+        _rubric_by_fingerprint[fingerprint] = None
+        return None
+
+    rubric = await rubric_for(job_description)
+    _rubric_by_fingerprint[fingerprint] = rubric
+    return rubric
+
+
+UPLOAD_SUFFIXES = {".pdf", ".docx", ".md", ".txt"}
+MAX_UPLOAD_BYTES = 2 * 1024 * 1024
+
+
+@app.post("/api/screen-upload")
+async def post_screen_upload(
+    # FastAPI declares multipart fields exactly this way; B008 is about
+    # mutable defaults in ordinary functions and does not apply.
+    file: UploadFile = File(...),  # noqa: B008
+    job_description: str = Form(...),
+) -> JSONResponse:
+    """Screen one uploaded resume against a posting.
+
+    Cheap enough to be synchronous: one extraction plus three panel calls,
+    a few cents and a handful of seconds, versus the minute a sampled batch
+    takes.
+
+    The uploaded file is written to a temporary path, read, and deleted in
+    a `finally`. Nothing is persisted and nothing is added to the corpus.
+    This is somebody's actual resume -- keeping a copy on a demo server is
+    not ours to decide.
+
+    An uploaded resume is untrusted input. It cannot make anything happen:
+    no tool here takes an action, so the worst an injected instruction can
+    do is argue for its own score, and the verdict is advisory in the first
+    place. Worth stating rather than assuming.
+    """
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in UPLOAD_SUFFIXES:
+        return JSONResponse(
+            {
+                "error": f"Unsupported file type {suffix or '(none)'}. "
+                f"Accepted: {', '.join(sorted(UPLOAD_SUFFIXES))}."
+            },
+            status_code=415,
+        )
+
+    payload = await file.read()
+    if not payload:
+        return JSONResponse({"error": "That file is empty."}, status_code=400)
+    if len(payload) > MAX_UPLOAD_BYTES:
+        return JSONResponse(
+            {
+                "error": f"That file is {len(payload) / 1e6:.1f} MB. "
+                f"The limit is {MAX_UPLOAD_BYTES // 1024 // 1024} MB."
+            },
+            status_code=413,
+        )
+    if not job_description.strip():
+        return JSONResponse({"error": "Paste a job posting first."}, status_code=400)
+
+    tmp_dir = Path(tempfile.mkdtemp(prefix="resume-upload-"))
+    tmp_path = tmp_dir / f"upload{suffix}"
+    try:
+        tmp_path.write_bytes(payload)
+        try:
+            resume_text = load_resume_text(str(tmp_path))
+        except Exception as exc:  # noqa: BLE001 - pypdf/python-docx raise anything
+            log.warning("Could not read uploaded %s: %s", suffix, exc)
+            return JSONResponse(
+                {"error": f"Could not read that {suffix} file. Is it a valid document?"},
+                status_code=422,
+            )
+        if len(resume_text.split()) < 40:
+            # Scanned PDFs extract to almost nothing. Scoring that would
+            # produce a confident zero about a resume nobody could read.
+            return JSONResponse(
+                {
+                    "error": "Almost no text came out of that file. If it is a "
+                    "scanned or image-only PDF, export a text version and retry."
+                },
+                status_code=422,
+            )
+
+        rubric = await rubric_for_posting(job_description)
+        verdict = await screen_one(str(tmp_path), job_description, rubric=rubric)
+    except RubricGenerationError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=422)
+    except RuntimeError as exc:  # no API key
+        return JSONResponse({"error": str(exc)}, status_code=503)
+    except Exception:
+        log.exception("Screening an uploaded resume failed")
+        return JSONResponse(
+            {"error": "Screening failed. Check the server log."}, status_code=500
+        )
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+
+    candidate = _attach_bullets(_verdict_to_dict(verdict, {}, graded=False))
+    candidate["name"] = verdict.candidate.name or Path(file.filename or "resume").stem
+    candidate["file"] = file.filename or "upload"
+    candidate["uploaded"] = True
+    return JSONResponse(
+        {
+            "candidate": candidate,
+            "criteria": rubric_view(rubric),
+        }
+    )
 
 
 class RubricRequest(BaseModel):

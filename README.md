@@ -26,6 +26,14 @@ Each agent's verdict shows as **two bullets, no more**, and every quote it relie
 
 The first question anyone asks about AI-written feedback is whether it actually read this resume or is producing plausible boilerplate. A citation that resolves to `§ Experience` and jumps to the sentence answers that in one click. A quote the system cannot find verbatim in the resume gets **no citation at all**, rather than a confident-looking label — an unlocatable quote means the model paraphrased, and dressing that up would defeat the point. Across the recorded run that leaves 100% of candidates with at least one grounded citation and about 6 highlighted lines each.
 
+## Where this stands
+
+**Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 209 tests, all offline.
+
+**Known weakness:** macro-F1 is 0.601, and the reason is `hold` recall of 0.20. It separates strong from weak reliably and cannot identify the middle. That is measured, not estimated, and the sweep below points at the cause.
+
+**Not built:** hosting, a guided walkthrough, `LIMITATIONS.md`, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md).
+
 ## How it works
 
 Each resume goes through three stages, and the expensive stage usually doesn't run.
@@ -69,6 +77,14 @@ Three also happens to be the smallest number that makes disagreement *readable*.
 It's now load-bearing: the escalation threshold is a spread across three scores, and more agents would widen that spread by chance alone and silently escalate more often. `core/rubric_gen.py` rejects any rubric that isn't exactly three.
 
 **Honest caveat:** the count was never tested. Two versus three versus five is still an open question in [PLAN.md §8](PLAN.md), and the "be skeptical of unbacked claims" instinct was folded into all three agents rather than made a fourth agent specifically to avoid prejudging it.
+
+### Try it on your own resume
+
+**Upload a resume** takes a PDF, Word document, Markdown or text file, screens it against whatever posting is in the box, and ranks it alongside the corpus.
+
+Nothing is kept. The file is written to a temp directory, read, and deleted in a `finally`; a test asserts the directory is gone afterwards. It is somebody's actual resume, and storing a copy on a demo server is not the demo's call to make.
+
+It also gets no ground-truth label. `expected` stays null rather than guessed, because scoring a real person against a synthetic answer key would report a fictional accuracy.
 
 ## The rubric is written from the posting, not hardcoded
 
@@ -136,6 +152,20 @@ Perfect on every unambiguous archetype, and progressively worse the more a candi
 Two facts point at the same cause: **all 22 mismatches run in one direction**, the model scoring below the label, and the archetype it fails hardest on is the one strong on production but light on AI depth. The panel over-weights AI depth, and the 7.0/5.0 cutoffs are too harsh. That is a calibration problem with a known fix ([PLAN.md §8](PLAN.md) items 5 and 6, both unrun), not a mystery.
 
 Having nine archetypes rather than one generic "bad resume" template is what makes that diagnosis possible. All three reject types fail for different reasons — shipped nothing, evidenced nothing, wrong field — so a screener cannot pass by pattern-matching. [docs/corpus_design.md](docs/corpus_design.md) has the full specs.
+
+### The scores are better than the verdicts
+
+`scripts/sweep_cutoffs.py` re-thresholds the recorded scores — no API calls, instant, free ([full output](docs/CUTOFF_SWEEP.md)). It found that the score-to-verdict mapping is throwing away most of the signal.
+
+| Label | lowest score | median | highest |
+|---|---|---|---|
+| advance | **4.0** | 6.5 | 8.0 |
+| hold | 0.0 | 2.5 | **4.5** |
+| reject | 0.0 | 0.3 | **1.0** |
+
+Every `advance` scored at or above 4.0. Every `reject` scored at or below 1.0. The panel ranks candidates well; the hand-picked 7.0/5.0 cutoffs sit in the wrong place. Re-thresholding at 4.0/1.0 takes macro-F1 from 0.601 to 0.862 on this run.
+
+That number is **not a result yet** — the cutoffs were fitted on the same 60 resumes they were scored against, and run-to-run drift is 10%. It is a strong reason to re-run the eval with new cutoffs, which is the next thing worth doing ([PLAN.md §3e](PLAN.md)).
 
 Other things named rather than hidden:
 

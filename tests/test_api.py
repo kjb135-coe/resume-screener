@@ -7,8 +7,10 @@ readable JSON rather than an opaque 500.
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections import Counter
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,6 +20,31 @@ from resume_screener.adapters.api import _split_sentences, bullets_from
 from resume_screener.core.models import ExtractedCandidate, Recommendation, Verdict
 from resume_screener.core.rubric_gen import RubricGenerationError, parse_rubric
 from tests.fakes import rubric_json
+
+
+def _fake_verdict(path: str) -> Verdict:
+    """A Verdict for the uploaded file, without calling a model."""
+    from resume_screener.core.models import RubricScore
+
+    text = Path(path).read_text(encoding="utf-8", errors="ignore")
+    return Verdict(
+        candidate=ExtractedCandidate(
+            source_path=path, name="Alex Rivera", years_experience=6,
+            companies=["Acme"], technologies=["Python"], education=[],
+            evidence=[], confidence=0.9, raw_text=text,
+        ),
+        score=7.4,
+        recommendation=Recommendation.ADVANCE,
+        rationale="Strong production evidence.",
+        panel_scores=[
+            RubricScore(agent_name=n, score=s, confidence=0.8,
+                        rationale='Evidence: "Shipped an agentic document pipeline to production".')
+            for n, s in (("production_reality", 8.0), ("technical_integration", 7.5),
+                         ("client_communication", 6.5))
+        ],
+        escalated=False,
+    )
+
 
 JD = "We want an AI solutions engineer who ships agentic systems to production."
 
@@ -506,3 +533,130 @@ class TestQuoteStyles:
         """
         rationale = "The candidate's evidence isn't strong and doesn't show ownership."
         assert bullets_from(rationale, RESUME)[0]["citations"] == []
+
+
+class TestUpload:
+    """Uploading a real resume. Everything except the model call is
+    exercised here; the screening itself is stubbed so the suite stays
+    offline and free.
+    """
+
+    RESUME_MD = (
+        "# Alex Rivera\n\n## Experience\n\n"
+        + "Shipped an agentic document pipeline to production serving real users. " * 12
+    )
+
+    @pytest.fixture
+    def stub_screen(self, monkeypatch):
+        async def _fake_rubric(job_description):
+            return None
+
+        async def _fake_screen(path, jd, models=None, rubric=None):
+            return _fake_verdict(path)
+
+        monkeypatch.setattr(api, "rubric_for_posting", _fake_rubric)
+        monkeypatch.setattr(api, "screen_one", _fake_screen)
+
+    def _post(self, client, name, content, jd="Engineer who ships to production."):
+        return client.post(
+            "/api/screen-upload",
+            files={"file": (name, content)},
+            data={"job_description": jd},
+        )
+
+    def test_markdown_upload_is_screened(self, client, stub_screen):
+        response = self._post(client, "alex.md", self.RESUME_MD.encode())
+        body = response.json()
+
+        assert response.status_code == 200
+        assert body["candidate"]["uploaded"] is True
+        assert body["candidate"]["recommendation"] in {"advance", "hold", "reject"}
+        assert "criteria" in body
+
+    def test_uploaded_candidate_is_not_graded(self, client, stub_screen):
+        """There is no ground-truth label for somebody's real resume, and
+        inventing one would report a made-up accuracy.
+        """
+        body = self._post(client, "alex.md", self.RESUME_MD.encode()).json()
+        assert body["candidate"]["expected"] is None
+        assert body["candidate"]["matches_ground_truth"] is None
+
+    def test_bullets_are_attached(self, client, stub_screen):
+        body = self._post(client, "alex.md", self.RESUME_MD.encode()).json()
+        for agent in body["candidate"]["panel"]:
+            assert len(agent["bullets"]) <= 2
+
+    @pytest.mark.parametrize("name", ["resume.exe", "resume.pages", "resume"])
+    def test_unsupported_types_are_refused(self, client, stub_screen, name):
+        response = self._post(client, name, b"whatever")
+        assert response.status_code == 415
+        assert "Accepted" in response.json()["error"]
+
+    def test_empty_file_is_refused(self, client, stub_screen):
+        assert self._post(client, "resume.md", b"").status_code == 400
+
+    def test_oversized_file_is_refused(self, client, stub_screen):
+        big = b"x" * (api.MAX_UPLOAD_BYTES + 1)
+        response = self._post(client, "resume.md", big)
+        assert response.status_code == 413
+        assert "limit" in response.json()["error"]
+
+    def test_near_empty_extraction_is_refused(self, client, stub_screen):
+        """A scanned PDF extracts to almost nothing. Scoring that would
+        produce a confident zero about a resume nobody could read.
+        """
+        response = self._post(client, "scan.pdf", b"%PDF-1.4 tiny")
+        assert response.status_code == 422
+
+    def test_missing_job_description_is_refused(self, client, stub_screen):
+        response = self._post(client, "alex.md", self.RESUME_MD.encode(), jd="   ")
+        assert response.status_code == 400
+
+    def test_nothing_is_left_on_disk(self, client, stub_screen, monkeypatch):
+        """It is somebody's actual resume. Keeping a copy on a demo server
+        is not ours to decide.
+        """
+        made: list[str] = []
+        real_mkdtemp = api.tempfile.mkdtemp
+
+        def spy(*args, **kwargs):
+            path = real_mkdtemp(*args, **kwargs)
+            made.append(path)
+            return path
+
+        monkeypatch.setattr(api.tempfile, "mkdtemp", spy)
+        self._post(client, "alex.md", self.RESUME_MD.encode())
+
+        assert made, "upload did not use a temp dir"
+        assert not any(Path(p).exists() for p in made)
+
+
+class TestRubricForPosting:
+    def test_bundled_posting_uses_the_hand_written_rubric(self):
+        """Generating a fresh rubric for the posting the eval measured
+        would make an uploaded resume incomparable to the recorded 60.
+        """
+        api._rubric_by_fingerprint.clear()
+        result = asyncio.run(api.rubric_for_posting(api.default_job_description()))
+        assert result is None
+
+    def test_same_posting_is_generated_once(self, monkeypatch):
+        """Five uploads against one posting must be judged by identical
+        criteria, not five slightly different rubrics.
+        """
+        api._rubric_by_fingerprint.clear()
+        calls = []
+        rubric = parse_rubric(json.loads(rubric_json()))
+
+        async def _fake(job_description):
+            calls.append(job_description)
+            return rubric
+
+        monkeypatch.setattr(api, "rubric_for", _fake)
+        posting = "Charge Nurse, nights. ACLS required."
+        first = asyncio.run(api.rubric_for_posting(posting))
+        second = asyncio.run(api.rubric_for_posting(f"  {posting}  "))
+
+        assert first is second
+        assert len(calls) == 1
+        api._rubric_by_fingerprint.clear()

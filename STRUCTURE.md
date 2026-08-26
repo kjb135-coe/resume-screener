@@ -14,6 +14,7 @@ removing files rather than editing this by hand.
 │   │   └── candidates.png               The candidates view, used in the README.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
+│   ├── CUTOFF_SWEEP.md              Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
 │   └── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
 ├── research/                    Background research with citations, gathered before design decisions were made.
@@ -28,6 +29,7 @@ removing files rather than editing this by hand.
 │   ├── evaluate.py                  Scores the pipeline against the labeled corpus. Writes EVAL_RESULTS.md and eval_run.json.
 │   ├── generate_candidate_report.py Builds CANDIDATE_REPORTS.md from the last evaluate.py run.
 │   ├── generate_corpus.py           Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.
+│   ├── sweep_cutoffs.py             Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.
 │   └── update_structure.py          Regenerates STRUCTURE.md from the real tree.
 ├── src/                         Package source.
 │   └── resume_screener/             The installable package.

@@ -166,6 +166,10 @@
       <select id="count" title="How many resumes to screen"></select>
       <button class="ghost" id="criteria-only" title="One call, a few cents. No screening.">Criteria only</button>
       <button class="ghost" id="reset">Reset to example</button>
+      <label class="ghost upload" id="upload-label" title="PDF, Word, Markdown or text. Nothing is stored.">
+        Upload a resume
+        <input type="file" id="upload" accept=".pdf,.docx,.md,.txt" hidden />
+      </label>
       <span class="status" id="status"></span>
     </div>
     <div class="bar" id="barwrap" hidden><div id="bar"></div></div>
@@ -295,6 +299,11 @@ function renderList() {
     const pill = document.createElement("span");
     pill.className = `pill ${c.recommendation}`; pill.textContent = c.recommendation;
     b.append(who, sc, pill);
+    if (c.uploaded) {
+      const up = document.createElement("span");
+      up.className = "uploaded-badge"; up.textContent = "yours";
+      b.append(up);
+    }
     if (c.needs_human_review) {
       const f = document.createElement("span");
       f.className = "flag"; f.textContent = "⚑"; f.title = c.review_reason;
@@ -456,6 +465,57 @@ function showResult(result) {
   if (DATA.candidates.length) renderDetail(DATA.candidates[0]);
   $("step-results").hidden = false;
 }
+
+/* ---------- upload ---------- */
+
+/* Screen one uploaded resume against the posting currently in the box.
+
+   The result is prepended to whatever list is on screen and selected, so
+   an uploaded resume is ranked among the corpus rather than shown off to
+   one side. It carries no ground-truth label, because nobody wrote one
+   for a real person's resume. */
+async function uploadResume(file) {
+  if (!file) return;
+  const jd = $("jd").value.trim();
+  if (!jd) { setStatus("Paste a job posting first.", true); return; }
+
+  $("upload-label").classList.add("busy");
+  setStatus(`Screening ${file.name}\u2026 a few seconds.`);
+  try {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("job_description", jd);
+    const res = await fetch("/api/screen-upload", { method: "POST", body: form });
+    const body = await res.json();
+    if (!res.ok) { setStatus(body.error || `Upload failed (${res.status}).`, true); return; }
+
+    const c = body.candidate;
+    if (!DATA) DATA = { candidates: [], summary: {}, rubric: body.criteria };
+    DATA.candidates = [c, ...DATA.candidates.filter((x) => x.file !== c.file)];
+    DATA.summary = {
+      ...DATA.summary,
+      n: DATA.candidates.length,
+      advance: DATA.candidates.filter((x) => x.recommendation === "advance").length,
+      hold: DATA.candidates.filter((x) => x.recommendation === "hold").length,
+      reject: DATA.candidates.filter((x) => x.recommendation === "reject").length,
+      needs_human_review: DATA.candidates.filter((x) => x.needs_human_review).length,
+    };
+    filter = "all";
+    selected = c.file;
+    if (body.criteria) renderCriteria(body.criteria);
+    renderStats(); renderFilters(); renderList(); renderDetail(c);
+    $("step-results").hidden = false;
+    setStatus(`${c.name}: ${c.score}/10, ${c.recommendation}.`);
+    document.getElementById("detail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (err) {
+    setStatus(`Upload failed: ${err.message}`, true);
+  } finally {
+    $("upload-label").classList.remove("busy");
+    $("upload").value = "";
+  }
+}
+
+$("upload").addEventListener("change", (e) => uploadResume(e.target.files[0]));
 
 /* ---------- run ---------- */
 async function poll(jobId) {
