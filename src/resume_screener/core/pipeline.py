@@ -27,6 +27,7 @@ import logging
 import os
 import re
 import statistics
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from resume_screener.core.ingest import iter_resume_paths, load_resume_text
@@ -119,6 +120,16 @@ def _panel_prefix(job_description: str, rubric: GeneratedRubric | None = None) -
 
 def _personas_for(rubric: GeneratedRubric | None) -> dict[str, str]:
     return _PANEL_PERSONAS if rubric is None else rubric.personas
+
+
+def hand_written_personas() -> dict[str, str]:
+    """The default panel: agent name -> that agent's brief.
+
+    Public because adapters need to *display* the criteria behind a run
+    that used the built-in rubric, not just the generated ones. Returns a
+    copy so a caller cannot reach in and edit the panel.
+    """
+    return dict(_PANEL_PERSONAS)
 
 
 # A \u escape the model never finished emitting, at the very end of a cut
@@ -436,12 +447,52 @@ async def rubric_for(
     return await generate_rubric(job_description, models["rubric"])
 
 
+async def rank_paths(
+    paths: Sequence[str],
+    job_description: str,
+    models: dict[str, Model] | None = None,
+    max_concurrent: int = MAX_CONCURRENT_RESUMES,
+    rubric: GeneratedRubric | None = None,
+    on_progress: Callable[[int, int], None] | None = None,
+) -> list[Verdict]:
+    """Screen an explicit list of resumes, ranked best-first.
+
+    `on_progress(done, total)` fires as each resume finishes, including
+    the ones that fail. A caller showing a progress bar needs the count to
+    reach `total` regardless of outcome, or the bar stalls forever on a
+    batch containing one bad file.
+    """
+    models = models or default_models()
+    semaphore = asyncio.Semaphore(max_concurrent)
+    total = len(paths)
+    done = 0
+
+    async def _bounded(path: str) -> Verdict | None:
+        nonlocal done
+        async with semaphore:
+            try:
+                return await screen_one(path, job_description, models, rubric)
+            except Exception:
+                # One unreadable resume shouldn't sink a 60-resume batch.
+                log.exception("Failed to screen %s", path)
+                return None
+            finally:
+                done += 1
+                if on_progress is not None:
+                    on_progress(done, total)
+
+    results = await asyncio.gather(*[_bounded(p) for p in paths])
+    verdicts = [v for v in results if v is not None]
+    return sorted(verdicts, key=lambda v: v.score, reverse=True)
+
+
 async def rank_all(
     resume_dir: str,
     job_description: str,
     models: dict[str, Model] | None = None,
     max_concurrent: int = MAX_CONCURRENT_RESUMES,
     rubric: GeneratedRubric | None = None,
+    on_progress: Callable[[int, int], None] | None = None,
 ) -> list[Verdict]:
     """Screen every resume in a directory, ranked best-first.
 
@@ -452,19 +503,11 @@ async def rank_all(
     `rubric` is resolved once here and reused for every resume, which is
     what keeps the cached panel prefix identical across the batch.
     """
-    models = models or default_models()
-    paths = iter_resume_paths(resume_dir)
-    semaphore = asyncio.Semaphore(max_concurrent)
-
-    async def _bounded(path: str) -> Verdict | None:
-        async with semaphore:
-            try:
-                return await screen_one(path, job_description, models, rubric)
-            except Exception:
-                # One unreadable resume shouldn't sink a 60-resume batch.
-                log.exception("Failed to screen %s", path)
-                return None
-
-    results = await asyncio.gather(*[_bounded(p) for p in paths])
-    verdicts = [v for v in results if v is not None]
-    return sorted(verdicts, key=lambda v: v.score, reverse=True)
+    return await rank_paths(
+        iter_resume_paths(resume_dir),
+        job_description,
+        models,
+        max_concurrent,
+        rubric,
+        on_progress,
+    )

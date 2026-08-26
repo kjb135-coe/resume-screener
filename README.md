@@ -4,9 +4,21 @@ An agent that reads a stack of resumes against a specific job posting, ranks the
 
 Built for the problem of a talent team reading every resume by hand with no ATS. It is not a filter that rejects people quietly. Every verdict comes with the evidence behind it, and anything the system isn't confident about gets handed back to a person rather than decided.
 
-![The candidates view: 60 resumes ranked, with each agent's score and reasoning](docs/img/candidates.png)
+![Submit a posting, see the criteria it wrote, then the ranked results](docs/img/candidates.png)
 
-That's 60 test resumes screened for **$0.93 total**, about a cent and a half each. 14 advance, 10 hold, 36 reject, and **33 flagged for a human**. Every score opens up into the reasoning that produced it.
+Submit a posting, and the whole flow runs top to bottom:
+
+1. **Paste a job posting.** Any posting, not just this one.
+2. **It writes three scoring criteria from that posting**, each with the brief for the agent that owns it.
+3. **Resumes get screened against those criteria**, ranked, with the reasoning behind every score.
+
+The screenshot shows 60 test resumes screened for **$0.93 total**, about a cent and a half each. 14 advance, 10 hold, 36 reject, and **33 flagged for a human**.
+
+```bash
+uvicorn resume_screener.adapters.api:app --reload
+```
+
+The page opens on the bundled posting and a run that already happened, so there is something real to look at before spending anything. Submit a different posting and it does a live run over a 12-resume sample, about $0.19 and under a minute, with a progress bar. Identical postings are served from cache rather than re-billed, and **Criteria only** writes the criteria without screening, for a few cents.
 
 ## How it works
 
@@ -64,6 +76,14 @@ Two rules are enforced in code rather than trusted to the model:
 
 - **Exactly three dimensions**, for the reason above.
 - **Generation failure raises.** There is no silent fallback to the built-in rubric. Scoring one job's candidates against a different job's criteria is a wrong answer that looks like a right one.
+
+### What keeps the demo honest
+
+A run against any posting other than the bundled one **reports no accuracy figure at all**. The labels in `data/labels.json` describe exactly one job. Screening these same resumes against a payments or nursing posting produces perfectly correct verdicts that those labels say nothing about, and grading them against the wrong answer key would publish a made-up number as if it meant something.
+
+Expect most candidates to score near zero there. The corpus is 60 AI-engineer resumes, and rejecting them for a payments role is the system working, not failing.
+
+A live run is capped at 24 resumes. That is a spending limit, not a technical one.
 
 ## Why MCP
 

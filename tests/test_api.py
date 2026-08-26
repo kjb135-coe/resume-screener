@@ -8,11 +8,13 @@ readable JSON rather than an opaque 500.
 from __future__ import annotations
 
 import json
+from collections import Counter
 
 import pytest
 from fastapi.testclient import TestClient
 
 from resume_screener.adapters import api
+from resume_screener.core.models import ExtractedCandidate, Recommendation, Verdict
 from resume_screener.core.rubric_gen import RubricGenerationError, parse_rubric
 from tests.fakes import rubric_json
 
@@ -104,6 +106,177 @@ class TestResults:
 
         assert response.status_code == 404
         assert "evaluate.py" in response.json()["error"]
+
+
+class TestDefaultJd:
+    def test_prefill_carries_the_bundled_posting(self, client):
+        body = client.get("/api/default-jd").json()
+        assert "AI Solutions Engineer" in body["job_description"]
+        assert body["default_count"] == api.DEFAULT_SAMPLE
+        assert body["max_count"] == api.MAX_SAMPLE
+
+
+class TestSampling:
+    def test_sample_is_balanced_across_ground_truth_classes(self):
+        """Taking the first N off disk would return twelve academic
+        researchers, since the corpus is alphabetical by archetype. A
+        viewer would watch a column of identical rejects.
+        """
+        labels = json.loads(api.LABELS_JSON.read_text())
+        counts = Counter(labels[p.name]["label"] for p in api.sample_resumes(12))
+        assert set(counts) == {"advance", "hold", "reject"}
+        assert max(counts.values()) - min(counts.values()) <= 1
+
+    def test_sample_is_deterministic(self):
+        assert api.sample_resumes(9) == api.sample_resumes(9)
+
+    def test_every_sampled_path_exists(self):
+        assert all(p.exists() for p in api.sample_resumes(api.MAX_SAMPLE))
+
+
+class TestFingerprint:
+    def test_whitespace_differences_are_the_same_posting(self):
+        """Otherwise someone gets re-billed for pasting the same JD twice."""
+        assert api.jd_fingerprint("Senior Engineer\n  Ships things.  ") == api.jd_fingerprint(
+            "Senior Engineer\nShips things."
+        )
+
+    def test_different_postings_differ(self):
+        assert api.jd_fingerprint("Nurse") != api.jd_fingerprint("Engineer")
+
+
+class TestScreenEndpoint:
+    def test_bundled_posting_is_served_from_the_recorded_run(self, client):
+        """The default demo path must not spend money. The bundled posting
+        maps onto the run already on disk.
+        """
+        body = client.post(
+            "/api/screen",
+            json={"job_description": api.default_job_description(), "count": 12},
+        ).json()
+
+        assert body["status"] == "done"
+        assert body["cached"] is True
+        assert body["result"]["source"] == "recorded"
+        assert len(body["result"]["candidates"]) == 60
+
+    def test_repeat_posting_reuses_the_cached_run(self, client):
+        """A second submission of the same posting must not re-bill."""
+        posting = "Charge Nurse, night shift. ACLS required."
+        fingerprint = api.jd_fingerprint(posting)
+        api._run_cache[fingerprint] = {
+            "source": "live",
+            "candidates": [],
+            "summary": {"n": 0},
+        }
+        try:
+            body = client.post("/api/screen", json={"job_description": posting}).json()
+            assert body["cached"] is True
+            assert body["result"]["source"] == "live"
+        finally:
+            api._run_cache.pop(fingerprint, None)
+
+    def test_whitespace_variant_still_hits_the_cache(self, client):
+        posting = "Charge Nurse, night shift. ACLS required."
+        fingerprint = api.jd_fingerprint(posting)
+        api._run_cache[fingerprint] = {"source": "live", "candidates": [], "summary": {"n": 0}}
+        try:
+            body = client.post(
+                "/api/screen", json={"job_description": f"  {posting}  \n\n"}
+            ).json()
+            assert body["cached"] is True
+        finally:
+            api._run_cache.pop(fingerprint, None)
+
+    def test_count_is_capped(self, client):
+        """A spending limit, not a technical one."""
+        response = client.post(
+            "/api/screen", json={"job_description": "Nurse wanted.", "count": 500}
+        )
+        assert response.status_code == 422
+
+    def test_empty_posting_is_rejected(self, client):
+        assert client.post("/api/screen", json={"job_description": ""}).status_code == 422
+
+    def test_unknown_job_id_is_a_404(self, client):
+        assert client.get("/api/screen/nope").status_code == 404
+
+    def test_running_job_reports_progress(self, client):
+        api._jobs["j1"] = {
+            "status": "running", "stage": "screening",
+            "progress": {"done": 5, "total": 12},
+            "fingerprint": "x", "rubric": None, "result": None, "error": None,
+        }
+        try:
+            body = client.get("/api/screen/j1").json()
+            assert body["status"] == "running"
+            assert body["progress"] == {"done": 5, "total": 12}
+        finally:
+            api._jobs.pop("j1", None)
+
+    def test_failed_job_surfaces_its_error(self, client):
+        api._jobs["j2"] = {
+            "status": "error", "stage": "rubric", "progress": {},
+            "fingerprint": "x", "rubric": None, "result": None,
+            "error": "ANTHROPIC_API_KEY is not set.",
+        }
+        try:
+            response = client.get("/api/screen/j2")
+            assert response.status_code == 422
+            assert "ANTHROPIC_API_KEY" in response.json()["error"]
+        finally:
+            api._jobs.pop("j2", None)
+
+
+class TestGroundTruthOnlyAppliesToItsOwnPosting:
+    """labels.json describes exactly one posting: the bundled AI Solutions
+    Engineer role. Screening the same resumes against a payments or nursing
+    posting produces correct verdicts the labels say nothing about, and
+    grading those against the wrong answer key would publish a made-up
+    accuracy number.
+    """
+
+    def _verdict(self):
+        return Verdict(
+            candidate=ExtractedCandidate(
+                source_path=str(api.RESUME_DIR / "academic_researcher__devon_whitaker.md"),
+                name="Devon Whitaker",
+                years_experience=3,
+                companies=[],
+                technologies=[],
+                education=[],
+                evidence=[],
+                confidence=0.9,
+                raw_text="...",
+            ),
+            score=0.0,
+            recommendation=Recommendation.REJECT,
+            rationale="No relevant evidence.",
+            panel_scores=[],
+            escalated=False,
+        )
+
+    def test_graded_run_reports_ground_truth(self):
+        labels = json.loads(api.LABELS_JSON.read_text())
+        row = api._verdict_to_dict(self._verdict(), labels, graded=True)
+
+        assert row["expected"] == "reject"
+        assert row["matches_ground_truth"] is True
+
+    def test_ungraded_run_withholds_ground_truth(self):
+        labels = json.loads(api.LABELS_JSON.read_text())
+        row = api._verdict_to_dict(self._verdict(), labels, graded=False)
+
+        assert row["expected"] is None
+        assert row["matches_ground_truth"] is None
+
+    def test_archetype_still_shown_when_ungraded(self):
+        """Archetype describes the resume itself, not the verdict, so it
+        stays useful regardless of which posting was used.
+        """
+        labels = json.loads(api.LABELS_JSON.read_text())
+        row = api._verdict_to_dict(self._verdict(), labels, graded=False)
+        assert row["archetype"] == "academic_researcher"
 
 
 class TestReviewReason:

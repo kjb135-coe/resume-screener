@@ -25,30 +25,62 @@
     font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
   header {
-    border-bottom: 1px solid var(--line); padding: 14px 22px;
-    display: flex; align-items: baseline; gap: 22px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--line); padding: 13px 22px;
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
   }
   h1 { font-size: 16px; margin: 0; font-weight: 700; }
-  nav { display: flex; gap: 4px; }
-  nav button {
-    background: none; border: 0; border-radius: 7px; padding: 6px 13px;
-    font-size: 14px; color: var(--muted); cursor: pointer;
-  }
-  nav button[aria-selected="true"] { background: var(--panel); color: var(--fg); font-weight: 600; }
+  header .tag { font-size: 12.5px; color: var(--muted); }
   .runmeta { margin-left: auto; font-size: 12.5px; color: var(--muted); }
-
   main { padding: 22px; max-width: 1400px; margin: 0 auto; }
   [hidden] { display: none !important; }
 
-  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-  .stat {
-    border: 1px solid var(--line); border-radius: 9px; padding: 9px 15px;
-    background: var(--panel); min-width: 108px;
+  /* ---------- step 1: the posting ---------- */
+  .step { margin-bottom: 26px; }
+  .steplabel {
+    font-size: 11.5px; text-transform: uppercase; letter-spacing: .7px;
+    color: var(--muted); font-weight: 700; margin-bottom: 8px;
   }
+  textarea {
+    width: 100%; min-height: 150px; padding: 13px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical;
+  }
+  .go { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .go button {
+    background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .go button:disabled { opacity: .5; cursor: default; }
+  .go .ghost { background: none; color: var(--muted); border: 1px solid var(--line); }
+  .go select {
+    background: var(--panel); color: var(--fg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 9px 11px; font-size: 13.5px;
+  }
+  .status { font-size: 13px; color: var(--muted); }
+  .status.error { color: var(--err); }
+
+  .bar { height: 5px; background: var(--panel); border-radius: 3px; overflow: hidden;
+         margin-top: 12px; border: 1px solid var(--line); }
+  .bar > div { height: 100%; background: var(--accent); width: 0; transition: width .3s ease; }
+
+  /* ---------- step 2: criteria ---------- */
+  .dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .dim { border: 1px solid var(--line); border-top: 3px solid var(--accent);
+         border-radius: 8px; padding: 14px 16px; background: var(--panel); }
+  .dim h4 { margin: 0 0 2px; font-size: 14.5px; }
+  .dim code { font-size: 11.5px; color: var(--muted); }
+  .dim p { margin: 9px 0 0; font-size: 13px; }
+  .dim .lens { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 9px; font-size: 12.5px; }
+  .dim .lens b { display: block; color: var(--muted); font-size: 10.5px;
+                 text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+
+  /* ---------- step 3: results ---------- */
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat { border: 1px solid var(--line); border-radius: 9px; padding: 9px 15px;
+          background: var(--panel); min-width: 104px; }
   .stat b { display: block; font-size: 20px; line-height: 1.25; }
   .stat span { font-size: 11.5px; color: var(--muted); }
-
-  .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 15px; }
   .filters button {
     border: 1px solid var(--line); background: var(--bg); color: var(--muted);
     border-radius: 999px; padding: 5px 14px; font-size: 13px; cursor: pointer;
@@ -56,16 +88,12 @@
   .filters button[aria-pressed="true"] {
     background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600;
   }
-
-  .split { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 20px; align-items: start; }
+  .split { display: grid; grid-template-columns: minmax(290px, 390px) 1fr; gap: 18px; align-items: start; }
   @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
-
   .list { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
-  .row {
-    display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
-    padding: 11px 14px; background: var(--bg); border: 0;
-    border-bottom: 1px solid var(--line); cursor: pointer; color: var(--fg); font: inherit;
-  }
+  .row { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+         padding: 11px 14px; background: var(--bg); border: 0;
+         border-bottom: 1px solid var(--line); cursor: pointer; color: var(--fg); font: inherit; }
   .row:last-child { border-bottom: 0; }
   .row:hover { background: var(--panel); }
   .row[aria-current="true"] { background: var(--panel); box-shadow: inset 3px 0 0 var(--accent); }
@@ -73,11 +101,8 @@
   .row .nm { font-weight: 600; font-size: 14px; }
   .row .arch { font-size: 11.5px; color: var(--muted); text-transform: capitalize; }
   .row .sc { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; }
-
-  .pill {
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-    padding: 3px 8px; border-radius: 999px; white-space: nowrap;
-  }
+  .pill { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+          padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
   .pill.advance { background: var(--advance-bg); color: var(--advance); }
   .pill.hold    { background: var(--hold-bg);    color: var(--hold); }
   .pill.reject  { background: var(--reject-bg);  color: var(--reject); }
@@ -85,17 +110,14 @@
 
   .detail { border: 1px solid var(--line); border-radius: 11px; padding: 20px 22px; background: var(--panel); }
   .detail h2 { margin: 0 0 3px; font-size: 20px; }
-  .detail .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; text-transform: capitalize; }
-  .headline { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .detail .sub { color: var(--muted); font-size: 13px; margin: 0 0 15px; text-transform: capitalize; }
+  .headline { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
   .headline .big { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .truth { font-size: 12px; color: var(--muted); }
-
-  .notice {
-    border-left: 3px solid var(--hold); background: var(--hold-bg); color: var(--fg);
-    padding: 10px 13px; border-radius: 0 7px 7px 0; font-size: 13.5px; margin-bottom: 16px;
-  }
+  .notice { border-left: 3px solid var(--hold); background: var(--hold-bg); color: var(--fg);
+            padding: 10px 13px; border-radius: 0 7px 7px 0; font-size: 13.5px; margin-bottom: 15px; }
   h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted);
-       margin: 20px 0 9px; font-weight: 700; }
+       margin: 19px 0 9px; font-weight: 700; }
   .agent { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
            margin-bottom: 9px; background: var(--bg); }
   .agent .top { display: flex; align-items: baseline; gap: 9px; margin-bottom: 5px; flex-wrap: wrap; }
@@ -105,51 +127,47 @@
   .agent p { margin: 0; font-size: 13.5px; }
   .bad { color: var(--err); font-size: 11.5px; font-weight: 600; }
   blockquote { margin: 0; padding: 11px 14px; border-left: 3px solid var(--accent);
-               background: var(--bg); border-radius: 0 7px 7px 0; font-size: 13.5px;
-               white-space: pre-wrap; }
-  details.resume { margin-top: 20px; }
+               background: var(--bg); border-radius: 0 7px 7px 0; font-size: 13.5px; white-space: pre-wrap; }
+  details.resume { margin-top: 18px; }
   details.resume summary { cursor: pointer; color: var(--muted); font-size: 13px; }
-  pre.resume {
-    background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px;
-    overflow-x: auto; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; margin-top: 10px;
-  }
+  pre.resume { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px;
+               overflow-x: auto; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; margin-top: 10px; }
   .empty { color: var(--muted); padding: 40px 0; text-align: center; }
-
-  textarea {
-    width: 100%; min-height: 210px; padding: 13px; border-radius: 9px;
-    border: 1px solid var(--line); background: var(--panel); color: var(--fg);
-    font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical;
-  }
-  .go { display: flex; align-items: center; gap: 13px; margin-top: 13px; }
-  .go button {
-    background: var(--accent); color: #fff; border: 0; border-radius: 8px;
-    padding: 10px 19px; font-size: 14px; font-weight: 600; cursor: pointer;
-  }
-  .go button:disabled { opacity: .55; cursor: default; }
-  .status { color: var(--muted); font-size: 13px; }
-  .status.error { color: var(--err); }
-  .dim { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px;
-         padding: 15px 17px; margin-bottom: 13px; background: var(--panel); }
-  .dim h4 { margin: 0 0 3px; font-size: 15px; }
-  .lens { border-top: 1px dashed var(--line); margin-top: 11px; padding-top: 10px; font-size: 13.5px; }
-  .lens b { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase;
-            letter-spacing: .5px; margin-bottom: 3px; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Resume Screener</h1>
-  <nav>
-    <button id="tab-results" aria-selected="true">Candidates</button>
-    <button id="tab-rubric" aria-selected="false">Rubric</button>
-  </nav>
+  <span class="tag">Submit a posting. It writes the scoring criteria, then screens resumes against them.</span>
   <div class="runmeta" id="runmeta"></div>
 </header>
 
 <main>
-  <!-- ================= CANDIDATES ================= -->
-  <section id="view-results">
+  <!-- step 1 -->
+  <section class="step">
+    <div class="steplabel">Step 1 &middot; Job posting</div>
+    <textarea id="jd" spellcheck="false" placeholder="Paste a job posting…"></textarea>
+    <div class="go">
+      <button id="run">Screen resumes</button>
+      <select id="count" title="How many resumes to screen"></select>
+      <button class="ghost" id="criteria-only" title="One call, a few cents. No screening.">Criteria only</button>
+      <button class="ghost" id="reset">Reset to example</button>
+      <span class="status" id="status"></span>
+    </div>
+    <div class="bar" id="barwrap" hidden><div id="bar"></div></div>
+  </section>
+
+  <!-- step 2 -->
+  <section class="step" id="step-criteria" hidden>
+    <div class="steplabel">Step 2 &middot; Scoring criteria written from that posting</div>
+    <div class="dims" id="dims"></div>
+  </section>
+
+  <!-- step 3 -->
+  <section class="step" id="step-results" hidden>
+    <div class="steplabel" id="results-label">Step 3 &middot; Results</div>
+    <div class="notice" id="ungraded-note" hidden></div>
     <div class="stats" id="stats"></div>
     <div class="filters" id="filters"></div>
     <div class="split">
@@ -157,87 +175,94 @@
       <div id="detail"></div>
     </div>
   </section>
-
-  <!-- ================= RUBRIC ================= -->
-  <section id="view-rubric" hidden>
-    <p style="margin-top:0;color:var(--muted)">
-      Paste any job posting. The panel's scoring rubric is written from it —
-      nothing is hardcoded to one role. This makes a live API call.
-    </p>
-    <textarea id="jd" placeholder="Paste the full job posting here…" spellcheck="false"></textarea>
-    <div class="go">
-      <button id="gen">Generate rubric</button>
-      <span class="status" id="status"></span>
-    </div>
-    <div id="rubric-out" hidden>
-      <h2 id="role" style="margin-bottom:4px"></h2>
-      <p class="sub" id="summary" style="color:var(--muted)"></p>
-      <div id="dims"></div>
-      <details><summary style="cursor:pointer;color:var(--muted);font-size:13px">Rubric as the panel receives it</summary>
-        <pre class="resume" id="md"></pre></details>
-    </div>
-  </section>
 </main>
 
 <script>
 const $ = (id) => document.getElementById(id);
-const FILTERS = [
-  ["all", "All"], ["advance", "Advance"], ["hold", "Hold"],
-  ["reject", "Reject"], ["review", "Needs review"],
-];
-let DATA = null;
-let filter = "all";
-let selected = null;
+const FILTERS = [["all","All"],["advance","Advance"],["hold","Hold"],["reject","Reject"],["review","Needs review"]];
+let DATA = null, filter = "all", selected = null, polling = null;
 
-/* ---------- tabs ---------- */
-function showTab(which) {
-  const results = which === "results";
-  $("view-results").hidden = !results;
-  $("view-rubric").hidden = results;
-  $("tab-results").setAttribute("aria-selected", String(results));
-  $("tab-rubric").setAttribute("aria-selected", String(!results));
+function setStatus(text, isError) {
+  $("status").textContent = text;
+  $("status").className = isError ? "status error" : "status";
 }
-$("tab-results").addEventListener("click", () => showTab("results"));
-$("tab-rubric").addEventListener("click", () => showTab("rubric"));
+function setBusy(busy) {
+  $("run").disabled = busy;
+  $("barwrap").hidden = !busy;
+  if (!busy) $("bar").style.width = "0%";
+}
 
-/* ---------- candidates ---------- */
+/* ---------- criteria ---------- */
+function renderCriteria(rubric) {
+  if (!rubric) { $("step-criteria").hidden = true; return; }
+  $("dims").replaceChildren(...rubric.dimensions.map((d, i) => {
+    const el = document.createElement("div"); el.className = "dim";
+    const h = document.createElement("h4"); h.textContent = `${i + 1}. ${d.title}`;
+    const code = document.createElement("code"); code.textContent = d.name;
+    const p = document.createElement("p"); p.textContent = d.criteria;
+    if (!d.criteria) p.hidden = true;
+    const lens = document.createElement("div"); lens.className = "lens";
+    const b = document.createElement("b"); b.textContent = "Agent brief";
+    const t = document.createElement("span"); t.textContent = d.lens;
+    lens.append(b, t);
+    el.append(h, code, p, lens);
+    return el;
+  }));
+  $("step-criteria").hidden = false;
+}
+
+/* ---------- results ---------- */
 function visible() {
   if (!DATA) return [];
   if (filter === "all") return DATA.candidates;
   if (filter === "review") return DATA.candidates.filter((c) => c.needs_human_review);
   return DATA.candidates.filter((c) => c.recommendation === filter);
 }
-
 function renderStats() {
   const s = DATA.summary;
-  $("stats").replaceChildren(...[
-    [s.advance, "Advance"], [s.hold, "Hold"], [s.reject, "Reject"],
-    [s.needs_human_review, "Need a human"], [s.n, "Screened"],
-  ].map(([n, label]) => {
-    const d = document.createElement("div");
-    d.className = "stat";
+  const tiles = [[s.advance,"Advance"],[s.hold,"Hold"],[s.reject,"Reject"],
+                 [s.needs_human_review,"Need a human"],[s.n,"Screened"]];
+  if (s.agreement != null) tiles.push([`${Math.round(s.agreement * 100)}%`, "Match labels"]);
+  $("stats").replaceChildren(...tiles.map(([n, label]) => {
+    const d = document.createElement("div"); d.className = "stat";
     const b = document.createElement("b"); b.textContent = n;
     const sp = document.createElement("span"); sp.textContent = label;
-    d.append(b, sp);
-    return d;
+    d.append(b, sp); return d;
   }));
-  $("runmeta").textContent =
-    `recorded run · macro-F1 ${s.macro_f1} · $${s.cost_total} for ${s.n} · p50 ${s.latency_p50}s`;
-}
+  $("results-label").textContent = DATA.source === "recorded"
+    ? `Step 3 · Results — previously recorded run of all ${s.n}`
+    : `Step 3 · Results — ${s.n} screened just now`;
 
+  // The corpus is 60 AI-engineer resumes. Screened against an unrelated
+  // posting they will all correctly score near zero, and the labels say
+  // nothing about that posting, so accuracy is deliberately not reported.
+  const note = $("ungraded-note");
+  if (DATA.source === "live" && DATA.graded === false) {
+    note.textContent =
+      "These 60 resumes are AI-engineer resumes, and the ground-truth labels " +
+      "describe the bundled AI Solutions Engineer posting only. Against a " +
+      "different posting the verdicts can be perfectly correct while the " +
+      "labels say nothing about them, so no accuracy figure is shown. " +
+      "Expect most candidates to score low: that is the system working.";
+    note.hidden = false;
+  } else {
+    note.hidden = true;
+  }
+  $("runmeta").textContent = DATA.source === "recorded" && s.macro_f1 != null
+    ? `recorded run · macro-F1 ${s.macro_f1} · $${s.cost_total} for ${s.n}`
+    : "";
+}
 function renderFilters() {
   $("filters").replaceChildren(...FILTERS.map(([key, label]) => {
     const b = document.createElement("button");
     const n = key === "all" ? DATA.candidates.length
-            : key === "review" ? DATA.summary.needs_human_review
-            : DATA.summary[key];
+            : key === "review" ? DATA.summary.needs_human_review : DATA.summary[key];
     b.textContent = `${label} (${n})`;
     b.setAttribute("aria-pressed", String(filter === key));
     b.addEventListener("click", () => { filter = key; renderList(); renderFilters(); });
     return b;
   }));
 }
-
 function renderList() {
   const rows = visible();
   if (!rows.length) {
@@ -246,21 +271,16 @@ function renderList() {
     return;
   }
   $("list").replaceChildren(...rows.map((c) => {
-    const b = document.createElement("button");
-    b.className = "row";
+    const b = document.createElement("button"); b.className = "row";
     b.setAttribute("aria-current", String(selected === c.file));
-
     const who = document.createElement("div"); who.className = "who";
     const nm = document.createElement("div"); nm.className = "nm"; nm.textContent = c.name;
     const ar = document.createElement("div"); ar.className = "arch";
-    ar.textContent = c.archetype.replace(/_/g, " ");
+    ar.textContent = (c.archetype || "").replace(/_/g, " ");
     who.append(nm, ar);
-
-    const sc = document.createElement("span"); sc.className = "sc";
-    sc.textContent = c.score.toFixed(1);
+    const sc = document.createElement("span"); sc.className = "sc"; sc.textContent = c.score.toFixed(1);
     const pill = document.createElement("span");
     pill.className = `pill ${c.recommendation}`; pill.textContent = c.recommendation;
-
     b.append(who, sc, pill);
     if (c.needs_human_review) {
       const f = document.createElement("span");
@@ -271,34 +291,28 @@ function renderList() {
     return b;
   }));
 }
-
 function renderDetail(c) {
-  const el = $("detail");
-  el.className = "detail";
-  el.replaceChildren();
-
+  const el = $("detail"); el.className = "detail"; el.replaceChildren();
   const h = document.createElement("h2"); h.textContent = c.name;
   const sub = document.createElement("p"); sub.className = "sub";
-  sub.textContent = c.archetype.replace(/_/g, " ");
-
+  sub.textContent = (c.archetype || "").replace(/_/g, " ");
   const head = document.createElement("div"); head.className = "headline";
   const big = document.createElement("span"); big.className = "big";
   big.textContent = `${c.score.toFixed(1)} / 10`;
   const pill = document.createElement("span");
   pill.className = `pill ${c.recommendation}`; pill.textContent = c.recommendation;
-  const truth = document.createElement("span"); truth.className = "truth";
-  truth.textContent = c.matches_ground_truth
-    ? `matches ground truth (${c.expected})`
-    : `⚠ ground truth says ${c.expected}`;
-  head.append(big, pill, truth);
+  head.append(big, pill);
+  if (c.matches_ground_truth != null) {
+    const truth = document.createElement("span"); truth.className = "truth";
+    truth.textContent = c.matches_ground_truth
+      ? `matches ground truth (${c.expected})` : `⚠ ground truth says ${c.expected}`;
+    head.append(truth);
+  }
   el.append(h, sub, head);
-
   if (c.needs_human_review) {
     const n = document.createElement("div"); n.className = "notice";
-    n.textContent = c.review_reason;
-    el.append(n);
+    n.textContent = c.review_reason; el.append(n);
   }
-
   const ph = document.createElement("h3");
   ph.textContent = `Panel — 3 agents, spread ${c.panel_spread.toFixed(1)}`;
   el.append(ph);
@@ -311,108 +325,146 @@ function renderDetail(c) {
     conf.textContent = `confidence ${a.confidence.toFixed(2)}`;
     top.append(n, code, conf);
     if (a.parse_failed) {
-      const bad = document.createElement("span");
-      bad.className = "bad"; bad.textContent = "UNREADABLE RESPONSE";
-      top.append(bad);
+      const bad = document.createElement("span"); bad.className = "bad";
+      bad.textContent = "UNREADABLE RESPONSE"; top.append(bad);
     }
     const p = document.createElement("p"); p.textContent = a.rationale;
-    box.append(top, p);
-    el.append(box);
+    box.append(top, p); el.append(box);
   }
-
   const rh = document.createElement("h3");
   rh.textContent = c.escalated ? "Arbiter ruling" : "Combined reasoning";
   const q = document.createElement("blockquote"); q.textContent = c.rationale;
   el.append(rh, q);
-
   const det = document.createElement("details"); det.className = "resume";
   const sm = document.createElement("summary"); sm.textContent = "Full resume";
   const pre = document.createElement("pre"); pre.className = "resume";
   pre.textContent = c.resume_text || "(resume file not found)";
-  det.append(sm, pre);
-  el.append(det);
+  det.append(sm, pre); el.append(det);
 }
 
-function emptyDetail() {
-  $("detail").className = "";
-  $("detail").replaceChildren(Object.assign(document.createElement("div"),
-    { className: "empty", textContent: "Select a candidate to see the panel's reasoning." }));
+function showResult(result) {
+  DATA = result;
+  filter = "all";
+  selected = DATA.candidates.length ? DATA.candidates[0].file : null;
+  renderCriteria(DATA.rubric);
+  renderStats(); renderFilters(); renderList();
+  if (DATA.candidates.length) renderDetail(DATA.candidates[0]);
+  $("step-results").hidden = false;
 }
 
-async function loadResults() {
-  const res = await fetch("/api/results");
+/* ---------- run ---------- */
+async function poll(jobId) {
+  const res = await fetch(`/api/screen/${jobId}`);
   const body = await res.json();
   if (!res.ok) {
-    $("list").replaceChildren(Object.assign(document.createElement("div"),
-      { className: "empty", textContent: body.error || "Could not load results." }));
+    clearInterval(polling); polling = null; setBusy(false);
+    setStatus(body.error || "Run failed.", true);
     return;
   }
-  DATA = body;
-  renderStats();
-  renderFilters();
-
-  // Open on the top-ranked candidate rather than an empty panel. On first
-  // load the question is "what did it decide and why", and an empty half
-  // of the screen answers neither.
-  const first = DATA.candidates[0];
-  if (first) selected = first.file;
-  renderList();
-  first ? renderDetail(first) : emptyDetail();
+  if (body.rubric) renderCriteria(body.rubric);
+  const p = body.progress || { done: 0, total: 1 };
+  if (body.stage === "rubric") {
+    setStatus("Writing the scoring criteria…");
+    $("bar").style.width = "8%";
+  } else {
+    setStatus(`Screening resumes… ${p.done} of ${p.total}`);
+    $("bar").style.width = `${10 + (p.done / p.total) * 90}%`;
+  }
+  if (body.status === "done" && body.result) {
+    clearInterval(polling); polling = null;
+    setBusy(false); setStatus("");
+    showResult(body.result);
+  }
 }
 
-/* ---------- rubric ---------- */
-function renderRubric(data) {
-  $("role").textContent = data.role_title;
-  $("summary").textContent = data.summary;
-  $("md").textContent = data.markdown;
-  $("dims").replaceChildren(...data.dimensions.map((d, i) => {
-    const el = document.createElement("div"); el.className = "dim";
-    const h = document.createElement("h4"); h.textContent = `${i + 1}. ${d.title}`;
-    const code = document.createElement("code"); code.textContent = d.name;
-    const cr = document.createElement("p"); cr.textContent = d.criteria;
-    const lens = document.createElement("div"); lens.className = "lens";
-    const b = document.createElement("b"); b.textContent = "Agent brief";
-    const t = document.createElement("span"); t.textContent = d.lens;
-    lens.append(b, t);
-    el.append(h, code, cr, lens);
-    return el;
-  }));
-  $("rubric-out").hidden = false;
-}
-
-async function generate() {
+async function run() {
   const jd = $("jd").value.trim();
-  if (!jd) { $("status").textContent = "Paste a job posting first."; $("status").className = "status error"; return; }
-  $("gen").disabled = true;
-  $("rubric-out").hidden = true;
-  $("status").className = "status";
-  $("status").textContent = "Writing the rubric… this takes a few seconds.";
+  if (!jd) { setStatus("Paste a job posting first.", true); return; }
+  if (polling) { clearInterval(polling); polling = null; }
+
+  setBusy(true);
+  setStatus("Starting…");
+  $("step-results").hidden = true;
+  $("step-criteria").hidden = true;
+
+  try {
+    const res = await fetch("/api/screen", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_description: jd, count: Number($("count").value) }),
+    });
+    const body = await res.json();
+    if (!res.ok && res.status !== 202) {
+      setBusy(false); setStatus(body.error || `Request failed (${res.status}).`, true); return;
+    }
+    if (body.status === "done" && body.result) {
+      setBusy(false);
+      setStatus(body.cached ? "Served from a previous run of this posting. No new API calls." : "");
+      showResult(body.result);
+      return;
+    }
+    polling = setInterval(() => poll(body.job_id), 1200);
+    poll(body.job_id);
+  } catch (err) {
+    setBusy(false); setStatus(`Could not reach the server: ${err.message}`, true);
+  }
+}
+
+/* ---------- boot ---------- */
+async function boot() {
+  const [jdRes, resultsRes] = await Promise.all([
+    fetch("/api/default-jd"), fetch("/api/results"),
+  ]);
+  const jd = await jdRes.json();
+  $("jd").value = jd.job_description;
+
+  const counts = [6, 12, 18, 24].filter((n) => n <= jd.max_count);
+  $("count").replaceChildren(...counts.map((n) => {
+    const o = document.createElement("option");
+    o.value = n; o.textContent = `${n} resumes · ~$${(n * 0.0155).toFixed(2)}`;
+    if (n === jd.default_count) o.selected = true;
+    return o;
+  }));
+
+  const results = await resultsRes.json();
+  if (resultsRes.ok) showResult(results);
+}
+
+/* The cheap look: criteria only, no screening. A few cents against ~$0.19,
+   for someone deciding whether a posting is even set up right. */
+async function criteriaOnly() {
+  const jd = $("jd").value.trim();
+  if (!jd) { setStatus("Paste a job posting first.", true); return; }
+  $("criteria-only").disabled = true;
+  $("step-criteria").hidden = true;
+  setStatus("Writing the scoring criteria…");
   try {
     const res = await fetch("/api/rubric", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ job_description: jd }),
     });
     const data = await res.json();
-    if (!res.ok) {
-      $("status").textContent = data.error || `Request failed (${res.status}).`;
-      $("status").className = "status error";
-      return;
-    }
-    renderRubric(data);
-    $("status").textContent = "";
+    if (!res.ok) { setStatus(data.error || `Request failed (${res.status}).`, true); return; }
+    renderCriteria(data);
+    setStatus("Criteria only. Press Screen resumes to score against them.");
   } catch (err) {
-    $("status").textContent = `Could not reach the server: ${err.message}`;
-    $("status").className = "status error";
+    setStatus(`Could not reach the server: ${err.message}`, true);
   } finally {
-    $("gen").disabled = false;
+    $("criteria-only").disabled = false;
   }
 }
-$("gen").addEventListener("click", generate);
+
+$("run").addEventListener("click", run);
+$("criteria-only").addEventListener("click", criteriaOnly);
+$("reset").addEventListener("click", async () => {
+  const jd = await (await fetch("/api/default-jd")).json();
+  $("jd").value = jd.job_description;
+  setStatus("");
+});
 $("jd").addEventListener("keydown", (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") generate();
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run();
 });
 
-loadResults();
+boot();
 </script>
 </body>
 </html>
