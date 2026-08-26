@@ -126,6 +126,19 @@
   .agent .conf { font-size: 11.5px; color: var(--muted); }
   .agent p { margin: 0; font-size: 13.5px; }
   .bad { color: var(--err); font-size: 11.5px; font-weight: 600; }
+  .agent ul { margin: 0; padding-left: 17px; }
+  .agent li { font-size: 13.5px; margin-bottom: 7px; }
+  .agent li:last-child { margin-bottom: 0; }
+  .cites { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .cite {
+    font-size: 11px; border: 1px solid var(--line); background: var(--bg);
+    color: var(--muted); border-radius: 999px; padding: 2px 9px; cursor: pointer;
+    font-family: inherit; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .cite:hover { border-color: var(--accent); color: var(--accent); }
+  mark { background: rgba(224,178,60,.32); color: inherit; border-radius: 3px; padding: 0 2px; }
+  mark.on { background: rgba(224,178,60,.75); }
   blockquote { margin: 0; padding: 11px 14px; border-left: 3px solid var(--accent);
                background: var(--bg); border-radius: 0 7px 7px 0; font-size: 13.5px; white-space: pre-wrap; }
   details.resume { margin-top: 18px; }
@@ -291,6 +304,65 @@ function renderList() {
     return b;
   }));
 }
+/* Highlight every cited line inside the resume.
+
+   Quotes are matched on collapsed whitespace, because the model quotes the
+   words and the resume wraps them across lines. Matching the raw string
+   would silently fail on any quote that spans a newline -- which is most
+   of the interesting ones. */
+function renderResume(pre, text, quotes) {
+  pre.replaceChildren();
+  const norm = (s) => s.replace(/\s+/g, " ").trim();
+
+  // Map each character of the collapsed text back to its original index.
+  const map = [];
+  let collapsed = "";
+  let pendingSpace = false;
+  for (let i = 0; i < text.length; i++) {
+    if (/\s/.test(text[i])) { pendingSpace = collapsed.length > 0; continue; }
+    if (pendingSpace) { collapsed += " "; map.push(i); pendingSpace = false; }
+    collapsed += text[i]; map.push(i);
+  }
+
+  const spans = [];
+  for (const q of quotes) {
+    let needle = norm(q);
+    if (needle.includes("...") || needle.includes("\u2026")) {
+      needle = needle.split(/\.\.\.|\u2026/).reduce((a, b) => (b.trim().length > a.length ? b.trim() : a), "");
+    }
+    if (needle.length < 15) continue;
+    const at = collapsed.indexOf(needle);
+    if (at === -1) continue;
+    spans.push([map[at], map[Math.min(at + needle.length - 1, map.length - 1)] + 1, q]);
+  }
+  spans.sort((a, b) => a[0] - b[0]);
+
+  let cursor = 0;
+  for (const [from, to, q] of spans) {
+    if (from < cursor) continue;  // overlapping citations: keep the first
+    pre.append(document.createTextNode(text.slice(cursor, from)));
+    const m = document.createElement("mark");
+    m.textContent = text.slice(from, to);
+    m.dataset.quote = q;
+    pre.append(m);
+    cursor = to;
+  }
+  pre.append(document.createTextNode(text.slice(cursor)));
+}
+
+function jumpToQuote(quote) {
+  const det = document.getElementById("resume-details");
+  const body = document.getElementById("resume-body");
+  if (!det || !body) return;
+  det.open = true;
+  const marks = [...body.querySelectorAll("mark")];
+  const target = marks.find((m) => m.dataset.quote === quote) || marks[0];
+  if (!target) return;
+  marks.forEach((m) => m.classList.remove("on"));
+  target.classList.add("on");
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function renderDetail(c) {
   const el = $("detail"); el.className = "detail"; el.replaceChildren();
   const h = document.createElement("h2"); h.textContent = c.name;
@@ -328,17 +400,50 @@ function renderDetail(c) {
       const bad = document.createElement("span"); bad.className = "bad";
       bad.textContent = "UNREADABLE RESPONSE"; top.append(bad);
     }
-    const p = document.createElement("p"); p.textContent = a.rationale;
-    box.append(top, p); el.append(box);
+    box.append(top);
+
+    // Two bullets max, each carrying the resume sections it cites. A
+    // reviewer's first question about AI feedback is whether it actually
+    // read this resume; a chip that jumps to the quoted line answers it.
+    const bullets = a.bullets && a.bullets.length ? a.bullets : null;
+    if (bullets) {
+      const ul = document.createElement("ul");
+      for (const b of bullets) {
+        const li = document.createElement("li");
+        li.textContent = b.text;
+        if (b.citations && b.citations.length) {
+          const cites = document.createElement("div"); cites.className = "cites";
+          for (const cit of b.citations) {
+            const chip = document.createElement("button");
+            chip.className = "cite"; chip.type = "button";
+            chip.textContent = `§ ${cit.section}`;
+            chip.title = cit.quote;
+            chip.addEventListener("click", () => jumpToQuote(cit.quote));
+            cites.append(chip);
+          }
+          li.append(cites);
+        }
+        ul.append(li);
+      }
+      box.append(ul);
+    } else {
+      const p = document.createElement("p"); p.textContent = a.rationale;
+      box.append(p);
+    }
+    el.append(box);
   }
   const rh = document.createElement("h3");
   rh.textContent = c.escalated ? "Arbiter ruling" : "Combined reasoning";
   const q = document.createElement("blockquote"); q.textContent = c.rationale;
   el.append(rh, q);
   const det = document.createElement("details"); det.className = "resume";
-  const sm = document.createElement("summary"); sm.textContent = "Full resume";
-  const pre = document.createElement("pre"); pre.className = "resume";
-  pre.textContent = c.resume_text || "(resume file not found)";
+  det.id = "resume-details";
+  const sm = document.createElement("summary");
+  sm.textContent = c.cited_quotes && c.cited_quotes.length
+    ? `Full resume — ${c.cited_quotes.length} cited line${c.cited_quotes.length === 1 ? "" : "s"} highlighted`
+    : "Full resume";
+  const pre = document.createElement("pre"); pre.className = "resume"; pre.id = "resume-body";
+  renderResume(pre, c.resume_text || "(resume file not found)", c.cited_quotes || []);
   det.append(sm, pre); el.append(det);
 }
 

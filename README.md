@@ -20,6 +20,12 @@ uvicorn resume_screener.adapters.api:app --reload
 
 The page opens on the bundled posting and a run that already happened, so there is something real to look at before spending anything. Submit a different posting and it does a live run over a 12-resume sample, about $0.19 and under a minute, with a progress bar. Identical postings are served from cache rather than re-billed, and **Criteria only** writes the criteria without screening, for a few cents.
 
+### Reasoning you can check
+
+Each agent's verdict shows as **two bullets, no more**, and every quote it relied on is traced back to the section of the resume it came from. The section chips are clickable: they open that candidate's resume and highlight the exact line.
+
+The first question anyone asks about AI-written feedback is whether it actually read this resume or is producing plausible boilerplate. A citation that resolves to `§ Experience` and jumps to the sentence answers that in one click. A quote the system cannot find verbatim in the resume gets **no citation at all**, rather than a confident-looking label — an unlocatable quote means the model paraphrased, and dressing that up would defeat the point. Across the recorded run that leaves 100% of candidates with at least one grounded citation and about 6 highlighted lines each.
+
 ## How it works
 
 Each resume goes through three stages, and the expensive stage usually doesn't run.
@@ -112,6 +118,24 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 **The number that matters more than the headline: 6 of 60 verdicts change between two identical runs.** A single run can't support a macro-F1 quoted to three decimals, and can't tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and until it exists the architecture comparison below can't mean much.
 
 **Where it actually fails:** `hold` recall is 0.20. It separates strong from weak reliably and identifies the middle badly. That did not move across runs, so it's real rather than noise.
+
+### The failure has a shape
+
+The 60 resumes are generated from nine **archetypes** — candidate types with a target verdict and a target level on each dimension, assigned at generation time. That is where the ground-truth labels come from, and it is what makes the failure legible:
+
+| Archetype | Label | Correct |
+|---|---|---|
+| `production_generalist` · `academic_researcher` · `keyword_stuffer` · `wrong_domain` | advance / reject | **100%** |
+| `adjacent_shipper` | advance | 67% |
+| `demo_specialist` · `quiet_builder` | hold / advance | 43% |
+| `early_career` | hold | 17% |
+| `production_light_ai` | hold | **0%** (0 of 7) |
+
+Perfect on every unambiguous archetype, and progressively worse the more a candidate sits in the middle. `production_light_ai` — a real production engineer whose AI work is shallow — is rejected every single time.
+
+Two facts point at the same cause: **all 22 mismatches run in one direction**, the model scoring below the label, and the archetype it fails hardest on is the one strong on production but light on AI depth. The panel over-weights AI depth, and the 7.0/5.0 cutoffs are too harsh. That is a calibration problem with a known fix ([PLAN.md §8](PLAN.md) items 5 and 6, both unrun), not a mystery.
+
+Having nine archetypes rather than one generic "bad resume" template is what makes that diagnosis possible. All three reject types fail for different reasons — shipped nothing, evidenced nothing, wrong field — so a screener cannot pass by pattern-matching. [docs/corpus_design.md](docs/corpus_design.md) has the full specs.
 
 Other things named rather than hidden:
 

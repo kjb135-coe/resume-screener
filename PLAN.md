@@ -187,6 +187,84 @@ is now the blocking item for §8, ahead of building the other two arms.
 both runs). The system reliably separates strong from weak, and
 reliably fails to identify the middle.
 
+### 3c-i. The errors are systematic, not random (2026-08-26)
+
+Reading all 60 scores together turns the weakness above into something
+specific and fixable.
+
+**Every one of the 22 mismatches runs the same direction: the model
+scored *below* the label.** Not once did it grade a candidate more
+generously than ground truth. Random error does not do that.
+
+Per-archetype accuracy says where:
+
+| Archetype | Correct |
+|---|---|
+| `production_generalist`, `academic_researcher`, `keyword_stuffer`, `wrong_domain` | 100% |
+| `adjacent_shipper` | 4/6 |
+| `demo_specialist`, `quiet_builder` | 3/7 |
+| `early_career` | 1/6 |
+| `production_light_ai` | **0/7** |
+
+Perfect on every unambiguous archetype, and worse the closer a candidate
+sits to the middle. `production_light_ai` — strong production history,
+shallow AI work — is rejected every single time despite being labelled
+`hold`.
+
+Those two facts point at one cause: the panel over-weights AI depth
+relative to production evidence, and the hand-picked 7.0/5.0 cutoffs sit
+too high. Both already have planned fixes that have never been run —
+§8 item 5 (sweep the disagreement threshold) and item 6 (sweep the
+cutoffs against the corpus rather than trusting 7/5). Item 6 in
+particular is cheap: it re-scores nothing, it only re-thresholds scores
+already in `data/eval_run.json`.
+
+This is worth doing before the §8 bake-off. Comparing architectures
+while the shared cutoffs are miscalibrated measures the cutoffs, not the
+architectures.
+
+### 3d. Grounded reasoning in the UI — built 2026-08-26
+
+The page shows each agent's verdict as **two bullets maximum**, and every
+quote inside them is traced to the resume section it came from. The
+section chips are clickable and highlight the exact line.
+
+The reason is narrow and worth stating: the first question anyone asks
+about AI-written hiring feedback is whether it read *this* resume or
+produced plausible boilerplate. Prose alone cannot answer that. A
+citation that resolves to a real heading and jumps to the sentence can.
+
+Decisions worth keeping:
+
+- **A quote that cannot be found verbatim in the resume gets no
+  citation.** Not a guessed section, not a "probably Experience" — the
+  chip simply does not appear. An unlocatable quote means the model
+  paraphrased, and labelling a paraphrase as a citation would defeat the
+  entire purpose. `_locate` returning None is a feature.
+- **Done at the display layer, not by changing the panel's response
+  schema.** The recorded run and every future live run render identically
+  with no re-scoring, and the eval numbers stay comparable. Had this gone
+  into the prompt as a structured `points` field, every past run would
+  have become undisplayable.
+- **The bullet keeps the model's sentence verbatim.** Stripping quotes
+  out to build a tidier claim turned a two-citation sentence into
+  "… and … matching the posting". The prose is the model's; only the
+  citations are ours.
+- **All four quote styles are matched** — straight, curly, and single.
+  Agents on the same candidate use different marks, and matching only
+  double quotes silently dropped one agent's citations entirely. Single
+  quotes risk catching an apostrophe pair, which is harmless precisely
+  because of the first rule above.
+- **Sentence splitting is quote-aware.** A regex on `[.!?]\s+` cuts
+  `..., e.g. "Shipped a system. It handles 12K docs."` into fragments,
+  one opening mid-quotation. Both the abbreviation guard and the
+  in-quotation guard exist because that happened to real output.
+
+Coverage on the recorded run: 100% of candidates carry at least one
+grounded citation, ~5.8 highlighted lines each, 64% of bullets cite
+something. The 36% that don't are mostly negative findings ("no evidence
+mentions client engagement"), which have nothing to point at by nature.
+
 ## 4. Human-in-the-loop and security — settled as design, partially built
 
 - No MCP tool can take a real-world action — all four only ever return

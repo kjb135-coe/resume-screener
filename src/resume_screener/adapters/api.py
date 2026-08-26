@@ -33,6 +33,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import re
 import uuid
 from collections import defaultdict
 from functools import lru_cache
@@ -96,6 +97,188 @@ def _review_reason(prediction: dict) -> str | None:
             "points); an arbiter resolved it, but a human should confirm."
         )
     return None
+
+
+# Agents quote with whatever mark they feel like -- straight doubles,
+# curly doubles, and single quotes all show up in real output, sometimes
+# from different agents on the same candidate. Matching only one style
+# silently drops that agent's citations.
+#
+# Single quotes risk catching an apostrophe pair ("candidate's ... system's"),
+# but a false extraction is harmless here: _locate refuses anything that is
+# not verbatim in the resume, so a bogus span produces no citation at all.
+_QUOTE_PATTERNS = (
+    re.compile(r'["“]([^"”]{15,400})["”]'),
+    re.compile(r"['‘]([^'’]{15,400})['’]"),
+)
+
+
+def _quoted_spans(text: str) -> list[str]:
+    """Every quoted span in `text`, in the order they appear."""
+    found: list[tuple[int, str]] = []
+    for pattern in _QUOTE_PATTERNS:
+        found += [(m.start(), m.group(1).strip()) for m in pattern.finditer(text)]
+    found.sort()
+    return [quote for _, quote in found if quote]
+_HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
+_ABBREVIATION = re.compile(
+    r"(?:e\.g|i\.e|etc|vs|approx|no|fig|cf|Dr|Mr|Mrs|Ms|Inc|Ltd|Jr|Sr|Ph\.D)\.$",
+    re.IGNORECASE,
+)
+
+
+def _split_sentences(text: str) -> list[str]:
+    """Split prose into sentences without breaking inside a quotation.
+
+    A regex on `[.!?]\\s+` looks sufficient until the model writes
+    `...ownership, e.g. "Architected and shipped..."`. It then splits on
+    the period in "e.g." and again inside the quote, turning one cited
+    claim into two fragments, one of which opens mid-quotation. Both
+    guards below exist because that happened to real output.
+    """
+    sentences: list[str] = []
+    start = 0
+    in_double = False   # straight " toggles
+    in_curly = False    # “ opens, ” closes
+
+    for i, char in enumerate(text):
+        closing_quote = False
+        if char == '"':
+            closing_quote = in_double
+            in_double = not in_double
+        elif char == "“":
+            in_curly = True
+        elif char == "”":
+            closing_quote = in_curly
+            in_curly = False
+
+        if closing_quote:
+            # `... docs." That is production.` -- the period that ends the
+            # sentence sits inside the quotation, so the only real boundary
+            # is just past the closing mark.
+            boundary = text[i - 1 : i] in (".", "!", "?")
+        elif char in ".!?" and not in_double and not in_curly:
+            boundary = True
+        else:
+            continue
+
+        if not boundary:
+            continue
+        following = text[i + 1 : i + 2]
+        if following and not following.isspace():
+            continue
+        if _ABBREVIATION.search(text[start : i + 1]):
+            continue
+        rest = text[i + 1 :].lstrip()
+        if not rest or not (rest[0].isupper() or rest[0].isdigit() or rest[0] in "\"“‘'"):
+            continue
+        sentences.append(text[start : i + 1].strip())
+        start = i + 1
+
+    tail = text[start:].strip()
+    if tail:
+        sentences.append(tail)
+    return [s for s in sentences if s]
+
+
+def _normalise(text: str) -> str:
+    """Collapse whitespace so a quote matches across line wrapping.
+
+    A model quoting a resume reproduces the words, not the line breaks
+    the PDF or Markdown happened to have.
+    """
+    return " ".join(text.split())
+
+
+def _resume_sections(resume_text: str) -> list[tuple[str, str]]:
+    """Split a resume into (heading, normalised body) pairs.
+
+    Anything before the first heading is attributed to "Summary" -- most
+    resumes open with a contact block and a profile paragraph that no
+    heading covers, and quotes do land there.
+    """
+    matches = list(_HEADING.finditer(resume_text))
+    if not matches:
+        return [("Résumé", _normalise(resume_text))]
+
+    sections: list[tuple[str, str]] = []
+    preamble = resume_text[: matches[0].start()].strip()
+    if preamble:
+        sections.append(("Summary", _normalise(preamble)))
+    for i, match in enumerate(matches):
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(resume_text)
+        sections.append((match.group(1).strip(), _normalise(resume_text[match.end() : end])))
+    return sections
+
+
+def _locate(quote: str, sections: list[tuple[str, str]]) -> str | None:
+    """Which section of the resume a quote came from, or None if it isn't there.
+
+    Returning None matters as much as returning a heading: a quote that
+    cannot be found in the resume is the model paraphrasing rather than
+    citing, and the page should not dress that up as a citation.
+    """
+    needle = _normalise(quote)
+    # Models elide with "..."; match on the longest contiguous run instead.
+    if "..." in needle or "…" in needle:
+        parts = re.split(r"\.\.\.|…", needle)
+        needle = max((p.strip() for p in parts), key=len, default="")
+    if len(needle) < 15:
+        return None
+    for heading, body in sections:
+        if needle in body:
+            return heading
+    return None
+
+
+def bullets_from(rationale: str, resume_text: str, limit: int = 2) -> list[dict]:
+    """Turn an agent's prose into at most `limit` bullets with citations.
+
+    The panel is prompted to quote the evidence it relied on, so the
+    quotes are already in the prose. Pulling them out and locating them in
+    the resume is what separates "this reads like feedback about a
+    person" from "this reads like feedback about anyone" -- a bullet that
+    names the section it came from cannot be generic boilerplate.
+
+    Done at the display layer rather than by changing the panel's response
+    schema, so the recorded run and every future live run render the same
+    way with no re-scoring.
+    """
+    text = (rationale or "").strip()
+    if not text:
+        return []
+
+    sections = _resume_sections(resume_text or "")
+    out: list[dict] = []
+    for sentence in _split_sentences(text):
+        # The sentence is kept verbatim. Stripping the quotes out of it to
+        # build a tidier "claim" turns a sentence with two citations into
+        # "… and … matching the posting", which is worse than the original.
+        citations: list[dict] = []
+        seen: set[str] = set()
+        for quote in _quoted_spans(sentence):
+            section = _locate(quote, sections)
+            if section and quote not in seen:
+                seen.add(quote)
+                citations.append({"quote": quote, "section": section})
+        out.append({"text": sentence, "citations": citations})
+        if len(out) == limit:
+            break
+    return out
+
+
+def _attach_bullets(candidate: dict) -> dict:
+    """Give every panel entry its bullets, and collect quotes for highlighting."""
+    resume_text = candidate.get("resume_text", "")
+    quotes: list[str] = []
+    for agent in candidate.get("panel", []):
+        agent["bullets"] = bullets_from(agent.get("rationale", ""), resume_text)
+        for bullet in agent["bullets"]:
+            quotes += [c["quote"] for c in bullet["citations"]]
+    # Deduped, preserving order: the page highlights these in the resume,
+    # and the same line is often cited by more than one agent.
+    candidate["cited_quotes"] = list(dict.fromkeys(quotes))
+    return candidate
 
 
 def _summarise(candidates: list[dict], **extra) -> dict:
@@ -177,6 +360,7 @@ def load_recorded_run() -> dict:
             }
         )
 
+    candidates = [_attach_bullets(c) for c in candidates]
     candidates.sort(key=lambda c: -c["score"])
     return {
         "source": "recorded",
@@ -301,7 +485,9 @@ async def _run_screening(job_id: str, job_description: str, count: int) -> None:
 
         labels = json.loads(LABELS_JSON.read_text(encoding="utf-8"))
         graded = job["fingerprint"] == jd_fingerprint(default_job_description())
-        candidates = [_verdict_to_dict(v, labels, graded=graded) for v in verdicts]
+        candidates = [
+            _attach_bullets(_verdict_to_dict(v, labels, graded=graded)) for v in verdicts
+        ]
         matched = [c for c in candidates if c["matches_ground_truth"] is not None]
         usage = sum((v.usage for v in verdicts), Usage())
 

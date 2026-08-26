@@ -14,6 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from resume_screener.adapters import api
+from resume_screener.adapters.api import _split_sentences, bullets_from
 from resume_screener.core.models import ExtractedCandidate, Recommendation, Verdict
 from resume_screener.core.rubric_gen import RubricGenerationError, parse_rubric
 from tests.fakes import rubric_json
@@ -279,6 +280,140 @@ class TestGroundTruthOnlyAppliesToItsOwnPosting:
         assert row["archetype"] == "academic_researcher"
 
 
+RESUME = """# Jane Doe
+Senior Engineer | jane@example.com
+
+## Experience
+
+**Staff Engineer** | Acme | 2023 - Present
+
+- Architected and shipped a multi-agent workflow system for document
+  processing; now handles 12K+ documents daily
+- Presented quarterly metrics to non-technical stakeholders
+
+## Education
+
+- BS Computer Science, State University
+"""
+
+
+class TestSentenceSplitting:
+    def test_does_not_split_inside_a_quotation(self):
+        """Observed on real output: the model writes `..., e.g. "Architected
+        and shipped..."` and a naive [.!?] split cuts the quote in half,
+        leaving a bullet that opens mid-quotation.
+        """
+        text = 'Ownership is clear, e.g. "Shipped a system. It handles 12K docs." That is production.'
+        assert _split_sentences(text) == [
+            'Ownership is clear, e.g. "Shipped a system. It handles 12K docs."',
+            "That is production.",
+        ]
+
+    @pytest.mark.parametrize("abbrev", ["e.g.", "i.e.", "etc.", "vs."])
+    def test_does_not_split_on_abbreviations(self, abbrev):
+        text = f"Evidence is thin, {abbrev} Nothing shipped."
+        assert len(_split_sentences(text)) == 1
+
+    def test_splits_ordinary_sentences(self):
+        assert _split_sentences("First one. Second one. Third one.") == [
+            "First one.",
+            "Second one.",
+            "Third one.",
+        ]
+
+    def test_handles_curly_quotes(self):
+        text = 'They wrote “Shipped it. Ran it.” and stopped there. Next point.'
+        assert len(_split_sentences(text)) == 2
+
+    def test_empty_input(self):
+        assert _split_sentences("") == []
+
+
+class TestBullets:
+    def test_at_most_two_bullets(self):
+        rationale = "One. Two. Three. Four."
+        assert len(bullets_from(rationale, RESUME)) == 2
+
+    def test_quote_is_located_to_its_section(self):
+        rationale = (
+            'Strong production evidence: "Architected and shipped a multi-agent '
+            'workflow system for document processing". Nothing else matters.'
+        )
+        bullets = bullets_from(rationale, RESUME)
+
+        assert bullets[0]["citations"][0]["section"] == "Experience"
+
+    def test_quote_matches_across_line_wrapping(self):
+        """The quote spans a newline in the resume. A model quoting it
+        reproduces the words, not the wrapping.
+        """
+        rationale = '"shipped a multi-agent workflow system for document processing" is clear.'
+        bullets = bullets_from(rationale, RESUME)
+        assert bullets[0]["citations"][0]["section"] == "Experience"
+
+    def test_quote_not_in_the_resume_is_not_cited(self):
+        """A quote that cannot be found is the model paraphrasing. Dressing
+        that up as a citation would be worse than showing no citation.
+        """
+        rationale = '"Led a team of two hundred engineers on Mars" is impressive.'
+        assert bullets_from(rationale, RESUME)[0]["citations"] == []
+
+    def test_sentence_text_is_kept_verbatim(self):
+        """Stripping quotes out to build a tidier claim turns a sentence
+        with two citations into "… and … matching the posting".
+        """
+        rationale = 'Evidence: "Presented quarterly metrics to non-technical stakeholders".'
+        assert "Presented quarterly metrics" in bullets_from(rationale, RESUME)[0]["text"]
+
+    def test_elided_quote_still_locates(self):
+        rationale = '"Architected and shipped a multi-agent... document processing" counts.'
+        bullets = bullets_from(rationale, RESUME)
+        assert bullets[0]["citations"][0]["section"] == "Experience"
+
+    def test_education_section_is_distinguished(self):
+        rationale = '"BS Computer Science, State University" is the only credential.'
+        assert bullets_from(rationale, RESUME)[0]["citations"][0]["section"] == "Education"
+
+    def test_empty_rationale_yields_nothing(self):
+        assert bullets_from("", RESUME) == []
+
+    def test_missing_resume_does_not_crash(self):
+        bullets = bullets_from('Something about "a quoted claim here".', "")
+        assert bullets and bullets[0]["citations"] == []
+
+
+class TestBulletsOnTheRecordedRun:
+    def test_every_panel_entry_gets_bullets(self, client):
+        for candidate in client.get("/api/results").json()["candidates"]:
+            for agent in candidate["panel"]:
+                assert "bullets" in agent
+                assert len(agent["bullets"]) <= 2
+
+    def test_citations_resolve_to_real_sections(self, client):
+        """Every cited section must be a heading that exists in that
+        candidate's own resume, not a plausible-sounding label.
+        """
+        for candidate in client.get("/api/results").json()["candidates"]:
+            headings = {h for h, _ in api._resume_sections(candidate["resume_text"])}
+            for agent in candidate["panel"]:
+                for bullet in agent["bullets"]:
+                    for citation in bullet["citations"]:
+                        assert citation["section"] in headings
+
+    def test_cited_quotes_are_deduped_for_highlighting(self, client):
+        for candidate in client.get("/api/results").json()["candidates"]:
+            quotes = candidate["cited_quotes"]
+            assert len(quotes) == len(set(quotes))
+
+    def test_most_candidates_get_at_least_one_citation(self, client):
+        """The whole point is showing the feedback is grounded in this
+        resume. If citations rarely resolved, the feature would be theatre.
+        """
+        candidates = client.get("/api/results").json()["candidates"]
+        with_citation = sum(1 for c in candidates if c["cited_quotes"])
+        assert with_citation / len(candidates) > 0.75
+
+
 class TestReviewReason:
     def test_unreadable_response_takes_priority_over_escalation(self):
         reason = api._review_reason(
@@ -343,3 +478,31 @@ class TestRubricEndpoint:
 
         assert response.status_code == 500
         assert "10.0.0.4" not in response.json()["error"]
+
+
+class TestQuoteStyles:
+    """Agents quote with whatever mark they feel like, sometimes different
+    styles on the same candidate. Matching only double quotes silently
+    dropped one agent's citations entirely.
+    """
+
+    @pytest.mark.parametrize(
+        "quoted",
+        [
+            '"Architected and shipped a multi-agent workflow system"',
+            "'Architected and shipped a multi-agent workflow system'",
+            "“Architected and shipped a multi-agent workflow system”",
+            "‘Architected and shipped a multi-agent workflow system’",
+        ],
+    )
+    def test_every_quote_style_is_cited(self, quoted):
+        bullets = bullets_from(f"Evidence: {quoted} is clear.", RESUME)
+        assert bullets[0]["citations"], f"no citation extracted from {quoted[:3]}"
+        assert bullets[0]["citations"][0]["section"] == "Experience"
+
+    def test_apostrophes_do_not_produce_phantom_citations(self):
+        """A false span is harmless because _locate refuses anything not
+        verbatim in the resume -- this pins that safety net down.
+        """
+        rationale = "The candidate's evidence isn't strong and doesn't show ownership."
+        assert bullets_from(rationale, RESUME)[0]["citations"] == []
