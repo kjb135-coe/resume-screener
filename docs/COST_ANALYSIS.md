@@ -20,12 +20,30 @@ The recorded run reported **$1.796**; the same measured token counts at
 correct rates come to roughly **$1.20**, about **2 cents per resume**
 rather than 3.
 
-**That $1.20 is re-derived, not measured.** The run predates
-`cost_by_model`, so its per-model token split was never saved. The
-estimate splits Sonnet from Haiku output by measuring the stored
-rationale text, which brackets the answer at $1.15-$1.24. The next full
-run will report the exact figure directly. Treat $1.20 as "about right,
-pending a re-run" and do not quote it to the cent.
+**That $1.20 was re-derived, not measured — and it was too high.** The
+recorded run predates `cost_by_model`, so its per-model token split was
+never saved. The estimate split Sonnet from Haiku output by measuring the
+stored rationale text, which bracketed the answer at $1.15-$1.24.
+
+**Measured on 2026-08-27, that bracket was wrong.** Three full runs of
+the same configuration reported cost directly:
+
+| Run | Cost for 60 resumes |
+|---|---|
+| `var1` | $0.956 |
+| `var3` | $0.946 |
+| `var4` | $0.957 (59 scored) |
+
+**The real figure is ~$0.95, about 1.6 cents per resume** — roughly 20%
+below the re-derived bracket, and stable to within a cent across runs.
+Cost is the most reproducible thing this system does: macro-F1 spans
+0.051 across those same runs while cost spans $0.011. See
+`docs/VARIANCE.md`.
+
+The $1.20 estimate is kept above rather than deleted, because the gap
+between a careful re-derivation and a direct measurement is the point:
+the re-derivation was honest, documented, bracketed — and still off by
+20%.
 
 ## Where the money actually goes
 
@@ -106,5 +124,5 @@ In order of size, none of it built:
 3. **Leave caching alone.** It works, it is 6% of cost, and the contract
    is already documented and protected by the module docstring.
 
-Combining 1 and 2 would plausibly take a 60-resume run from ~$1.20 to
-~$0.50. Further caching work would save perhaps five cents.
+Combining 1 and 2 would plausibly take a 60-resume run from ~$0.95 to
+~$0.40. Further caching work would save perhaps five cents.

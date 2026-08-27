@@ -10,13 +10,25 @@ its accuracy is the kind of tool that gets deployed past its evidence.
 
 ## 1. The headline number is weaker than it looks
 
-**macro-F1 0.847 comes from one run.** Two identical runs of this system
-disagree on about 10% of verdicts (6 of 60, measured in
-[RESULTS_HISTORY.md](RESULTS_HISTORY.md)). Several comparisons quoted in
-this repo are smaller than that drift, including the model-tier bake-off
-in [PLAN.md §8a](../PLAN.md). Until each configuration is run 3-5 times
-and reported as a spread, treat every figure here as a single sample, not
-an estimate.
+**The headline is a range, not a number: macro-F1 0.81-0.86.** This was
+measured, not assumed. Four runs of one unchanged configuration span
+**0.051** in macro-F1, and 9 of 51 candidates (18%) change verdict at
+least once. Full detail in [VARIANCE.md](VARIANCE.md).
+
+**Any comparison in this repo that turns on less than 0.051 is
+unresolved.** That includes the aggregation sweep (0.018 across five
+schemes) and most of the cutoff sweep's internal differences. The
+model-tier bake-off in [PLAN.md §8a](../PLAN.md) survives, because a
+0.847 -> 0.516 collapse is far outside the band.
+
+**The band is a floor.** It widened from 0.042 at two runs to 0.051 at
+four. More runs will widen it further. Four runs give a rough spread, not
+a confidence interval.
+
+**All 9 unstable candidates sat within 1.0 of a score cutoff.** The
+scores bunch against the 4.0 and 1.0 thresholds, so small jitter crosses
+a line. This is a property of the design, not bad luck: 44 of 60 scores
+sit within 1.0 of a cutoff.
 
 **The cutoffs were fitted on the same 60 resumes they are scored
 against.** `ADVANCE_CUTOFF = 4.0` and `HOLD_CUTOFF = 1.0` came from

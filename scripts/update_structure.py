@@ -132,6 +132,7 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/SCORE_SCALE.md": "Why a strong candidate scores 6 not 8, and the measured cost of fixing it.",
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
+    "docs/VARIANCE.md": "Output of scripts/variance_report.py: how much macro-F1 moves between identical runs.",
     "docs/CUTOFF_SWEEP.md": "Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.",
     "docs/EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md": "Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).",
     "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
@@ -146,6 +147,7 @@ DESCRIPTIONS: dict[str, str] = {
     "scripts/build_resume_pdfs.py": "Renders every corpus resume to PDF with reportlab. Deterministic, no model calls.",
     "scripts/sweep_escalation.py": "Compares escalation policies on cost and pointless calls. No API calls.",
     "scripts/sweep_cutoffs.py": "Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.",
+    "scripts/variance_report.py": "Reports run-to-run spread across repeated runs of one config. No API calls.",
     "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
 }
 

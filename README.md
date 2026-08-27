@@ -12,7 +12,7 @@ Submit a posting, and the whole flow runs top to bottom:
 2. **It writes three scoring criteria from that posting**, each with the brief for the agent that owns it.
 3. **Resumes get screened against those criteria**, ranked, with the reasoning behind every score.
 
-The screenshot shows 60 test resumes screened for roughly **$1.20 total**, about two cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
+The screenshot shows 60 test resumes screened for roughly **$0.95 total**, about 1.6 cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
 
 ```bash
 uvicorn resume_screener.adapters.api:app --reload
@@ -30,7 +30,7 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 **Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 249 tests, all offline.
 
-**Measured:** macro-F1 **0.847**, accuracy 0.850 on 60 labelled resumes, ~2 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65.
+**Measured:** macro-F1 **0.81–0.86** across four runs of 60 labelled resumes, ~1.6 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65. It is quoted as a range because four identical runs span 0.051; see [docs/VARIANCE.md](docs/VARIANCE.md).
 
 **Remaining weakness:** all 9 surviving errors still run one direction, the model scoring below the label. `production_light_ai` — strong production history, shallow AI depth — is 1 of 7.
 
@@ -129,13 +129,13 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 
 | Metric | Value |
 |---|---|
-| Macro-F1 | **0.847** |
-| Accuracy | 0.850 |
-| Cost | ~$1.20 for 60 (~2c each) |
+| Macro-F1 | **0.81–0.86** (4 runs) |
+| Accuracy | 0.80–0.86 |
+| Cost | ~$0.95 for 60 (~1.6c each) |
 | Latency | p50 19.4s, p95 32.9s |
 | Flagged for a human | 29 / 60 |
 
-**The number that matters more than the headline: 6 of 60 verdicts change between two identical runs.** A single run can't support a macro-F1 quoted to three decimals, and can't tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and until it exists the architecture comparison below can't mean much.
+**The number that matters more than the headline: run the same configuration four times, unchanged, and macro-F1 spans 0.051.** 9 of 51 candidates change verdict at least once, and all 9 sit within 1.0 of a score cutoff. So the headline is one draw from a wide distribution, not a fixed property — which is why it is quoted as a range, and why any comparison below that turns on less than 0.051 is unresolved rather than decided. Measured over four runs in [docs/VARIANCE.md](docs/VARIANCE.md).
 
 **Where it actually fails:** `hold` is still the weakest class at 0.65 recall, against 0.90 for `advance` and 1.00 for `reject`. Identifying the middle is harder than separating the ends, and it stayed the hardest even after the fix that tripled it.
 
@@ -231,7 +231,7 @@ Score one resume:
 resume-screener screen data/synthetic_resumes/quiet_builder__elena_vasquez.md docs/job_description.md
 ```
 
-Rank the whole corpus. 60 resumes, roughly $1.20 and a few minutes:
+Rank the whole corpus. 60 resumes, roughly $0.95 and a few minutes:
 
 ```bash
 resume-screener rank data/synthetic_resumes docs/job_description.md --top 10

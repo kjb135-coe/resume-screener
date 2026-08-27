@@ -220,3 +220,86 @@ The agent's poor discrimination is still a real defect worth fixing on
 its own merits: a dimension that cannot separate `high` from `medium`
 is not measuring anything. But that is a prompt problem, and it is worth
 much less than it looked.
+
+## Variance runs — 2026-08-27
+
+**What changed before these runs: nothing.** That is the point. `var1`
+through `var4` re-ran one configuration four times with no edit of any
+kind between them.
+
+**`baseline` is deliberately excluded.** Three commits touched
+`core/pipeline.py` after `data/eval_run.json` was recorded — `7380abc`,
+`198a49a` (which fixed a real scoring bug), and `c39bb03`. Comparing
+`baseline` against a run made today would repeat the flaw in the original
+§3c drift figure, where a parse fix sat between the two runs being called
+identical.
+
+Metrics are recomputed over the **51 candidates all four runs scored**,
+not read from stored per-run totals, so a run that dropped a few resumes
+still contributes.
+
+| Run | n | Macro-F1 (shared 51) | Accuracy | Escalated | Cost |
+|---|---|---|---|---|---|
+| `var1` | 60 | 0.788 | 0.804 | 53% | $0.956 |
+| `var2` | 52 | 0.833 | 0.843 | 53% | $0.838 |
+| `var3` | 60 | 0.838 | 0.843 | 51% | $0.946 |
+| `var4` | 59 | 0.837 | 0.843 | 55% | $0.957 |
+
+**Macro-F1 spans 0.788–0.838 with nothing changed. The band is 0.051.
+9 of 51 candidates (18%) changed verdict at least once.**
+
+The band grew as runs were added — 0.042 at two runs, 0.051 at four.
+That is the expected direction. **More runs will widen it, not narrow
+it.** Treat 0.051 as a floor on the noise, not a confidence interval.
+
+**Treat any difference under 0.051 as unresolved.** That is larger than
+most gaps this repo has compared. The aggregation sweep spanned 0.018 and
+is now firmly inside the noise. §8a's all-Haiku collapse (0.847 → 0.516)
+survives easily; little else does.
+
+### What the README should say
+
+Quoted on whole runs, the four runs gave 0.814, 0.844 and 0.861 (`var2`
+was partial). The published **0.847 sits inside that range**, so it is
+not wrong — but it is one draw from a wide distribution. **Quote
+macro-F1 as roughly 0.81–0.86, not 0.847.**
+
+### The mechanism, confirmed
+
+**All 9 unstable candidates sat within 1.0 of a cutoff.** With
+`ADVANCE_CUTOFF` at 4.0 and `HOLD_CUTOFF` at 1.0, and 44 of 60 scores
+inside 1.0 of a cutoff, scores bunch against the thresholds and small
+jitter crosses a line. Score movement is near-universal: the mean score
+range across runs is 0.88 points, and **only 1 of 51 candidates scored
+identically in all four runs.**
+
+Three further findings:
+
+- **`reject` is the least stable class, not `hold`.** Per-class F1
+  spread: `advance` 0.051, `hold` 0.042, `reject` **0.161**. The
+  `hold`-recall story in §3c pointed at the wrong place.
+- **Routing is roughly stable.** Escalation ran 51–55%. The noise lives
+  in the scores far more than in the decision to escalate.
+- **Cost is stable and lower than estimated.** Three full runs cost
+  $0.946, $0.956 and $0.957 — a spread of one cent. `COST_ANALYSIS.md`
+  re-derived $1.20 and bracketed it at $1.15–$1.24. **The measured figure
+  is ~$0.95, below that bracket.** That doc needs updating.
+
+Parse failures ran 1.9%–3.9% (4/180, 3/156, 7/180, 6/177), wider than the
+2.2% §8a measured for Sonnet. A failed parse scores 0.0, which is
+indistinguishable from a confident reject, so this is noise with a
+mechanical cause and a plausible fix.
+
+### A methodology note worth keeping
+
+The first `var3` attempt scored 29 of 60 and had to be thrown away.
+31 candidates died on connection errors, and **the survivors were not a
+random subset**: zero escalations, and panel spread capped at 5.0 against
+9.0 in every other run. An escalating candidate makes an extra arbiter
+call, so it is more exposed to a dropped connection — and it is also the
+hard candidate carrying the disagreement. The run kept only the easy
+cases, which would have understated the very thing it was measuring.
+`scripts/variance_report.py` now has a **Run health** section that flags
+this automatically.
+
+Full detail: `docs/VARIANCE.md`.

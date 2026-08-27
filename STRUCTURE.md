@@ -12,6 +12,8 @@ removing files rather than editing this by hand.
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
 │   ├── eval_run__all-haiku-panel-sonnet-arbiter.json A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__recalibrated.json  A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
+│   ├── eval_run__var1.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
+│   ├── eval_run__var2.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   └── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
@@ -25,10 +27,13 @@ removing files rather than editing this by hand.
 │   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).
 │   ├── EVAL_RESULTS__recalibrated.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
+│   ├── EVAL_RESULTS__var1.md        Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
+│   ├── EVAL_RESULTS__var2.md        Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
 │   ├── LIMITATIONS.md               Where the numbers stop meaning what they look like, and where this must not be trusted: the fitted cutoffs, the one-directional errors, the escalation blind spot, and the unmeasured bias audit.
 │   ├── RESULTS_HISTORY.md           Every measured run, what changed before it, and why the number moved.
-│   └── SCORE_SCALE.md               Why a strong candidate scores 6 not 8, and the measured cost of fixing it.
+│   ├── SCORE_SCALE.md               Why a strong candidate scores 6 not 8, and the measured cost of fixing it.
+│   └── VARIANCE.md                  Output of scripts/variance_report.py: how much macro-F1 moves between identical runs.
 ├── research/                    Background research with citations, gathered before design decisions were made.
 │   ├── ats_scoring_criteria.md      How real ATS and AI screeners score resumes in 2026; gaps in our rubric.
 │   ├── cascade_architecture_research.md Whether the tiered-cascade design has real support. Honest answer: partial.
@@ -44,7 +49,8 @@ removing files rather than editing this by hand.
 │   ├── generate_corpus.py           Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.
 │   ├── sweep_cutoffs.py             Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.
 │   ├── sweep_escalation.py          Compares escalation policies on cost and pointless calls. No API calls.
-│   └── update_structure.py          Regenerates STRUCTURE.md from the real tree.
+│   ├── update_structure.py          Regenerates STRUCTURE.md from the real tree.
+│   └── variance_report.py           Reports run-to-run spread across repeated runs of one config. No API calls.
 ├── src/                         Package source.
 │   └── resume_screener/             The installable package.
 │       ├── adapters/                    Thin translation layers over core. No scoring logic lives here.

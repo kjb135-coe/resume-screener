@@ -44,27 +44,36 @@ persona. Read that module docstring before touching prompt assembly.
 
 ## Where things stand
 
-- **macro-F1 0.847, accuracy 0.850** on 60 labelled synthetic resumes,
-  roughly $1.20 per full run (~2c/resume).
+- **macro-F1 0.81–0.86** on 60 labelled synthetic resumes, measured over
+  four runs. **Quote it as a range**, never as a point — four identical
+  runs span 0.051. Roughly **$0.95** per full run (~1.6c/resume),
+  measured, stable to a cent.
 - 249 offline tests, ruff clean.
 - Working: the cascade, rubrics generated from any posting, MCP server
   (5 tools), CLI (3 commands), web app with reviewer workflow and
   password gate, PDF/Word upload.
 
 **Read `docs/LIMITATIONS.md` before making any accuracy claim.** The
-short version: the cutoffs were fitted on the same 60 resumes they are
-scored against, all 9 errors run below the label, and no bias audit
-exists.
+short version: the noise band is 0.051 so any smaller difference is
+unresolved, the cutoffs were fitted on the same 60 resumes they are
+scored against, the errors run below the label, and no bias audit exists.
+
+**Before comparing two runs, check they share the same code.** Run
+`scripts/variance_report.py`, and read its **Run health** table first — a
+run that lost candidates to network errors keeps the easy ones and
+understates the noise.
 
 ## What's next — in order
 
-1. **Variance estimate.** 3–5 runs of the current config, reported as a
-   spread. ~$2. Two identical runs already disagree on ~10% of verdicts,
-   which is larger than most differences this repo compares. **Nothing
-   below can be concluded until this exists.**
+1. ~~**Variance estimate.**~~ **Done 2026-08-27.** Four runs. The band is
+   **macro-F1 0.051**, and it is a floor — it grew from 0.042 at two
+   runs. See `docs/VARIANCE.md`. **Any comparison turning on less than
+   0.051 is unresolved.**
 2. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
    justification is that it beats one big call. That is asserted, never
-   measured. Needs item 1 first or it is noise against noise.
+   measured. **No single-pass code path exists** — this is implementation
+   plus a run, not just a run. It must beat the cascade by more than
+   0.051 to count, which likely means several runs per arm.
 3. **Batch API** — roughly 50% off input and output, and the eval is
    exactly the offline fixed-corpus job Batch exists for. Biggest
    available cost win; changes latency only. See `docs/COST_ANALYSIS.md`.

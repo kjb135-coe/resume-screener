@@ -7,26 +7,32 @@ piece before we can move on).
 
 ## Start here — updated 2026-08-27
 
-**State:** macro-F1 0.847, accuracy 0.850, ~$1.20 per 60-resume run,
-249 offline tests, everything committed and pushed. Nothing is
-half-finished in the working tree.
+**State:** macro-F1 **0.81–0.86** (a range, measured over four runs;
+the band is 0.051), **~$0.95** per 60-resume run, 249 offline tests,
+everything committed and pushed. Nothing is half-finished in the working
+tree.
 
 **Next, in order** (full reasoning in §10):
 
-1. **Variance estimate** — 3–5 runs, reported as a spread, ~$2. Two
-   identical runs disagree on ~10% of verdicts. Until this exists, no
-   comparison in this document can be trusted, including §8a.
+1. ~~**Variance estimate**~~ — **done 2026-08-27**, four runs. Band is
+   **0.051 macro-F1**, and it is a floor (0.042 at two runs, 0.051 at
+   four). `docs/VARIANCE.md`. **Any comparison in this document turning
+   on less than 0.051 is unresolved** — the aggregation sweep's 0.018 is
+   now inside the noise; §8a's 0.847→0.516 survives.
 2. **Single-pass arm of the bake-off** (§8) — the cascade's entire
-   justification, still unmeasured. Blocked on item 1.
+   justification, still unmeasured. No single-pass code path exists yet.
+   To count, it must differ by more than 0.051, which means several runs
+   per arm, not one.
 3. **Batch API** — ~50% off, natural fit, see `docs/COST_ANALYSIS.md`.
 4. **Cut output tokens** — 69% of spend; try lower effort on the panel.
 5. **Walkthrough mode** (§11) and the **hosting spend cap** — both
    specified, neither built.
 
-**Read before quoting any number:** `docs/LIMITATIONS.md` (fitted
-cutoffs, one-directional errors, no bias audit) and
-`docs/COST_ANALYSIS.md` (the pricing table was wrong until 2026-08-27;
-older cost figures in this repo are inflated).
+**Read before quoting any number:** `docs/VARIANCE.md` (the 0.051 band —
+quote macro-F1 as a range), `docs/LIMITATIONS.md` (fitted cutoffs,
+one-directional errors, no bias audit) and `docs/COST_ANALYSIS.md` (the
+pricing table was wrong until 2026-08-27, and the $1.20 that replaced it
+was still ~20% high; the measured figure is ~$0.95).
 
 ---
 
@@ -629,8 +635,8 @@ run, both untrue for a while by then.
   deterministically via reportlab, with no model calls.
 - **249 offline tests**, none of which touch the network.
 - The 60-resume synthetic corpus, its labels, and three recorded eval
-  runs. The current one: macro-F1 **0.847**, accuracy 0.850, roughly
-  $1.20 for 60 resumes. Written up in `docs/EVAL_RESULTS.md` and
+  runs, plus four variance runs. The current figure: macro-F1
+  **0.81–0.86**, roughly $0.95 for 60 resumes. Written up in `docs/EVAL_RESULTS.md` and
   `docs/CANDIDATE_REPORTS.md`, with the full history in
   `docs/RESULTS_HISTORY.md`. Read §3c before quoting any of these to
   three decimals — run-to-run drift is larger than it looks.
@@ -807,14 +813,16 @@ MCP server (5 tools), the CLI (3 commands), the web app (submit a posting
 resume upload for PDF/Word/Markdown/text, a password gate, and a
 60-resume labelled eval. 249 offline tests.
 
-**The honest headline:** macro-F1 **0.847**, accuracy 0.850, ~2 cents per
+**The honest headline:** macro-F1 **0.81–0.86**, ~1.6 cents per
 resume. `hold` recall is 0.65 against 0.90 for `advance` and 1.00 for
 `reject` — the middle class is still the weak one, but it is no longer
 broken. It was 0.20 before the cutoffs were swept.
 
-**The caveat that outranks the headline:** every number here is one run,
-and §3c measured 10% verdict drift between two identical runs. Several
-comparisons in this document are smaller than that.
+**The caveat that outranks the headline:** the spread is now measured
+rather than feared. Four identical runs span **0.051 macro-F1** and flip
+18% of verdicts at least once (`docs/VARIANCE.md`). Several comparisons
+in this document are smaller than that, and are therefore unresolved
+rather than decided.
 
 **The best-supported next move, in order:**
 
