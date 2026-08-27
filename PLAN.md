@@ -528,9 +528,10 @@ anonymously.
   `needs_human_review_count`. **Built.**
 - Known blind spot, not yet mitigated in code: disagreement-based
   escalation can't catch a panel that's unanimously and confidently
-  wrong for a shared/correlated reason. Documented fix is a governance
-  practice (audit a sample of confident unanimous rejects too) —
-  belongs in `LIMITATIONS.md`, which **does not exist yet.**
+  wrong for a shared/correlated reason. The fix is a governance practice
+  (audit a sample of confident unanimous rejects too) rather than a code
+  change. Written up, with the rest of the failure modes, in
+  `docs/LIMITATIONS.md`.
 
 ## 5. Cost/latency measurement — methodology settled, nothing implemented
 
@@ -542,11 +543,22 @@ anonymously.
   returns, report the measured delta. Latency as p50/p95, not mean,
   compared against a flat "everything hits all three tiers" run.
 - **Partly implemented.** `Usage` accumulates through the cascade and
-  `scripts/evaluate.py` reports real totals — the last run measured
-  $0.890981 for 60 resumes (p50 31.3s, p95 44.0s, 425K cache-read
-  tokens). What is still missing is the *comparison*: no uncached run
-  has been done, so the caching saving is recorded but not yet
-  quantified against its own baseline.
+  `scripts/evaluate.py` reports real totals. The latest recorded run
+  (run 3, `data/eval_run.json`) measured **$1.796 for 60 resumes**
+  ($0.0299 each), p50 19.4s, p95 32.9s, 421K cache-read tokens against
+  197K input and 104K output.
+- Cost is now attributed **per model** (`Usage.by_model`), which was the
+  fix for a real accounting bug: `Usage.__add__` kept the first
+  `model_id` it saw, and extraction leads the cascade, so an entire run
+  was being priced at Haiku rates. Documented spend was roughly half of
+  actual spend until this was corrected — the reason the earlier
+  $0.89 figure looked so good.
+- Run 3 costs about twice run 1 despite dropping the arbiter from Opus
+  to Sonnet. That is not a regression: run 1 was mispriced by the bug
+  above. Comparing the two headline costs directly is meaningless.
+- What is still missing is the *comparison*: no uncached run has been
+  done, so the caching saving is recorded but not yet quantified
+  against its own baseline.
 
 ## 6. Local and embedding models — settled
 
@@ -573,18 +585,30 @@ run, both untrue for a while by then.
   ingest.py`, `core/pipeline.py` (Tier 0/1/2), `core/query.py`,
   `core/enrichment.py` (documented stub), `core/rubric_gen.py` (§3a).
 - `adapters/mcp_server.py` — all 5 tools.
-- `adapters/api.py` + `adapters/static/index.html` — the rubric-preview
-  page. Deliberately scoped to previewing a rubric; it does not screen.
+- `adapters/api.py` + `adapters/static/index.html` — the full flow, not
+  just a rubric preview: submit a posting, get generated criteria, screen
+  a sample or read the recorded run, open a candidate, follow every
+  citation back to the resume line it came from. Three tabs (Screen /
+  Review queue / Results), a reviewer approve-reject workflow whose
+  decisions are stored separately from model output so human-vs-model
+  disagreement survives, PDF/Word/Markdown/text upload that persists
+  nothing, and a default-closed password gate implemented as middleware.
 - `prompts/rubric.md`, `prompts/rubric_generator.md`.
 - `adapters/cli.py` — `rubric`, `screen`, `rank`. The `resume-screener`
   console script in pyproject.toml now resolves; it previously pointed at
   a module that did not exist, so the documented command raised
   ImportError on a fresh install.
-- **143 offline tests**, none of which touch the network.
-- The 60-resume synthetic corpus, its labels, and a real eval run:
-  macro-F1 0.601, accuracy 0.633, $0.93 for 60 resumes. Written up in
-  `docs/EVAL_RESULTS.md` and `docs/CANDIDATE_REPORTS.md`. Read §3c before
-  quoting that number — run-to-run drift is larger than it looks.
+- `scripts/sweep_cutoffs.py`, `scripts/sweep_escalation.py` — offline
+  re-thresholding of recorded scores, zero API cost.
+  `scripts/build_resume_pdfs.py` renders the corpus to PDF
+  deterministically via reportlab, with no model calls.
+- **249 offline tests**, none of which touch the network.
+- The 60-resume synthetic corpus, its labels, and three recorded eval
+  runs. The current one: macro-F1 **0.847**, accuracy 0.850, $1.796 for
+  60 resumes. Written up in `docs/EVAL_RESULTS.md` and
+  `docs/CANDIDATE_REPORTS.md`, with the full history in
+  `docs/RESULTS_HISTORY.md`. Read §3c before quoting any of these to
+  three decimals — run-to-run drift is larger than it looks.
 - The live path has actually been exercised end to end: rubrics
   generated from both the target posting and an unrelated non-technical
   one (a charge-nurse req, which produced nursing dimensions with no
@@ -594,16 +618,17 @@ run, both untrue for a while by then.
   (0.2 in the recorded run) rather than a regression.
 
 **Still does not exist:**
-- `adapters/cli.py` — zero code. The `resume-screener` console script in
-  pyproject.toml points at it and would fail today.
-- `docs/ARCHITECTURE.md`, `docs/LIMITATIONS.md` — referenced by the
-  README, still missing. LIMITATIONS is the more urgent of the two: §4's
-  known blind spot is documented nowhere a reader would find it.
+- `docs/ARCHITECTURE.md` — referenced by the README, still missing.
+  Lower priority than it looks: the README's "How it works" section and
+  `STRUCTURE.md` between them already cover most of what it would say.
 - The embedding pre-filter, and the pydantic validation of `_parse_json`.
 - The 3-way architecture bake-off from §8 — only the panel+arbiter arm
   has been measured. Single-pass and flat-ensemble are unrun, so the
   "does the cascade earn its complexity" question is still open.
-- Any demo recording, any deployment.
+- A variance estimate. Every number in this document comes from a single
+  run of each configuration, and §3c measured 10% verdict drift between
+  two identical runs.
+- Walkthrough mode (§11), any demo recording, any deployment.
 
 ## 8. Testing and evaluation — ironed out 2026-08-25
 
@@ -737,44 +762,52 @@ can be measured until those 60 resumes and their labels exist.
 
 ## 9. Not started at all
 
-- `ARCHITECTURE.md`, `LIMITATIONS.md`. LIMITATIONS is the more urgent:
-  §4 names a real blind spot that lives only in this planning doc.
+- `ARCHITECTURE.md`. `LIMITATIONS.md` was the urgent one and now exists
+  at `docs/LIMITATIONS.md`.
+- A variance estimate: 3-5 runs per configuration, reported as a spread.
+  This blocks the bake-off below from meaning anything.
 - The single-pass and flat-ensemble arms of the §8 bake-off.
 - An uncached eval run to quantify the caching saving (§5).
 - **Walkthrough mode** (§11) — planned below, not built.
-- **Hosting.** Nothing is deployed. See §11 for the one blocker that
-  actually matters, which is the API key rather than the hosting.
+- **Hosting.** Nothing is deployed. Option 2 (shared password + hard
+  daily spend cap) is chosen; the password gate is built, the spend cap
+  and the deployment are not. See §11.
 - Demo recordings.
 
 ## 10. Where this actually stands — 2026-08-26
 
 **Working and verified end to end:** the cascade, generated rubrics, the
 MCP server (5 tools), the CLI (3 commands), the web app (submit a posting
-→ criteria → screened results → grounded reasoning), resume upload for
-PDF/Word/Markdown/text, and a 60-resume labelled eval. 209 offline tests.
+→ criteria → screened results → grounded reasoning → reviewer decision),
+resume upload for PDF/Word/Markdown/text, a password gate, and a
+60-resume labelled eval. 249 offline tests.
 
-**The honest headline:** macro-F1 0.601, and the reason it is that low is
-`hold` recall of 0.20 — the system separates strong from weak reliably
-and cannot identify the middle.
+**The honest headline:** macro-F1 **0.847**, accuracy 0.850, ~3 cents per
+resume. `hold` recall is 0.65 against 0.90 for `advance` and 1.00 for
+`reject` — the middle class is still the weak one, but it is no longer
+broken. It was 0.20 before the cutoffs were swept.
+
+**The caveat that outranks the headline:** every number here is one run,
+and §3c measured 10% verdict drift between two identical runs. Several
+comparisons in this document are smaller than that.
 
 **The best-supported next move, in order:**
 
-1. **Act on the cutoff sweep (§3e).** This is now the highest-value item
-   and costs one eval run. Two options: the safe constant change
-   (+0.045), or the design change where the arbiter stops returning its
-   own recommendation and cutoffs own the verdict (potentially ~+0.26).
-   Either way it needs a fresh run to confirm, because the cutoffs were
-   fit on the same 60 resumes.
-2. **Give the eval a variance estimate.** §3c measured 10% verdict drift
-   between identical runs. Several differences being compared are smaller
-   than that. Until each configuration is run 3-5 times and reported as a
-   spread, neither the bake-off nor the sweep result can be trusted to
-   the precision they are currently quoted at.
-3. **`LIMITATIONS.md`.** Cheap, and the one document a careful reader
-   will look for.
+1. **Give the eval a variance estimate.** 3-5 runs of the current
+   configuration, reported as a spread rather than a point. Roughly $2,
+   and until it exists nothing below can be concluded — including
+   whether the model-tier bake-off in §8a found anything real.
+2. **The single-pass arm of the §8 bake-off.** The cascade's whole
+   justification is that it beats one big call. That is currently
+   asserted, not measured. Needs item 1 first, or the comparison is
+   noise against noise.
+3. **Grow the corpus, or accept the cutoffs as fitted.** 4.0/1.0 was
+   swept on the same 60 resumes it is scored against, and the plateau on
+   the `advance` side is narrow. This is the single largest threat to
+   the headline number being real.
 
-Items 1 and 2 are entangled: doing 1 without 2 risks chasing noise, and
-2 makes 1 conclusive. Doing both is roughly $4 of eval runs.
+Items 1 and 2 are entangled and cost roughly $4 of eval runs together.
+Item 3 is the honest one and is more work than either.
 
 ## 11. Walkthrough mode and hosting — planned, not built
 
@@ -846,5 +879,9 @@ cap turns out to be awkward. The two features worth protecting are
 exactly the two that cost money, and the audience is small enough that a
 gate costs them nothing.
 
-None of this is built. It needs a decision on option 1 vs 2 first,
-because that decides whether the hosted build even needs a key.
+**Decided: option 2.** The password gate is built — `APP_PASSWORD`,
+a session cookie, and a default-closed middleware that gates every route
+except the login page and the health check (see §3j). What is still
+missing is the other half of option 2, the hard per-day spend cap, and
+the deployment itself. Until the cap exists, a hosted build with a live
+key is still an open invoice to anyone who gets the password.

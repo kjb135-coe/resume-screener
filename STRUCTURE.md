@@ -25,6 +25,7 @@ removing files rather than editing this by hand.
 │   ├── EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).
 │   ├── EVAL_RESULTS__recalibrated.md Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
+│   ├── LIMITATIONS.md               Where the numbers stop meaning what they look like, and where this must not be trusted: the fitted cutoffs, the one-directional errors, the escalation blind spot, and the unmeasured bias audit.
 │   ├── RESULTS_HISTORY.md           Every measured run, what changed before it, and why the number moved.
 │   └── SCORE_SCALE.md               Why a strong candidate scores 6 not 8, and the measured cost of fixing it.
 ├── research/                    Background research with citations, gathered before design decisions were made.

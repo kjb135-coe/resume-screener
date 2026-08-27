@@ -12,7 +12,7 @@ Submit a posting, and the whole flow runs top to bottom:
 2. **It writes three scoring criteria from that posting**, each with the brief for the agent that owns it.
 3. **Resumes get screened against those criteria**, ranked, with the reasoning behind every score.
 
-The screenshot shows 60 test resumes screened for **$0.93 total**, about a cent and a half each. 14 advance, 10 hold, 36 reject, and **33 flagged for a human**.
+The screenshot shows 60 test resumes screened for **$1.80 total**, about three cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
 
 ```bash
 uvicorn resume_screener.adapters.api:app --reload
@@ -28,17 +28,17 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 ## Where this stands
 
-**Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 209 tests, all offline.
+**Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 249 tests, all offline.
 
 **Measured:** macro-F1 **0.847**, accuracy 0.850 on 60 labelled resumes, ~3 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65.
 
 **Remaining weakness:** all 9 surviving errors still run one direction, the model scoring below the label. `production_light_ai` — strong production history, shallow AI depth — is 1 of 7.
 
-**Not built:** hosting, a guided walkthrough, `LIMITATIONS.md`, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md).
+**Not built:** hosting, a guided walkthrough, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md). What this system cannot do, and where it should not be trusted, is in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ## How it works
 
-Each resume goes through three stages, and the expensive stage usually doesn't run.
+Each resume goes through three stages, and the last one runs on slightly under half of them.
 
 ```
   Resume
@@ -53,16 +53,18 @@ Each resume goes through three stages, and the expensive stage usually doesn't r
     ▼
   Do they agree?
     │
-    ├── yes ──▶  average the scores            (45% of candidates)
+    ├── yes ──▶  average the scores            (53% of candidates)
     │
-    └── no  ──▶  arbiter reads all three       (55% of candidates)
+    └── no  ──▶  arbiter reads all three       (47% of candidates)
                  rationales and rules
                           │
                           ▼
-              ≥7 advance · ≥5 hold · else reject
+              ≥4 advance · ≥1 hold · else reject
 ```
 
-Escalation is triggered by the panel disagreeing with each other, not by a score being near a cutoff. A candidate everyone agrees is strong costs three cheap calls. A candidate the panel splits on gets the expensive model, and gets flagged for a person.
+Escalation is triggered by the panel disagreeing about the *verdict*, not by a score being near a cutoff and not by the scores merely varying — a 9.0/7.0/6.0 panel has a wide spread but nothing an arbiter could return would change the outcome. A candidate everyone agrees on costs one cheap extraction and three panel calls. A candidate the panel splits on pays for a fourth call, and gets flagged for a person.
+
+The arbiter used to run on Opus. It was moved to Sonnet after cost accounting showed it was ~57% of total spend while adjudicating rationales that were already written for it — reading and choosing, not fresh analysis. That swap shipped in the same run as the cutoff fix, so its effect on accuracy was never isolated and no claim is made about it.
 
 ### Why three agents
 
@@ -130,12 +132,12 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 | Macro-F1 | **0.847** |
 | Accuracy | 0.850 |
 | Cost | $1.80 for 60 (~3c each) |
-| Latency | p50 33.7s, p95 46.0s |
-| Flagged for a human | 28 / 60 |
+| Latency | p50 19.4s, p95 32.9s |
+| Flagged for a human | 29 / 60 |
 
 **The number that matters more than the headline: 6 of 60 verdicts change between two identical runs.** A single run can't support a macro-F1 quoted to three decimals, and can't tell a 0.03 difference from noise. Giving the eval a variance estimate is the next thing worth doing, and until it exists the architecture comparison below can't mean much.
 
-**Where it actually fails:** `hold` recall is 0.20. It separates strong from weak reliably and identifies the middle badly. That did not move across runs, so it's real rather than noise.
+**Where it actually fails:** `hold` is still the weakest class at 0.65 recall, against 0.90 for `advance` and 1.00 for `reject`. Identifying the middle is harder than separating the ends, and it stayed the hardest even after the fix that tripled it.
 
 ### Where it still fails
 
@@ -173,7 +175,7 @@ Caveat worth keeping: those cutoffs were fitted on the same 60 resumes they are 
 Other things named rather than hidden:
 
 - The three-way architecture bake-off in [PLAN.md §8](PLAN.md) is unfinished. Only this design has been measured, so "the cascade beats one big call" is asserted, not shown.
-- `docs/LIMITATIONS.md` isn't written yet. The known blind spot, that disagreement-based escalation can't catch a panel which is unanimously and confidently wrong, is in [PLAN.md §4](PLAN.md) meanwhile.
+- Disagreement-based escalation can't catch a panel that is unanimously and confidently wrong, because there is no disagreement to detect. That and the rest of the failure modes are in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 - Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [PLAN.md §3b](PLAN.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
 
 Every measured run, what changed before it, and why the number moved is tracked in [docs/RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md).
@@ -229,7 +231,7 @@ Score one resume:
 resume-screener screen data/synthetic_resumes/quiet_builder__elena_vasquez.md docs/job_description.md
 ```
 
-Rank the whole corpus. 60 resumes, roughly $0.93 and a few minutes:
+Rank the whole corpus. 60 resumes, roughly $1.80 and a few minutes:
 
 ```bash
 resume-screener rank data/synthetic_resumes docs/job_description.md --top 10

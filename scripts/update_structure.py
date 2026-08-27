@@ -71,7 +71,7 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/job_description.md": "The real posting the rubric is built against. Ground truth for scoring criteria.",
     "docs/corpus_design.md": "Archetypes, labels, and generation method for the synthetic resume corpus.",
     "docs/ARCHITECTURE.md": "Design decisions and their reasoning. (not written yet)",
-    "docs/LIMITATIONS.md": "What this tool does not catch — bias, injection, human-review boundaries. (not written yet)",
+    "docs/LIMITATIONS.md": "Where the numbers stop meaning what they look like, and where this must not be trusted: the fitted cutoffs, the one-directional errors, the escalation blind spot, and the unmeasured bias audit.",
 
     # research/
     "research": "Background research with citations, gathered before design decisions were made.",
