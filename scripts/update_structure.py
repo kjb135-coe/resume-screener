@@ -71,6 +71,8 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/job_description.md": "The real posting the rubric is built against. Ground truth for scoring criteria.",
     "docs/corpus_design.md": "Archetypes, labels, and generation method for the synthetic resume corpus.",
     "docs/ARCHITECTURE.md": "Design decisions and their reasoning. (not written yet)",
+    "CLAUDE.md": "Guidance for Claude Code in this repo: the hard constraints (no AI attribution in git history, the live key in .env), the load-bearing caching contract, and the ordered next steps.",
+    "docs/COST_ANALYSIS.md": "Where the run cost actually goes, the pricing-table bug found 2026-08-27, and why prompt caching is already maxed out here.",
     "docs/LIMITATIONS.md": "Where the numbers stop meaning what they look like, and where this must not be trusted: the fitted cutoffs, the one-directional errors, the escalation blind spot, and the unmeasured bias audit.",
 
     # research/

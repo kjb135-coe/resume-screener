@@ -5,6 +5,29 @@ actual reasoning), **built** (code that exists — separate from whether
 it's been run), and **open** (still needs a real decision or a missing
 piece before we can move on).
 
+## Start here — updated 2026-08-27
+
+**State:** macro-F1 0.847, accuracy 0.850, ~$1.20 per 60-resume run,
+249 offline tests, everything committed and pushed. Nothing is
+half-finished in the working tree.
+
+**Next, in order** (full reasoning in §10):
+
+1. **Variance estimate** — 3–5 runs, reported as a spread, ~$2. Two
+   identical runs disagree on ~10% of verdicts. Until this exists, no
+   comparison in this document can be trusted, including §8a.
+2. **Single-pass arm of the bake-off** (§8) — the cascade's entire
+   justification, still unmeasured. Blocked on item 1.
+3. **Batch API** — ~50% off, natural fit, see `docs/COST_ANALYSIS.md`.
+4. **Cut output tokens** — 69% of spend; try lower effort on the panel.
+5. **Walkthrough mode** (§11) and the **hosting spend cap** — both
+   specified, neither built.
+
+**Read before quoting any number:** `docs/LIMITATIONS.md` (fitted
+cutoffs, one-directional errors, no bias audit) and
+`docs/COST_ANALYSIS.md` (the pricing table was wrong until 2026-08-27;
+older cost figures in this repo are inflated).
+
 ---
 
 ## 1. Goal and hard constraints — settled
@@ -544,9 +567,11 @@ anonymously.
   compared against a flat "everything hits all three tiers" run.
 - **Partly implemented.** `Usage` accumulates through the cascade and
   `scripts/evaluate.py` reports real totals. The latest recorded run
-  (run 3, `data/eval_run.json`) measured **$1.796 for 60 resumes**
-  ($0.0299 each), p50 19.4s, p95 32.9s, 421K cache-read tokens against
-  197K input and 104K output.
+  (run 3, `data/eval_run.json`) measured p50 19.4s, p95 32.9s, and 421K
+  cache-read tokens against 197K input and 104K output. It *reported*
+  $1.796, but two of the three rates in the pricing table were wrong --
+  at correct rates the same tokens come to roughly **$1.20** (~2c per
+  resume). See `docs/COST_ANALYSIS.md`; the exact figure needs a re-run.
 - Cost is now attributed **per model** (`Usage.by_model`), which was the
   fix for a real accounting bug: `Usage.__add__` kept the first
   `model_id` it saw, and extraction leads the cascade, so an entire run
@@ -604,8 +629,8 @@ run, both untrue for a while by then.
   deterministically via reportlab, with no model calls.
 - **249 offline tests**, none of which touch the network.
 - The 60-resume synthetic corpus, its labels, and three recorded eval
-  runs. The current one: macro-F1 **0.847**, accuracy 0.850, $1.796 for
-  60 resumes. Written up in `docs/EVAL_RESULTS.md` and
+  runs. The current one: macro-F1 **0.847**, accuracy 0.850, roughly
+  $1.20 for 60 resumes. Written up in `docs/EVAL_RESULTS.md` and
   `docs/CANDIDATE_REPORTS.md`, with the full history in
   `docs/RESULTS_HISTORY.md`. Read §3c before quoting any of these to
   three decimals — run-to-run drift is larger than it looks.
@@ -782,7 +807,7 @@ MCP server (5 tools), the CLI (3 commands), the web app (submit a posting
 resume upload for PDF/Word/Markdown/text, a password gate, and a
 60-resume labelled eval. 249 offline tests.
 
-**The honest headline:** macro-F1 **0.847**, accuracy 0.850, ~3 cents per
+**The honest headline:** macro-F1 **0.847**, accuracy 0.850, ~2 cents per
 resume. `hold` recall is 0.65 against 0.90 for `advance` and 1.00 for
 `reject` — the middle class is still the weak one, but it is no longer
 broken. It was 0.20 before the cutoffs were swept.

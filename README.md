@@ -12,7 +12,7 @@ Submit a posting, and the whole flow runs top to bottom:
 2. **It writes three scoring criteria from that posting**, each with the brief for the agent that owns it.
 3. **Resumes get screened against those criteria**, ranked, with the reasoning behind every score.
 
-The screenshot shows 60 test resumes screened for **$1.80 total**, about three cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
+The screenshot shows 60 test resumes screened for roughly **$1.20 total**, about two cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
 
 ```bash
 uvicorn resume_screener.adapters.api:app --reload
@@ -30,11 +30,11 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 **Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 249 tests, all offline.
 
-**Measured:** macro-F1 **0.847**, accuracy 0.850 on 60 labelled resumes, ~3 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65.
+**Measured:** macro-F1 **0.847**, accuracy 0.850 on 60 labelled resumes, ~2 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65.
 
 **Remaining weakness:** all 9 surviving errors still run one direction, the model scoring below the label. `production_light_ai` — strong production history, shallow AI depth — is 1 of 7.
 
-**Not built:** hosting, a guided walkthrough, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md). What this system cannot do, and where it should not be trusted, is in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
+**Not built:** hosting, a guided walkthrough, and two of the three arms of the architecture comparison. All tracked in [PLAN.md §9–§11](PLAN.md). What this system cannot do, and where it should not be trusted, is in [docs/LIMITATIONS.md](docs/LIMITATIONS.md); where the money goes is in [docs/COST_ANALYSIS.md](docs/COST_ANALYSIS.md).
 
 ## How it works
 
@@ -131,7 +131,7 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 |---|---|
 | Macro-F1 | **0.847** |
 | Accuracy | 0.850 |
-| Cost | $1.80 for 60 (~3c each) |
+| Cost | ~$1.20 for 60 (~2c each) |
 | Latency | p50 19.4s, p95 32.9s |
 | Flagged for a human | 29 / 60 |
 
@@ -231,7 +231,7 @@ Score one resume:
 resume-screener screen data/synthetic_resumes/quiet_builder__elena_vasquez.md docs/job_description.md
 ```
 
-Rank the whole corpus. 60 resumes, roughly $1.80 and a few minutes:
+Rank the whole corpus. 60 resumes, roughly $1.20 and a few minutes:
 
 ```bash
 resume-screener rank data/synthetic_resumes docs/job_description.md --top 10

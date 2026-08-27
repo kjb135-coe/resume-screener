@@ -44,10 +44,22 @@ CLASSES = ("advance", "hold", "reject")
 
 # Published per-million-token rates, used only to turn measured token
 # counts into a dollar figure. Token counts themselves are real.
+#
+# Verified against platform.claude.com/docs/en/about-claude/pricing on
+# 2026-08-27. Two of these three were WRONG before that check, and every
+# cost figure this repo published was inflated as a result:
+#   sonnet-5 was carrying Sonnet 4.6 rates ($3/$15) -- it is $2/$10
+#   opus-5   was carrying Opus 4.1 rates ($15/$75)  -- it is $5/$25
+# The recorded run reported $1.796; at correct rates the same token
+# counts come to roughly $1.20. See docs/COST_ANALYSIS.md.
+#
+# cache_write is the 5-minute rate (1.25x base). This code never sets
+# ttl="1h", so the 2x rate does not apply -- see COST_ANALYSIS.md on why
+# the 1-hour TTL would be a pure loss for a continuous batch run.
 PRICING = {
     "claude-haiku-4-5-20251001": {"in": 1.00, "out": 5.00, "cache_read": 0.10, "cache_write": 1.25},
-    "claude-sonnet-5": {"in": 3.00, "out": 15.00, "cache_read": 0.30, "cache_write": 3.75},
-    "claude-opus-5": {"in": 15.00, "out": 75.00, "cache_read": 1.50, "cache_write": 18.75},
+    "claude-sonnet-5": {"in": 2.00, "out": 10.00, "cache_read": 0.20, "cache_write": 2.50},
+    "claude-opus-5": {"in": 5.00, "out": 25.00, "cache_read": 0.50, "cache_write": 6.25},
 }
 
 

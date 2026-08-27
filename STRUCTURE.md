@@ -18,6 +18,7 @@ removing files rather than editing this by hand.
 │   │   └── candidates.png               The candidates view, used in the README.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
+│   ├── COST_ANALYSIS.md             Where the run cost actually goes, the pricing-table bug found 2026-08-27, and why prompt caching is already maxed out here.
 │   ├── CUTOFF_SWEEP.md              Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.
 │   ├── ESCALATION_SWEEP.md          Output of scripts/sweep_escalation.py: escalation policies compared on cost.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
@@ -80,6 +81,7 @@ removing files rather than editing this by hand.
 │   └── test_rubric_gen.py           Rubric validation: dimension count, identifier names, and failing loud on junk.
 ├── .env.example                 Template for .env. Names the one key needed; holds no secret.
 ├── .gitignore                   Excludes venv, caches, .env, and generated databases.
+├── CLAUDE.md                    Guidance for Claude Code in this repo: the hard constraints (no AI attribution in git history, the live key in .env), the load-bearing caching contract, and the ordered next steps.
 ├── LICENSE                      MIT.
 ├── PLAN.md                      Living status doc — what's settled, what's built, what's open.
 ├── pyproject.toml               Package metadata, dependencies, pytest and ruff config.

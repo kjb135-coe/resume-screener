@@ -6,6 +6,14 @@ Hand-maintained: add a row whenever an eval run happens.
 `docs/EVAL_RESULTS.md` always describes the *latest* run only. This file
 is the record of how it got there.
 
+> **Every cost in this file is overstated.** The pricing table in
+> `scripts/evaluate.py` carried Sonnet 4.6 rates for Sonnet 5 and Opus
+> 4.1 rates for Opus 5 until 2026-08-27. The dollar figures below are
+> left as they were reported, because this file is a record of what each
+> run said at the time. Run 3's $1.796 is really about **$1.20**. Token
+> counts, macro-F1, and every other number here are unaffected. See
+> `docs/COST_ANALYSIS.md`.
+
 ## Runs
 
 | # | Date | macro-F1 | Accuracy | Reported cost | What changed before this run |
@@ -68,9 +76,10 @@ archetype still failing badly, and with `adjacent_shipper` at 4/6 it
 accounts for 8 of the 9 remaining errors. Strong production history with
 shallow AI depth is the profile this rubric still cannot place.
 
-**Cost.** $1.796 for 60 resumes, about 3 cents each, and this is the
-first figure priced per model rather than billing everything at Haiku
-rates. It is not comparable to the "$0.93" in runs 1 and 2, which were
+**Cost.** $1.796 for 60 resumes as reported, about 3 cents each, and this
+is the first figure priced per model rather than billing everything at
+Haiku rates. (Corrected for the bad rate table, it is roughly $1.20, or
+2 cents each — see the note at the top of this file.) It is not comparable to the "$0.93" in runs 1 and 2, which were
 wrong rather than cheaper. Against a corrected estimate of run 2 at
 roughly $4, moving the arbiter to Sonnet did close to halve real spend.
 

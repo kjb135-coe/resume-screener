@@ -2,6 +2,13 @@
 
 60 of 60 resumes scored. Prompt caching: on.
 
+> **Generated file — the two cost rows below are stale.** This report was
+> written before the pricing table in `scripts/evaluate.py` was corrected
+> on 2026-08-27, so it prices Sonnet 5 at Sonnet 4.6 rates. Real cost for
+> this run is about **$1.20 total / $0.020 per resume**. Re-running
+> `scripts/evaluate.py` regenerates this file with correct rates. Every
+> other number here is accurate. See `docs/COST_ANALYSIS.md`.
+
 ## Headline
 
 | Metric | Value |
