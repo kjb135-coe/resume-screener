@@ -7,7 +7,7 @@ Built for a team screening by hand with no ATS. It is not a filter that rejects 
 ## TL;DR
 
 - **What it does.** Writes scoring criteria *from your job posting*, scores each resume against them with a quoted rationale per dimension, and asks a second model for another look when the call is close.
-- **How well.** macro-F1 **0.88–0.92** on 60 labelled resumes, **~$0.28 per 60** (~0.5¢ each), p50 **8.4s**, **16%** sent to a human. → [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md)
+- **How well.** Over 3 runs of 60 labelled resumes: macro-F1 **0.88–0.92**, **~$0.28 per 60** (~0.5¢ each), p50 **8.4s**, **16%** sent to a human. → [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md)
 - **Why a range, not a number.** Four identical runs — same code, same corpus — span **0.051** macro-F1. Any smaller difference is unresolved. → [VARIANCE.md](docs/VARIANCE.md)
 - **It replaced its own architecture.** It ran as three parallel agents plus an arbiter. Measured, the parallel panel scored *worse* than a single call (0.788 vs 0.821) at twice the API calls; the arbiter was the part earning its keep. → [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md)
 - **What it does not prove.** The corpus is synthetic, the cutoffs were fitted on it, and about half the errors ship unreviewed. → [LIMITATIONS.md](docs/LIMITATIONS.md)
@@ -44,7 +44,7 @@ Two stages per resume, plus a third on about a quarter of them.
 
 ## Results
 
-Measured on 60 labelled synthetic resumes, 3 runs. Full working in [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md); raw run files in [`data/`](data).
+Measured over 3 runs of 60 labelled synthetic resumes. The live site opens on a *single* recorded run, so its counts differ slightly — one run is inside the noise band of three. Full working in [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md); raw run files in [`data/`](data).
 
 | Metric | Value | Evidence |
 |---|---|---|
@@ -53,7 +53,7 @@ Measured on 60 labelled synthetic resumes, 3 runs. Full working in [RESULTS_HIST
 | Cost | ~$0.28 per 60 (~0.5¢ each) | [COST_ANALYSIS.md](docs/COST_ANALYSIS.md) |
 | Latency | p50 8.4s | [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md) |
 | Sent to a human | 9 / 60 | [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md) |
-| Offline tests | 338, no network, no key | `pytest` |
+| Test suite | offline — no network, no key, no cost | `pytest` |
 
 **Does the name change the score?** Swapping only the candidate's name — heading, email, LinkedIn handle, nothing else — moved group means by at most **0.20 points** against a ~0.88 noise floor. No detectable name effect, which rules out a *large* one and not a small one. → [BIAS_AUDIT.md](docs/BIAS_AUDIT.md)
 

@@ -46,7 +46,7 @@ persona. Read that module docstring before touching prompt assembly.
   three runs. **Quote it as a range**, never as a point — identical
   runs span 0.051. Roughly **$0.28** per full run (~0.5c/resume),
   measured, stable to a cent.
-- 306 offline tests, ruff clean.
+- Offline test suite (no network, no key), ruff clean.
 - **Escalation and the human-review flag are separate decisions.** The
   arbiter fires when the panel MEAN is within `ESCALATION_MARGIN` (0.5)
   of a cutoff; a human is asked when the FINAL score is within

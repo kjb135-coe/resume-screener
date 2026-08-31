@@ -10,7 +10,7 @@ its accuracy is the kind of tool that gets deployed past its evidence.
 
 ## 1. The headline number is weaker than it looks
 
-**The headline is a range, not a number: macro-F1 0.81-0.86.** This was
+**The headline is a range, not a number: macro-F1 0.88-0.92.** This was
 measured, not assumed. Four runs of one unchanged configuration span
 **0.051** in macro-F1, and 9 of 51 candidates (18%) change verdict at
 least once. Full detail in [VARIANCE.md](VARIANCE.md).

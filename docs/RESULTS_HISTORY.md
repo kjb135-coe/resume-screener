@@ -14,6 +14,31 @@ is the record of how it got there.
 > counts, macro-F1, and every other number here are unaffected. See
 > `docs/COST_ANALYSIS.md`.
 
+## What is in here
+
+Newest last. Each entry says what changed *before* the run, because a
+number without that is not evidence of anything.
+
+- [Runs](#runs)
+- [Run 3 — what actually moved](#run-3-what-actually-moved)
+- [Comparison runs — not the baseline](#comparison-runs-not-the-baseline)
+- [Offline sweeps — analysis, not runs](#offline-sweeps-analysis-not-runs)
+- [`client_communication` — a correction](#client_communication-a-correction)
+- [Variance runs — 2026-08-27](#variance-runs-2026-08-27)
+- [Multi-provider bake-off — 2026-08-27](#multi-provider-bake-off-2026-08-27)
+- [Haiku panel, re-tested properly — 2026-08-27](#haiku-panel-re-tested-properly-2026-08-27)
+- [Panel confidence removed — 2026-08-27](#panel-confidence-removed-2026-08-27)
+- [Cutoffs refitted per model, and held out — 2026-08-27](#cutoffs-refitted-per-model-and-held-out-2026-08-27)
+- [The 60-resume bake-off, finished — 2026-08-27](#the-60-resume-bake-off-finished-2026-08-27)
+- [Cutoffs are now per-model — shipped 2026-08-27](#cutoffs-are-now-per-model-shipped-2026-08-27)
+- [Escalation and human review, unwelded — 2026-08-27](#escalation-and-human-review-unwelded-2026-08-27)
+- [Panel switched to GPT-5.6 Luna — 2026-08-31](#panel-switched-to-gpt-56-luna-2026-08-31)
+- [The extraction-confidence review flag, replaced — 2026-08-31](#the-extraction-confidence-review-flag-replaced-2026-08-31)
+- [The cascade vs one call — 2026-08-31](#the-cascade-vs-one-call-2026-08-31)
+- [Cutting output tokens — 2026-08-31](#cutting-output-tokens-2026-08-31)
+- [Single-pass + arbiter — the best architecture found — 2026-08-31](#single-pass-arbiter-the-best-architecture-found-2026-08-31)
+- [Recorded run regenerated on the shipped architecture — 2026-08-31](#recorded-run-regenerated-on-the-shipped-architecture-2026-08-31)
+
 ## Runs
 
 | # | Date | macro-F1 | Accuracy | Reported cost | What changed before this run |

@@ -119,9 +119,10 @@ Sending extracted evidence instead of the full resume saves 365 input
 tokens per panel call (11.9%), worth ~$0.13 across a 60-resume run.
 Extraction itself costs ~$0.24. **Net loss of about $0.11 per run.**
 
-It is kept for grounding — every score cites a verbatim quote — and for
-giving all three agents one shared evidence base. It is a quality
-decision, not a cost optimisation, and `docs/COST_ANALYSIS.md` says so.
+It is kept for grounding: every score cites a verbatim quote, and the
+scoring call sees only those quotes, so a rationale cannot rest on an
+impression the resume never supported. It is a quality decision, not a
+cost optimisation, and `docs/COST_ANALYSIS.md` says so.
 On real multi-page PDFs the saving grows and this may flip.
 
 ### One place owns the verdict
