@@ -156,3 +156,39 @@ class TestProviderFailureMessages:
         # else must keep its generic error so it is not hidden.
         assert self._explain("Connection reset by peer") is None
         assert self._explain("Malformed JSON in model response") is None
+
+
+class TestFailureTag:
+    """`failure_tag` is what a hosted deploy shows instead of "check the log".
+
+    The message body of a provider exception can quote the request that
+    failed, and a request carries an Authorization header. So the tag
+    must be built only from the class name and the HTTP status, never
+    from the text.
+    """
+
+    def _tag(self, exc):
+        from resume_screener.adapters.budget import failure_tag
+
+        return failure_tag(exc)
+
+    def test_reads_a_status_code_off_the_exception(self):
+        exc = RuntimeError("boom")
+        exc.status_code = 401
+        assert self._tag(exc) == "RuntimeError 401"
+
+    def test_reads_a_status_code_off_a_wrapped_response(self):
+        class _Response:
+            status_code = 429
+
+        exc = RuntimeError("boom")
+        exc.response = _Response()
+        assert self._tag(exc) == "RuntimeError 429"
+
+    def test_falls_back_to_the_class_name_alone(self):
+        assert self._tag(ValueError("boom")) == "ValueError"
+
+    def test_never_carries_the_message(self):
+        exc = RuntimeError("x-api-key: sk-ant-SECRETVALUE")
+        exc.status_code = 401
+        assert "SECRET" not in self._tag(exc)

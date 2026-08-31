@@ -54,6 +54,7 @@ from resume_screener.adapters.budget import (
     BudgetExceeded,
     budget,
     explain_provider_failure,
+    failure_tag,
 )
 from resume_screener.core.cutoffs import (
     REVIEW_MARGIN_FRACTION,
@@ -651,9 +652,7 @@ async def _run_screening(job_id: str, job_description: str, count: int) -> None:
     except Exception as exc:
         log.exception("Screening job %s failed", job_id)
         job["status"] = "error"
-        job["error"] = (
-            explain_provider_failure(exc) or "Screening failed. Check the server log."
-        )
+        job["error"] = _provider_error(exc, "Screening failed.")
 
 
 # --------------------------------------------------------------------------
@@ -923,9 +922,54 @@ async def get_budget() -> JSONResponse:
     return JSONResponse(budget.snapshot())
 
 
+# The last provider failure, for /health. One slot, not a list: the
+# operator wants "what broke just now", and keeping a history here would
+# be a slow memory leak on a long-lived free instance.
+_last_failure: dict[str, str] | None = None
+
+
+def _record_failure(exc: BaseException) -> str:
+    """Remember a failure for /health, and return its secret-free tag."""
+    global _last_failure
+    tag = failure_tag(exc)
+    _last_failure = {"tag": tag, "at": datetime.now(UTC).isoformat()}
+    return tag
+
+
+def _provider_error(exc: BaseException, fallback: str) -> str:
+    """The message to show a visitor when a provider call failed.
+
+    Always names the HTTP status. Before this, every unrecognised failure
+    read "Check the server log", which on a hosted demo is advice nobody
+    can take -- the visitor has no log and the operator is not watching
+    one. A status code is enough to tell a dead key from spent credit
+    without reading anything.
+    """
+    tag = _record_failure(exc)
+    return f"{explain_provider_failure(exc) or fallback} ({tag})"
+
+
 @app.get("/health")
 async def health() -> dict:
-    return {"ok": True}
+    """Liveness, plus the two things that actually break a deploy.
+
+    Public on purpose, and it reveals no secret: `configured` reports
+    only whether each key is *present*, never its value or any prefix of
+    it. Both keys are `sync: false` in `render.yaml`, so they are typed
+    by hand in the dashboard and are the most likely thing to be missing
+    after a fresh deploy. `last_failure` carries the exception class and
+    HTTP status of the most recent provider error, which is what tells a
+    dead key (401) apart from spent credit (429).
+    """
+    return {
+        "ok": True,
+        "configured": {
+            "ANTHROPIC_API_KEY": bool(os.environ.get("ANTHROPIC_API_KEY")),
+            "OPENAI_API_KEY": bool(os.environ.get("OPENAI_API_KEY")),
+            "APP_PASSWORD": bool(os.environ.get("APP_PASSWORD")),
+        },
+        "last_failure": _last_failure,
+    }
 
 
 @app.get("/api/default-jd")
@@ -1114,7 +1158,7 @@ async def post_screen_upload(
         log.exception("Screening an uploaded resume failed")
         friendly = explain_provider_failure(exc)
         return JSONResponse(
-            {"error": friendly or "Screening failed. Check the server log."},
+            {"error": _provider_error(exc, "Screening failed.")},
             status_code=503 if friendly else 500,
         )
     finally:
@@ -1155,10 +1199,12 @@ async def post_rubric(request: RubricRequest) -> JSONResponse:
     except RuntimeError as exc:
         # default_models() raises this when ANTHROPIC_API_KEY is unset.
         return JSONResponse({"error": str(exc)}, status_code=503)
-    except Exception:
+    except Exception as exc:
         log.exception("Rubric generation failed")
+        friendly = explain_provider_failure(exc)
         return JSONResponse(
-            {"error": "Rubric generation failed. Check the server log."}, status_code=500
+            {"error": _provider_error(exc, "Rubric generation failed.")},
+            status_code=503 if friendly else 500,
         )
     return JSONResponse(rubric.to_dict())
 

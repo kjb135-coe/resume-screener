@@ -145,6 +145,28 @@ _OUT_OF_CREDIT = (
     "billing_hard_limit_reached",
 )
 _BAD_KEY = ("invalid_api_key", "invalid x-api-key", "incorrect api key", "unauthorized")
+_RATE_LIMIT = ("rate_limit", "rate limit", "too many requests")
+_OVERLOADED = ("overloaded", "service unavailable", "502 bad gateway", "503")
+
+
+def failure_tag(exc: BaseException) -> str:
+    """A short, secret-free label for an exception: `APIStatusError 401`.
+
+    Safe to show on a public page and to log. It carries the exception
+    class and the HTTP status if there is one, and nothing else -- never
+    the message body, which can quote a request and therefore a key.
+
+    This exists because "check the server log" is useless advice on a
+    hosted demo: the operator is not watching the log, and the visitor
+    cannot reach it. A status code names the problem in one glance --
+    401 is a key, 429 is credit or a rate limit, 500 is the provider.
+    """
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        response = getattr(exc, "response", None)
+        status = getattr(response, "status_code", None)
+    name = type(exc).__name__
+    return f"{name} {status}" if status is not None else name
 
 
 def explain_provider_failure(exc: BaseException) -> str | None:
@@ -154,7 +176,8 @@ def explain_provider_failure(exc: BaseException) -> str | None:
     "Screening failed, check the server log" for something no visitor can
     check and the operator cannot see from the outside. It happened four
     times during development; each time the surface error said nothing
-    useful.
+    useful -- and once more on the hosted site, where the rubric endpoint
+    was not calling this function at all.
     """
     text = str(exc).lower()
     if any(marker in text for marker in _OUT_OF_CREDIT):
@@ -168,5 +191,15 @@ def explain_provider_failure(exc: BaseException) -> str | None:
             "The API key behind this site is not being accepted, so nothing "
             "can be scored right now. This is a server configuration "
             "problem, not something you did."
+        )
+    if any(marker in text for marker in _RATE_LIMIT):
+        return (
+            "The API account behind this site hit a rate limit. Wait a "
+            "minute and try again."
+        )
+    if any(marker in text for marker in _OVERLOADED):
+        return (
+            "The model provider is refusing requests right now. This is on "
+            "their side, not yours. Try again in a few minutes."
         )
     return None

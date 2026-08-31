@@ -90,7 +90,27 @@ class TestPage:
         assert "Resume Screener" in response.text
 
     def test_health(self, client):
-        assert client.get("/health").json() == {"ok": True}
+        body = client.get("/health").json()
+        assert body["ok"] is True
+        assert set(body["configured"]) == {
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+            "APP_PASSWORD",
+        }
+
+    def test_health_reports_key_presence_and_never_the_key(self, client, monkeypatch):
+        """/health says *whether* a key is set, never any part of its value.
+
+        The endpoint is public, so this is the test that stops a helpful
+        future edit ("show the first 8 characters so we can tell which
+        key it is") from publishing a secret.
+        """
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-SECRETVALUE")
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        body = client.get("/health").json()
+        assert body["configured"]["ANTHROPIC_API_KEY"] is True
+        assert body["configured"]["OPENAI_API_KEY"] is False
+        assert "SECRETVALUE" not in client.get("/health").text
 
 
 class TestResults:

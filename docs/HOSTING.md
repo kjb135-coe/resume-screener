@@ -55,11 +55,45 @@ combined $30 provider cap is the backstop that survives any bug here.
 5. **Set `APP_PASSWORD`.** There is no default. Left unset, the app
    generates a random password per process and prints it to the log —
    which means it changes on every restart and every redeploy.
-6. Deploy. Check `/health`, then log in and confirm `/api/budget`
+6. Deploy. Open `/health`, then log in and confirm `/api/budget`
    returns the expected limit.
 
 The free plan sleeps after ~15 minutes idle and takes ~30s to wake. That
 is acceptable for a link someone opens once; `plan: starter` removes it.
+
+## When the site says a run failed
+
+Open `/health` first. It needs no password and it answers the two
+questions that cause almost every hosted failure:
+
+```json
+{
+  "ok": true,
+  "configured": {"ANTHROPIC_API_KEY": true, "OPENAI_API_KEY": true, "APP_PASSWORD": true},
+  "last_failure": {"tag": "APIStatusError 401", "at": "2026-08-31T16:40:02Z"}
+}
+```
+
+`configured` reports only whether each key is *present*. It never shows a
+key or any part of one. All three are `sync: false` in `render.yaml`, so
+they are typed by hand and are the most likely thing missing after a
+fresh deploy.
+
+`last_failure` carries the exception class and HTTP status of the most
+recent provider error. Read it like this:
+
+| Tag | Meaning | Fix |
+|---|---|---|
+| `401` | The key is wrong or revoked | Re-enter it in **Environment** |
+| `429` | Out of credit, or rate limited | Add credit, or wait a minute |
+| `500`, `529` | The provider is refusing requests | Wait; nothing to fix here |
+| `configured` shows `false` | The key was never set | Add it in **Environment** |
+
+Both the rubric step and the screening step need **both** keys: criteria
+generation runs on Opus and evidence extraction runs on Haiku, so
+`ANTHROPIC_API_KEY` is required even though scoring runs on Luna. One
+missing key breaks both buttons, which looks like a broken app rather
+than a missing setting.
 
 ## What is NOT protected
 
