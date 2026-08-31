@@ -680,3 +680,105 @@ Two claims in the write-up above were wrong or overstated:
 The objections that stand are the escalation rate (70% vs 47%, being
 addressed next), the wide fold spread, and the fact that this is one
 synthetic corpus.
+
+## Escalation and human review, unwelded — 2026-08-27
+
+The reviewer queue was the problem: escalating auto-flagged a candidate
+for human review, so at a 47% escalation rate (70% for Luna) most of the
+stack landed in a person's queue. That defeats the point of the product.
+
+Two faults, welded into one decision. Both measured over 179 recorded
+screenings (`var1`, `var3`, `var4`).
+
+### Fault 1: the arbiter was called when it could not help
+
+The arbiter changes a verdict only by moving the score across a cutoff.
+Measured over 84 escalations, it moves the score off the panel mean by:
+
+| median | p75 | p90 | p95 | max |
+|---|---|---|---|---|
+| 0.33 | 0.50 | 0.93 | 1.00 | 1.50 |
+
+So a panel mean sitting further from a cutoff than that is a call the
+arbiter cannot win. **92% of escalations (77/84) returned a different
+number and the same verdict.** Every one of the 7 that did change a
+verdict had a mean within **0.33** of a cutoff.
+
+`ESCALATION_MARGIN = 0.5` adds a third condition: the mean must be close
+enough that the arbiter could realistically cross a line. It is twice the
+largest distance at which an escalation has ever mattered, and equal to
+the arbiter's p75 movement.
+
+### Fault 2: `escalated` was a bad proxy for "a human should look"
+
+Panel disagreement does not predict a wrong answer. The old flag was
+dominated on both axes:
+
+| Flag rule | Queue | Errors caught |
+|---|---|---|
+| **Old** (parse failure OR escalated) | **53%** | **36%** |
+| Near-cutoff 0.75 | 54% | **82%** |
+
+At the *same* queue size, a near-cutoff test catches more than twice the
+errors. `REVIEW_MARGIN = 0.4` now drives the flag, off the **final**
+score. Escalation keys off the **panel mean**, before the arbiter runs —
+different quantities, so they get separate margins.
+
+### The review margin had to become band-relative
+
+The first version used a flat 0.4 points. Run live, that produced very
+different queues per model, because the models grade on different scales
+— **the same mistake the single global cutoff pair made**:
+
+| Flat 0.4 margin | Queue |
+|---|---|
+| Sonnet (band 0.7–3.1, width 2.4) | **43%** |
+| Luna (band 2.6–5.8, width 3.2) | 15% |
+
+Sonnet's scores cluster tightly inside a narrower band, so a fixed gap
+catches far more of them. `REVIEW_MARGIN_FRACTION = 0.125` is a fraction
+of each model's own hold band — 0.30 points for Sonnet, 0.40 for Luna.
+
+The escalation margin stays **absolute** at 0.5. Its justification is the
+arbiter's measured movement (84 recorded escalations), and movement does
+*not* scale cleanly with band width: as a fraction of band, Sonnet's max
+move is 0.139 and Luna's 0.521. Each margin is expressed in the unit its
+own evidence supports.
+
+### Measured result, live
+
+One run per arm on all 60 resumes:
+
+| | Sonnet | Luna |
+|---|---|---|
+| Escalation rate | **5%** (was 47%) | **23%** (was ~70%) |
+| Review queue | **30%** (was 53%) | **15%** |
+| macro-F1 | 0.857 | 0.853 |
+| Cost | $0.841 | $0.309 |
+
+Both arms sit inside the 0.051 noise band of where they were. **Escalation
+fell by roughly 90% for Sonnet and two-thirds for Luna, the queue nearly
+halved, and accuracy did not move.**
+
+### What this does not fix
+
+**57% of errors still ship unreviewed.** The system is wrong on 16% of
+candidates and a human now sees 32% of them. Reviewing a third of a stack
+cannot catch most errors in it — that is arithmetic, not a tuning
+failure. Raising `REVIEW_MARGIN` trades queue size for recall roughly
+linearly up to ~0.75; it cannot reach high recall at any tolerable queue
+size.
+
+**The margin rests on 7 events.** All 7 useful escalations sat within
+0.33 and the margin is 0.5. The principled retreat, if it proves too
+tight, is 1.0 — the arbiter's p95 movement — which still cuts calls 39%.
+Do not tune below 0.33.
+
+### A correction to the earlier "never escalate" figures
+
+`docs/ESCALATION_SWEEP.md` reports never-escalating at **0.797**; an
+earlier entry in this file says **0.784**. Measured over var1/var3/var4
+the answer is **0.813 mean (0.784–0.830)** — the 0.784 was one run, not
+the figure. Either way the arbiter's whole contribution is 0.027
+macro-F1, *inside* the 0.051 noise band, which is the honest frame: it
+was never carrying the system.

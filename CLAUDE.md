@@ -48,7 +48,14 @@ persona. Read that module docstring before touching prompt assembly.
   four runs. **Quote it as a range**, never as a point — four identical
   runs span 0.051. Roughly **$0.95** per full run (~1.6c/resume),
   measured, stable to a cent.
-- 290 offline tests, ruff clean.
+- 306 offline tests, ruff clean.
+- **Escalation and the human-review flag are separate decisions.** The
+  arbiter fires when the panel MEAN is within `ESCALATION_MARGIN` (0.5)
+  of a cutoff; a human is asked when the FINAL score is within
+  `REVIEW_MARGIN_FRACTION` (0.125 of that model's own band -- NOT a flat
+  number of points; a flat margin queued 43% of Sonnet's stack and 15% of
+  Luna's). Both live in `core/cutoffs.py`. Measured live: escalation 47%
+  -> 5% (Sonnet), review queue 53% -> 30%, macro-F1 unchanged.
 - **Panel agents no longer emit a confidence score.** It was never used in
   any logic and was anti-correlated with correctness (0.867 mean when the
   verdict was wrong, 0.816 when right). Extraction confidence is kept —

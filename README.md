@@ -160,7 +160,7 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 | Accuracy | 0.80–0.86 |
 | Cost | ~$0.95 for 60 (~1.6c each) |
 | Latency | p50 19.4s, p95 32.9s |
-| Flagged for a human | 29 / 60 |
+| Flagged for a human | 18 / 60 (was 32) |
 
 **The number that matters more than the headline: run the same configuration four times, unchanged, and macro-F1 spans 0.051.** 9 of 51 candidates change verdict at least once, and all 9 sit within 1.0 of a score cutoff. So the headline is one draw from a wide distribution, not a fixed property — which is why it is quoted as a range, and why any comparison below that turns on less than 0.051 is unresolved rather than decided. Measured over four runs in [docs/VARIANCE.md](docs/VARIANCE.md).
 
@@ -197,6 +197,8 @@ Every `advance` scored ≥ 4.0. Every `reject` scored ≤ 1.0. The panel was ran
 
 Moving to **4.0/1.0** took macro-F1 from 0.601 to **0.847**, with `hold` recall going 0.20 → 0.65. The sweep predicted 0.846; the run measured 0.847.
 
+**Escalation and human review were later unwelded** — that turned out to matter more than either. Escalating used to auto-flag a candidate for a human, so ~half the stack landed in a queue. But panel disagreement barely predicts a wrong answer: the old flag queued 53% of candidates and caught 36% of errors, while a *near-cutoff* flag at the same queue size catches 82%. And the arbiter itself was mostly ceremony — it moves a score by 0.33 on average, so **92% of escalations returned a different number and the same verdict**. Now the arbiter fires only when the panel mean sits within 0.5 of a cutoff, and a human is asked only when the *final* score sits within 0.4 of one. Measured live: escalation fell **47% → 5%**, the human queue **53% → 30%**, macro-F1 unchanged. The review margin is a fraction of each model's own score band, not a fixed number of points — a flat margin queued 43% of Sonnet's stack and 15% of Luna's, because they grade on different scales. [docs/RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md)
+
 Two things landed with it. The arbiter now returns a **score only** — previously an escalated 6.5 could be `advance` because the arbiter said so while an unescalated 6.5 was `hold`, the same score getting different answers depending on a coin flip. And escalation now requires the agents to disagree on the *verdict*, not merely to vary: a 9.0/7.0/6.0 panel has a wide spread but nothing an arbiter returns changes the outcome.
 
 Caveat worth keeping: those cutoffs were fitted on the same 60 resumes they are scored against. The plateau is narrow on the advance side, so treat 4.0/1.0 as informed rather than validated until the corpus grows.
@@ -204,6 +206,7 @@ Caveat worth keeping: those cutoffs were fitted on the same 60 resumes they are 
 Other things named rather than hidden:
 
 - The three-way architecture bake-off in [PLAN.md §8](PLAN.md) is unfinished. Only this design has been measured, so "the cascade beats one big call" is asserted, not shown.
+- **A third of the stack still reaches a human, and half the errors still get through.** The system is wrong on ~13% of candidates and a reviewer sees ~30%; reviewing a third of a stack cannot catch most of the mistakes in it. That is arithmetic, not a tuning failure — raising the review margin trades queue size for recall roughly linearly, and cannot reach high recall at any tolerable queue size.
 - Disagreement-based escalation can't catch a panel that is unanimously and confidently wrong, because there is no disagreement to detect. That and the rest of the failure modes are in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 - Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [PLAN.md §3b](PLAN.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
 

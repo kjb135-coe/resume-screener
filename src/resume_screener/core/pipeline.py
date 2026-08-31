@@ -29,8 +29,19 @@ import re
 import statistics
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import NamedTuple
 
+from resume_screener.core.cutoffs import (
+    ADVANCE_CUTOFF,
+    DEFAULT_CUTOFFS,
+    ESCALATION_MARGIN,
+    HOLD_CUTOFF,
+    MODEL_CUTOFFS,
+    REVIEW_MARGIN_FRACTION,
+    Cutoffs,
+    band_width,
+    cutoffs_for,
+    distance_to_cutoff,
+)
 from resume_screener.core.ingest import iter_resume_paths, load_resume_text
 from resume_screener.core.models import (
     Evidence,
@@ -43,6 +54,30 @@ from resume_screener.core.router import AnthropicModel, Model, Usage
 from resume_screener.core.rubric_gen import GeneratedRubric, generate_rubric
 
 log = logging.getLogger(__name__)
+
+# Cutoffs and their margins live in core/cutoffs.py -- models.py needs
+# them for the human-review rule, and importing them from here would make
+# that a cycle. Listed here so they stay importable from `pipeline`, which
+# is where scripts/ and tests/ already reach for them.
+__all__ = [
+    "ADVANCE_CUTOFF",
+    "DEFAULT_CUTOFFS",
+    "DEFAULT_MODEL_IDS",
+    "ESCALATION_MARGIN",
+    "HOLD_CUTOFF",
+    "MODEL_CUTOFFS",
+    "REVIEW_MARGIN_FRACTION",
+    "Cutoffs",
+    "band_width",
+    "cutoffs_for",
+    "default_models",
+    "distance_to_cutoff",
+    "hand_written_personas",
+    "rank_all",
+    "recommendation_from_score",
+    "rubric_for",
+    "screen_one",
+]
 
 RUBRIC = (Path(__file__).parent.parent / "prompts" / "rubric.md").read_text(encoding="utf-8")
 
@@ -59,58 +94,10 @@ DISAGREEMENT_THRESHOLD = 2.0  # spread across panel scores before escalating
 # makes them an informed setting rather than a validated one. The plateau
 # is narrow on the advance side (3.1-3.3 on panel means), so treat this as
 # provisional until the corpus grows.
-ADVANCE_CUTOFF = 4.0
-HOLD_CUTOFF = 1.0
-
-
-class Cutoffs(NamedTuple):
-    """The two thresholds that turn a 0-10 score into a verdict."""
-
-    advance: float
-    hold: float
-
-
-DEFAULT_CUTOFFS = Cutoffs(ADVANCE_CUTOFF, HOLD_CUTOFF)
-
-# Cutoffs are per MODEL, not global.
-#
-# This is the single most load-bearing finding in the bake-off. The
-# thresholds above were swept against Sonnet's score distribution, then
-# used to judge every other model. A model that grades on a different
-# scale then loses macro-F1 to the mismatch rather than to its judgment.
-#
-# Measured 2026-08-27 on 60 resumes, 3 runs per model, cutoffs fitted per
-# model and tested on folds they never saw (scripts/fit_cutoffs.py):
-#
-#   model            shipped 4.0/1.0    own cutoffs   held-out macro-F1
-#   claude-sonnet-5       0.823           3.1/0.7           0.787
-#   gpt-5.6-luna          0.563           5.8/2.6           0.861
-#
-# Luna's mean score is 4.60 against Sonnet's 2.35. Under one global pair
-# it looked 0.26 worse; calibrated to itself it is better, and it won 4
-# of 5 folds while losing none.
-#
-# A model absent from this table falls back to DEFAULT_CUTOFFS, which is
-# honest rather than safe: the fallback is Sonnet's calibration, so an
-# unfitted model is being judged on another model's scale. Fit it before
-# trusting its score -- docs/CUTOFF_FIT.md.
-#
-# These are fitted on 60 synthetic resumes and cross-validated on folds of
-# those same 60. That is better than fitting and scoring on all of them,
-# and it is still not fresh data. See docs/LIMITATIONS.md.
-MODEL_CUTOFFS: dict[str, Cutoffs] = {
-    "claude-sonnet-5": Cutoffs(3.1, 0.7),
-    "gpt-5.6-luna": Cutoffs(5.8, 2.6),
-}
-
-
-def cutoffs_for(model: Model | str | None) -> Cutoffs:
-    """The verdict thresholds for whichever model scored the panel."""
-    if model is None:
-        return DEFAULT_CUTOFFS
-    model_id = model if isinstance(model, str) else getattr(model, "model_id", "")
-    return MODEL_CUTOFFS.get(model_id, DEFAULT_CUTOFFS)
-
+# Cutoffs, and the two margins built on them, live in core/cutoffs.py --
+# models.py needs them for its human-review rule and importing them from
+# here would make that a cycle. Re-exported so existing callers in
+# scripts/ and tests/ keep working unchanged.
 # Caps simultaneous in-flight resumes. Each resume fans out to 1 extraction
 # + 3 panel calls, so 60 unbounded resumes would mean ~240 concurrent
 # requests and immediate rate limiting.
@@ -618,7 +605,25 @@ async def screen_one(
     spread = max(scores) - min(scores) if len(scores) > 1 else 0.0
 
     cutoffs = cutoffs_for(models["panel"])
-    if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores, cutoffs):
+    mean_score = statistics.mean(scores)
+
+    # Three conditions, each removing a different kind of wasted call:
+    #   spread          -- the agents actually disagree
+    #   _verdict_is_in_doubt -- they disagree about the VERDICT, not just
+    #                      the number
+    #   margin          -- and the mean sits close enough to a cutoff that
+    #                      the arbiter could realistically cross it
+    #
+    # The third is the one that does the work. Measured over 84 recorded
+    # escalations, 92% of them returned a different score and the SAME
+    # verdict -- the arbiter was being paid to move a number that was
+    # never going to cross a line. See ESCALATION_MARGIN in core/cutoffs.py
+    # for the movement distribution this threshold comes from.
+    if (
+        spread > DISAGREEMENT_THRESHOLD
+        and _verdict_is_in_doubt(scores, cutoffs)
+        and distance_to_cutoff(mean_score, cutoffs) <= ESCALATION_MARGIN
+    ):
         score, rationale, arb_usage = await _arbitrate(
             candidate, panel, job_description, models["arbiter"], rubric
         )
@@ -630,18 +635,21 @@ async def screen_one(
             panel_scores=panel,
             escalated=True,
             panel_spread=spread,
+            cutoff_distance=distance_to_cutoff(score, cutoffs),
+            cutoff_band_width=band_width(cutoffs),
             usage=usage + arb_usage,
         )
 
-    avg = statistics.mean(scores)
     return Verdict(
         candidate=candidate,
-        score=avg,
-        recommendation=recommendation_from_score(avg, cutoffs),
+        score=mean_score,
+        recommendation=recommendation_from_score(mean_score, cutoffs),
         rationale=" | ".join(f"[{p.agent_name}] {p.rationale}" for p in panel),
         panel_scores=panel,
         escalated=False,
         panel_spread=spread,
+        cutoff_distance=distance_to_cutoff(mean_score, cutoffs),
+        cutoff_band_width=band_width(cutoffs),
         usage=usage,
     )
 

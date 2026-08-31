@@ -104,6 +104,7 @@ removing files rather than editing this by hand.
 │       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.
 │       │   ├── __init__.py                  Package marker.
+│       │   ├── cutoffs.py                   Score-to-verdict cutoffs per model, plus the escalation and human-review margins built on them.
 │       │   ├── enrichment.py                Documented extension point for consuming external MCP servers. Intentionally unimplemented.
 │       │   ├── ingest.py                    Resume file -> raw text. PDF, DOCX, Markdown, plain text.
 │       │   ├── models.py                    Shared dataclasses: Evidence, ExtractedCandidate, RubricScore, Verdict.

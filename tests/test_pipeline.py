@@ -162,7 +162,10 @@ class TestScreenOne:
         assert len(models["arbiter"].calls) == 1
         assert verdict.score == 2.0
         assert verdict.recommendation == Recommendation.HOLD
-        assert "disagreed" in verdict.review_reason
+        # Escalating no longer conscripts a human. 2.0 sits 1.0 from the
+        # nearest cutoff, well outside REVIEW_MARGIN, so the arbiter
+        # resolved it and nobody is asked to re-do that work.
+        assert verdict.review_reason is None
 
     async def test_arbiter_recommendation_is_ignored_in_favour_of_the_cutoffs(self):
         """One place maps a score to a verdict. Previously an escalated 6.5
@@ -275,7 +278,9 @@ class TestGeneratedRubricDrivesThePanel:
 
     async def test_arbiter_sees_the_generated_rubric_too(self):
         rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
-        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        # Mean 3.83, inside ESCALATION_MARGIN of the 4.0 cutoff, so this
+        # still reaches the arbiter. [9.0, 4.0, 3.5] no longer does.
+        models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
         await screen_one(FIXTURE, JD, models, rubric)
 
         assert rubric.markdown in models["arbiter"].calls[0]["system"]
@@ -494,12 +499,31 @@ class TestEscalationGuard:
         assert models["arbiter"].calls == []
         assert verdict.recommendation == Recommendation.ADVANCE
 
-    async def test_wide_spread_across_buckets_still_escalates(self):
-        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+    async def test_spread_across_buckets_escalates_when_near_a_cutoff(self):
+        # Mean 3.83, only 0.17 from the 4.0 line: a typical arbiter move
+        # of 0.33 crosses it, so this call can actually change something.
+        models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
         verdict = await screen_one(FIXTURE, JD, models)
 
         assert verdict.escalated
         assert len(models["arbiter"].calls) == 1
+
+    async def test_spread_across_buckets_far_from_a_cutoff_does_not_escalate(self):
+        """The saving. [9.0, 4.0, 3.5] used to buy an arbiter call.
+
+        Its mean is 5.5 -- 1.5 from the nearest cutoff, further than the
+        arbiter has EVER moved a score (max 1.50, p95 1.00 over 84
+        recorded escalations). The agents genuinely straddle two buckets,
+        so the old two-condition gate fired, but no ruling the arbiter
+        could return would change the verdict. 92% of escalations were
+        this case.
+        """
+        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert not verdict.escalated
+        assert models["arbiter"].calls == [], "paid for a verdict it could not move"
+        assert verdict.score == pytest.approx(5.5, abs=0.01)
 
     async def test_narrow_spread_never_escalates(self):
         models = _models([7.0, 7.5, 7.2])
@@ -562,7 +586,9 @@ class TestPerModelUsage:
         assert total.output_tokens == sum(m["output_tokens"] for m in total.by_model.values())
 
     async def test_a_verdict_carries_every_tier_it_used(self):
-        models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
+        # Mean 3.83 -- close enough to a cutoff to still escalate, so all
+        # three tiers actually run.
+        models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
         for name, tier in (("triage", "t"), ("panel", "p"), ("arbiter", "a")):
             models[name]._model_id = tier
         verdict = await screen_one(FIXTURE, JD, models)
@@ -772,3 +798,122 @@ class TestPerModelCutoffs:
         scores = [3.0, 5.0]
         assert _verdict_is_in_doubt(scores, cutoffs_for("claude-sonnet-5")) is True
         assert _verdict_is_in_doubt(scores, cutoffs_for("gpt-5.6-luna")) is False
+
+
+class TestEscalationMargin:
+    """The arbiter is only worth calling when it could change the answer.
+
+    It changes a verdict by moving the score across a cutoff. Measured
+    over 84 recorded escalations it moves the score off the panel mean by
+    a median of 0.33 and never more than 1.50, so a mean sitting far from
+    a cutoff is a call it cannot win. 92% of escalations were that.
+    """
+
+    def test_distance_is_to_the_nearest_boundary(self):
+        from resume_screener.core.cutoffs import Cutoffs, distance_to_cutoff
+
+        bounds = Cutoffs(4.0, 1.0)
+        assert distance_to_cutoff(4.2, bounds) == pytest.approx(0.2)
+        assert distance_to_cutoff(0.8, bounds) == pytest.approx(0.2)
+        assert distance_to_cutoff(2.5, bounds) == pytest.approx(1.5)
+
+    def test_margin_uses_the_models_own_cutoffs(self):
+        # The same score is borderline on one model's scale and safely
+        # mid-band on another's. A global margin would be measuring the
+        # wrong distance for every model but Sonnet.
+        from resume_screener.core.cutoffs import (
+            ESCALATION_MARGIN,
+            cutoffs_for,
+            distance_to_cutoff,
+        )
+
+        sonnet = distance_to_cutoff(3.3, cutoffs_for("claude-sonnet-5"))
+        luna = distance_to_cutoff(3.3, cutoffs_for("gpt-5.6-luna"))
+        assert sonnet <= ESCALATION_MARGIN
+        assert luna > ESCALATION_MARGIN
+
+    @pytest.mark.asyncio
+    async def test_verdict_records_its_distance_to_a_cutoff(self):
+        models = _models([7.0, 7.5, 7.2])
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        # Mean 7.23 against the default 4.0 advance line.
+        assert verdict.cutoff_distance == pytest.approx(3.23, abs=0.01)
+
+
+class TestReviewFlagIsDecoupledFromEscalation:
+    """Panel disagreement stopped meaning "a human should look".
+
+    It was a poor proxy: over 179 screenings it queued 53% of the stack
+    and caught 36% of the errors. Distance to a cutoff predicts a wrong
+    verdict far better, and at the same queue size catches 82%.
+    """
+
+    def _verdict(self, score, distance, escalated=False, parse_failed=False, band=2.4):
+        from resume_screener.core.models import (
+            ExtractedCandidate,
+            Recommendation,
+            RubricScore,
+            Verdict,
+        )
+
+        return Verdict(
+            candidate=ExtractedCandidate(
+                source_path="x.md",
+                name="X",
+                years_experience=3.0,
+                companies=[],
+                technologies=[],
+                education=[],
+                evidence=[],
+                confidence=0.9,
+                raw_text="x",
+            ),
+            score=score,
+            recommendation=Recommendation.HOLD,
+            rationale="r",
+            panel_scores=[
+                RubricScore(
+                    agent_name="a", score=score, rationale="r", parse_failed=parse_failed
+                )
+            ],
+            escalated=escalated,
+            cutoff_distance=distance,
+            cutoff_band_width=band,
+        )
+
+    def test_near_a_cutoff_is_flagged(self):
+        assert "human should make this call" in self._verdict(3.9, 0.1).review_reason
+
+    def test_far_from_a_cutoff_is_not_flagged(self):
+        assert self._verdict(7.0, 3.0).review_reason is None
+
+    def test_escalating_alone_no_longer_flags(self):
+        # The whole point. The arbiter resolved it; do not then ask a
+        # human to redo the arbiter's work.
+        assert self._verdict(7.0, 3.0, escalated=True).review_reason is None
+
+    def test_unflagged_when_distance_was_never_computed(self):
+        # None means nobody worked out which cutoffs applied. Abstain
+        # rather than guess with another model's thresholds.
+        assert self._verdict(3.9, None).review_reason is None
+
+    def test_parse_failure_still_outranks_the_near_cutoff_reason(self):
+        reason = self._verdict(3.9, 0.1, parse_failed=True).review_reason
+        assert "unreadable" in reason
+
+    def test_the_margin_scales_with_the_models_band(self):
+        """The same gap is borderline on a narrow scale and mid-band on a
+        wide one. A flat margin repeats the mistake the single global
+        cutoff pair made -- measured live, a flat 0.4 queued 43% of
+        Sonnet's stack and 15% of Luna's.
+        """
+        # 0.35 points: 15% of Sonnet's 2.4 band -> flagged.
+        assert self._verdict(3.0, 0.35, band=2.4).review_reason is None
+        # ...and 0.28 is 11.7% of it -> flagged.
+        assert self._verdict(3.0, 0.28, band=2.4).review_reason is not None
+        # The same 0.35 is only 11% of Luna's 3.2 band -> flagged there.
+        assert self._verdict(3.0, 0.35, band=3.2).review_reason is not None
+
+    def test_unflagged_when_band_width_is_unknown(self):
+        assert self._verdict(3.9, 0.1, band=None).review_reason is None

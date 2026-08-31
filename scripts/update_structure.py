@@ -91,6 +91,7 @@ DESCRIPTIONS: dict[str, str] = {
     "src": "Package source.",
     "src/resume_screener": "The installable package.",
     "src/resume_screener/core": "Domain logic. Knows nothing about MCP, HTTP, or the CLI.",
+    "src/resume_screener/core/cutoffs.py": "Score-to-verdict cutoffs per model, plus the escalation and human-review margins built on them.",
     "src/resume_screener/core/models.py": "Shared dataclasses: Evidence, ExtractedCandidate, RubricScore, Verdict.",
     "src/resume_screener/core/router.py": "Model provider abstraction. Returns ModelResponse with real token/latency usage.",
     "src/resume_screener/core/ingest.py": "Resume file -> raw text. PDF, DOCX, Markdown, plain text.",

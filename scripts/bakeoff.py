@@ -400,6 +400,16 @@ async def main() -> int:
                         "predicted": v.recommendation.value,
                         "score": v.score,
                         "escalated": v.escalated,
+                        # Per-agent scores and the spread, so an escalation
+                        # policy can be re-simulated offline for free later.
+                        # Without these, the only recorded fact about
+                        # escalation is the binary flag -- which is why the
+                        # Luna arm's 70% rate could not be analysed without
+                        # paying for a fresh run. scripts/evaluate.py has
+                        # always saved them; this brings the bake-off level.
+                        "panel_spread": v.panel_spread,
+                        "cutoff_distance": v.cutoff_distance,
+                        "panel": [p.to_dict() for p in v.panel_scores],
                     }
                     for f, v in rows
                 ],

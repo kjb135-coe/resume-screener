@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
+from resume_screener.core.cutoffs import REVIEW_MARGIN_FRACTION
 from resume_screener.core.router import Usage
 
 
@@ -80,6 +81,21 @@ class Verdict:
     panel_scores: list[RubricScore]
     escalated: bool
     panel_spread: float = 0.0
+    cutoff_distance: float | None = None
+    """How far `score` sits from the nearest verdict cutoff, in points.
+
+    Computed by the pipeline, which is the only place that knows which
+    model scored the panel and therefore which cutoffs apply. `None` means
+    nobody worked it out -- the review rule then abstains rather than
+    guessing with the wrong model's thresholds.
+    """
+    cutoff_band_width: float | None = None
+    """Width of the model's `hold` band, the unit `cutoff_distance` is in.
+
+    Kept alongside the raw distance rather than folded into it so both
+    stay readable: the distance is what a human wants to see, the ratio is
+    what the review rule compares.
+    """
     usage: Usage = field(default_factory=Usage)
 
     @property
@@ -92,15 +108,32 @@ class Verdict:
                 "This resume parsed poorly, so the extracted evidence may be "
                 "incomplete. Scores based on it are less reliable."
             )
-        if self.escalated:
-            # Name the scores rather than the spread. "Spread of 7.0" is an
-            # abstraction a reader has to decode; "9.0, 9.0 and 2.0" is the
-            # disagreement itself, and makes obvious which agent dissented.
-            scored = [p for p in self.panel_scores if not p.parse_failed]
-            values = ", ".join(f"{p.score:.1f}" for p in scored)
+        # Deliberately NOT `if self.escalated`. Panel disagreement used to
+        # trigger this, and it was a poor proxy for "this one is wrong":
+        # measured over 179 screenings it queued 53% of the stack and
+        # caught 36% of the errors. What actually predicts a wrong verdict
+        # is the score landing near a cutoff, where a small difference in
+        # judgment flips the answer. Same queue size, that catches 82%.
+        #
+        # The arbiter still runs on disagreement -- it just no longer
+        # conscripts a human every time it does. See REVIEW_MARGIN in
+        # core/cutoffs.py and docs/RESULTS_HISTORY.md.
+        near_cutoff = (
+            self.cutoff_distance is not None
+            and self.cutoff_band_width
+            and self.cutoff_distance / self.cutoff_band_width <= REVIEW_MARGIN_FRACTION
+        )
+        if near_cutoff:
+            # Deliberately does not name WHICH boundary. The cutoffs are
+            # per-model and this object does not know which model scored
+            # the panel -- inferring the boundary from the score alone
+            # would be a guess, and a wrong one for any model whose
+            # cutoffs are not the default pair.
             return (
-                f"The panel disagreed ({values}); an arbiter resolved it, "
-                "but a human should confirm."
+                f"This scored {self.score:.1f} and landed on "
+                f"`{self.recommendation.value}`, close enough to the line "
+                "that a small difference in judgment changes the answer. "
+                "A human should make this call."
             )
         return None
 

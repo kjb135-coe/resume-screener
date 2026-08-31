@@ -9,26 +9,26 @@
   ],
   "n": 60,
   "requested": 60,
-  "macro_f1": 0.7965811965811965,
+  "macro_f1": 0.8573153899240855,
   "per_class_f1": {
-    "advance": 0.9230769230769231,
-    "hold": 0.6666666666666665,
-    "reject": 0.7999999999999999
+    "advance": 0.9523809523809523,
+    "hold": 0.7499999999999999,
+    "reject": 0.8695652173913044
   },
-  "accuracy": 0.8,
-  "cost_total": 0.9564052000000001,
-  "cost_per_resume": 0.01594008666666667,
-  "latency_p50": 11.836981665052008,
-  "latency_mean": 11.923091256278955,
-  "wall_clock_s": 102.24304658302572,
-  "parse_failed": 10,
+  "accuracy": 0.8666666666666667,
+  "cost_total": 0.8405370000000003,
+  "cost_per_resume": 0.014008950000000004,
+  "latency_p50": 10.601844541030005,
+  "latency_mean": 10.676513456988808,
+  "wall_clock_s": 87.55258725001477,
+  "parse_failed": 5,
   "panel_calls": 180,
-  "escalated": 28,
+  "escalated": 3,
   "tokens": {
-    "input": 199169,
-    "output": 69765,
-    "cache_read": 403596,
-    "cache_write": 11988
+    "input": 181353,
+    "output": 63779,
+    "cache_read": 359640,
+    "cache_write": 5994
   },
   "predictions": [
     {
@@ -36,420 +36,1740 @@
       "expected": "reject",
       "predicted": "reject",
       "score": 0.0,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "All evidence describes academic research (e.g., \"Doctoral research focused on generative models for molecular dynamics simulation. Designed graph neural network architectures\") with no mention of agentic systems\u2014memory, tools, or orchestration\u2014or integration into APIs, business systems, or cloud-native/hybrid infrastructure.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "All evidence is academic/research-focused (e.g., \"Contributed to three peer-reviewed publications on uncertainty quantification in structural biology, with cumulative citation count of 47 across venues including ICML and Proteins journal\") with no mention of client engagement, non-technical communication, or cross-functional collaboration with sales/delivery teams.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "academic_researcher__freya_ashcombe.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.5,
-      "escalated": false
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 2.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every piece of evidence describes benchmark evaluation, publication, or academic research rather than shipped production systems, epitomized by \"evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\" -- a research validation claim, not a deployed, used-in-production system.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "All evidence describes academic research and benchmark evaluation (e.g., \"Developed graph neural network architecture for supply chain disruption prediction; evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\") with no mention of agentic systems (memory, tools, orchestration), API/business-system integration, or cloud-native/hybrid deployment.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only quasi-relevant evidence is academic collaboration\u2014\"Collaborated with domain experts on problem formulation; conducted three workshops with supply chain researchers to validate model assumptions and dataset selection\"\u2014which reflects research-peer engagement, not the client-facing, sales/delivery, or non-technical-audience communication this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "academic_researcher__kwame_asante.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.3333333333333333,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every quote describes research/benchmark/academic work \u2014 e.g. \"Designed evaluation framework for anomaly detection models across 7 public financial datasets (Yahoo Finance, Kaggle); published detailed benchmark results comparing 12 baseline architectures\" \u2014 with no evidence of any system deployed, used by clients, or supported in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "All evidence describes research artifacts\u2014e.g., \"Published research on temporal graph neural networks for transaction risk modeling in *ACM TIST*\"\u2014with no mention of agentic systems (memory, tools, orchestration) or integration into APIs, business systems, or automation platforms.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Published research on temporal graph neural networks for transaction risk modeling in *ACM TIST* (accepted 2025)\"\u2014describes explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement; it is exclusively academic/research output.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "academic_researcher__marcus_feldman.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.0,
-      "escalated": false
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence describes a research career\u2014\"ML systems researcher with 6 years of experience designing and evaluating compiler optimization frameworks and runtime systems for deep learning workloads\"\u2014with frameworks that were \"benchmarked\" and \"published\" rather than deployed, shipped, or supported in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The evidence describes compiler optimization and tensor scheduling research\u2014e.g., \"Developed TensorBind, an automatic scheduling framework for heterogeneous accelerators\"\u2014with no mention of agentic systems (memory, tools, orchestration) or integration into APIs, business systems, or automation platforms.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence in the resume touches client-facing work, cross-functional collaboration, or explaining technical concepts to non-technical audiences\u2014every quote (e.g., \"Published research on tensor scheduling and memory allocation strategies with 340+ combined citations\") points to solitary research/technical output rather than any collaborative or communicative signal.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "academic_researcher__ravi_chandrasekar.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.0,
-      "escalated": false
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every piece of evidence describes academic research and publication work\u2014e.g., \"Lead development of named entity recognition models for government policy document analysis; achieved 91.2% F1 on internal NILT-Policy-2025 benchmark\"\u2014with no mention of deployment, production ownership, or systems used by real users.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The evidence contains no mention of agentic systems, memory, tools, orchestration, or API/business system integration\u2014only research work such as \"Lead development of named entity recognition models for government policy document analysis; achieved 91.2% F1 on internal NILT-Policy-2025 benchmark,\" which is unrelated to the required lens.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only interpersonal signal is \"Mentored 2 junior researchers on experiment design and reproducibility standards,\" which reflects internal research mentorship, not client-facing communication, non-technical translation, or cross-functional (sales/delivery/engineering) collaboration as required by the posting.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "academic_researcher__tomas_herrera.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.3333333333333333,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence is entirely research and academic output\u2014e.g. \"Published primary dissertation work as \"Sequential Embeddings for E-Commerce Product Graphs\" in ACM Transactions on Information Systems (July 2023, 14 citations to date)\"\u2014with no mention of deployment, production use, or ongoing operational support.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The strongest technical evidence\u2014\"Developed and evaluated multiple sequence-to-sequence models on proprietary e-commerce datasets, achieving 12% improvement over baseline collaborative filtering approaches\"\u2014describes offline research model evaluation, with no mention of agentic systems (memory, tools, orchestration) or integration into APIs, business systems, or automation platforms.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence in the candidate's record addresses explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement \u2014 the closest available quote, \"Published findings on attention mechanisms for fashion recommendation in the ICML 2025 Workshop on Machine Learning for E-Commerce (currently at 8 citations)\", reflects academic publication, not the required signal.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__bennett_cross.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 5.5,
-      "escalated": true
+      "score": 4.333333333333333,
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 1.233333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "\"Architected and deployed a multi-agent document analysis service for compliance workflows, integrating Claude API with internal document retrieval system; system processes 15,000+ documents monthly with 99.2% uptime SLA\" directly demonstrates a production-deployed, live-load-serving agentic/LLM system, not a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 5.0,
+          "rationale": "The strongest agentic-systems evidence is \"Architected and deployed a multi-agent document analysis service for compliance workflows, integrating Claude API with internal document retrieval system; system processes 15,000+ documents monthly with 99.2% uptime SLA,\" which shows a real multi-agent production integration but gives no detail on memory or tool orchestration design, leaving the rest of the evidence focused on generic ML infrastructure, databases, and APIs rather than agentic architecture.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence contains any mention of client engagement, non-technical communication, or cross-functional collaboration with sales/delivery \u2014 the closest quote, \"Owned the data ingestion and feature serving platform supporting a 40-person ML team,\" describes internal engineering scale, not the required signal.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__bruno_salvatore.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 6.0,
-      "escalated": true
+      "score": 5.0,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 1.9,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The claim \"Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers\" directly describes a production system with real user load, not a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest evidence\u2014\"Engineered the agentic layer using Claude API with function calling to handle dynamic product queries, pricing lookups, and promotional logic\"\u2014demonstrates real orchestration/tool-use integration into a production recommendation system, but lacks any mention of persistent memory architecture, leaving the agentic depth only partially demonstrated.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only quasi-relevant evidence, \"this work directly reduced onboarding time for new clients by 35%,\" describes an SDK improvement's business impact rather than any direct client-facing, cross-functional, or non-technical communication activity.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__dele_adeyemi.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 5.2,
-      "escalated": true
+      "score": 3.6666666666666665,
+      "escalated": false,
+      "panel_spread": 6.0,
+      "cutoff_distance": 0.5666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The strongest production evidence is \"Architected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehouses\", which describes a live, measurably-used system rather than a demo, though it is the only AI-specific production claim among otherwise generic backend/infra work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The only AI-related evidence \u2014 \"Architected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehouses\" \u2014 shows a single LLM integration for classification/triage but contains no mention of memory, tools, or orchestration (agentic system design) as the posting requires.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only remotely relevant item is \"Mentored 2 junior engineers on cloud deployment practices and code review standards,\" which is internal engineering mentorship, not client-facing, cross-functional (sales/delivery), or non-technical-audience communication as the posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__julius_amankwah.md",
       "expected": "advance",
       "predicted": "advance",
       "score": 4.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 0.8999999999999999,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The claim that the system \"currently processes over 2,000 clinical encounters daily and has achieved 92% adoption among eligible providers\" is concrete evidence of a production-deployed, actively-used system rather than a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The evidence describes an LLM-powered documentation assistant with compliance validation but never mentions building agentic components\u2014memory, tools, or orchestration\u2014or integrating with business APIs/automation platforms, as in \"Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence contains no client-facing, cross-functional (sales/delivery), or non-technical-audience communication\u2014only engineering artifacts like \"Architected a highly available message-driven system using Kafka and Apache Flink to process 500+ million events daily.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__keiko_yamashita.md",
       "expected": "advance",
-      "predicted": "hold",
-      "score": 3.5,
-      "escalated": true
+      "predicted": "advance",
+      "score": 3.6666666666666665,
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 0.5666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "\"Architected and shipped real-time transaction dispute resolution agent serving 50K+ daily users, integrating GPT-4 with internal risk models via API layer\" directly demonstrates a production-deployed, real-user-serving AI system rather than a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The only agentic/LLM-related evidence is \"Architected and shipped real-time transaction dispute resolution agent serving 50K+ daily users, integrating GPT-4 with internal risk models via API layer,\" which shows a single LLM-API integration but gives no description of memory, tools, or orchestration mechanics that the posting explicitly asks for.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence quotes\u2014e.g. \"Architected and shipped real-time transaction dispute resolution agent serving 50K+ daily users, integrating GPT-4 with internal risk models via API layer\"\u2014reference explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "adjacent_shipper__sofia_marchetti.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 4.0,
-      "escalated": true
+      "score": 4.5,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 1.4,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The claims agent is explicitly described as deployed and operational at scale rather than a prototype: \"Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL systems via REST layers and handles asynchronous job workflows.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "None of the evidence describes explaining technical work to non-technical audiences, cross-functional work with sales/delivery, or client engagement -- the closest item, \"Mentored team of five engineers on production Kubernetes operations and disaster recovery procedures; established runbooks adopted across infrastructure group,\" is internal engineering mentorship, not the client-facing or cross-functional signal this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__beatrix_hollowell.md",
       "expected": "hold",
       "predicted": "hold",
-      "score": 2.0,
-      "escalated": true
+      "score": 3.0,
+      "escalated": true,
+      "panel_spread": 4.0,
+      "cutoff_distance": 0.10000000000000009,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "Every quote describes technical work in terms of what was 'developed,' 'implemented,' 'engineered,' or 'measured on benchmarking hardware' (e.g., 'measured latency at 340ms per request on benchmarking hardware')\u2014language consistent with isolated proof-of-concept or research-style projects, with no mention of deployment, production users, on-call support, or post-launch iteration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The evidence describes concrete agentic orchestration work \u2014 \"Implemented agentic workflow orchestration using LangGraph to handle product comparison, inventory lookup, and pricing logic in sequence; measured latency at 340ms per request on benchmarking hardware\" \u2014 showing real tool/orchestration engineering with performance measurement, but it reads as an isolated benchmarked pipeline rather than an integration into a live business system or client-facing API/automation platform, and no infrastructure (cloud-native/hybrid) or memory-component detail is described.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only relevant evidence is presenting at a technical meetup \u2014 \"Presented \\\"Agents in Retail: Bridging Search and Language\\\" at Seattle AI Meetup (August 2024, 120+ attendees)\" \u2014 which shows communication to a technical AI community, not non-technical audiences, client engagement, or cross-functional work with sales/delivery.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__hana_novak.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 2.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 4.0,
+      "cutoff_distance": 1.1,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "Every quote describes architecture, fine-tuning, RAG pipelines, and evaluation frameworks in technical/metric-driven terms (e.g., \"reduced hallucination rate from 12% baseline to 3.2%\") but none states these systems were deployed, used by real clients, or supported in production\u2014the closest role signal is just \"Senior Machine Learning Engineer | Meridian Health Systems | Cleveland, OH | Jan 2024 \u2013 Present,\" which gives no indication of production ownership, on-call, or real user load.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The evidence shows real agentic/RAG architecture work\u2014\"Architected multi-agent framework for clinical decision support using LangGraph and Claude API\" and \"Implemented RAG pipeline integrating 200K+ clinical research papers via vector embeddings (E5-large)\"\u2014but nothing describes tool use, memory, orchestration mechanics, or integration into business systems/APIs beyond the model layer, nor any cloud-native/hybrid infrastructure detail.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence quotes\u2014e.g. \"Architected multi-agent framework for clinical decision support using LangGraph and Claude API\"\u2014mentions explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__mei_lin_chow.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 2.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 3.0,
+      "cutoff_distance": 1.1,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every claim is framed as benchmarks, evaluation sets, or metrics on internal/holdout data\u2014e.g. \"agent successfully routes queries across three independent financial APIs with 99.2% accuracy on evaluation set\"\u2014with no mention of deployment, users, on-call, monitoring, or production ownership, indicating this is proof-of-concept/benchmark work, not shipped production systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The evidence shows technical breadth\u2014\"Designed multi-agent system for payment reconciliation using Claude and GPT-4; agent successfully routes queries across three independent financial APIs with 99.2% accuracy on evaluation set\"\u2014but every claim is framed as benchmark/evaluation-set performance rather than a deployed system with orchestration or memory components described, so integration depth into real business systems remains unproven.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "None of the evidence mentions client engagement, non-technical communication, or cross-functional collaboration\u2014the closest item, \"published technical blog post on LLM evaluation methodologies that reached 8K readers,\" is thought leadership to a technical/public audience, not evidence of translating work for non-technical stakeholders or working across sales/delivery.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__priya_raghunathan.md",
       "expected": "hold",
       "predicted": "hold",
-      "score": 2.7,
-      "escalated": true
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 4.0,
+      "cutoff_distance": 0.9666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every quote describes research/experimentation artifacts (test sets, held-out accuracy, benchmark construction) rather than a deployed production system, exemplified by \"The fine-tuned Mistral model achieved 78% accuracy on a held-out test set of 400 scripts when predicting structural breakdown points,\" which is evaluation-stage work with no mention of shipping, users, on-call, or production monitoring.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The candidate describes a substantive agentic/RAG build \u2014 \"I architected our agentic reasoning layer using a custom implementation of tool-use patterns with Claude and GPT-4\" and grounding via \"retrieval-augmented generation across all agents\" \u2014 but nothing describes integration into real APIs, business systems, or automation platforms on cloud-native/hybrid infrastructure, nor production deployment or client environments, so depth is credited only for orchestration/RAG mechanics, not the integration dimension this lens demands.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence mentions explaining work to non-technical audiences, cross-functional collaboration, or client engagement\u2014every quote is purely technical, e.g. \"Advanced proficiency in LLM agent orchestration, retrieval-augmented generation (RAG), fine-tuning on consumer hardware, multi-modal embeddings, prompt engineering, evaluation framework design, and benchmark construction.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__rina_matsumoto.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 3.0,
-      "escalated": true
+      "escalated": true,
+      "panel_spread": 6.0,
+      "cutoff_distance": 0.10000000000000009,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The strongest claim, \"Owned development of internal LLM serving infrastructure; built multi-model endpoint abstraction supporting OpenAI, Anthropic, and open-weight model inference,\" implies some production ownership but is never tied to shipped user-facing outcomes, on-call responsibility, or post-launch iteration\u2014everything else is framed as benchmarks, offline evals, or an open-source toolkit rather than deployed, production-used systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest evidence of hands-on agentic/infrastructure building is \"Owned development of internal LLM serving infrastructure; built multi-model endpoint abstraction supporting OpenAI, Anthropic, and open-weight model inference,\" which shows real integration work but lacks any mention of memory, tool orchestration, or business-system/API integration specifics that the posting emphasizes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence mentions explaining work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery \u2014 the closest item, \"accumulated 12K+ views and cited by community projects,\" reflects open-source community reach, not the client-facing or cross-functional signal this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__saoirse_lachlan.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 2.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 5.0,
+      "cutoff_distance": 1.1,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every claim is framed as a technical build with benchmark metrics (e.g., \"achieving 94% retrieval accuracy on a curated eval set of 500 supply chain queries\") but none describes deployment, users, monitoring, or post-launch iteration, so this reads as evaluation-stage/proof-of-concept work rather than a shipped production system.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 5.0,
+          "rationale": "The strongest evidence\u2014\"Engineered an agentic workflow that chains document retrieval, constraint validation, and cost optimization in sequence, reducing latency per inference from 8.2 seconds to 2.1 seconds through prompt caching and batched API calls\"\u2014shows real orchestration work with tool-chaining, but lacks the explicit \"memory\" component the posting names and never describes integration into business systems, APIs, or automation platforms beyond the AI pipeline itself.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence mentions explaining work to non-technical audiences, cross-functional collaboration, or client engagement\u2014every quote is purely technical, e.g. \"Engineered an agentic workflow that chains document retrieval, constraint validation, and cost optimization in sequence, reducing latency per inference from 8.2 seconds to 2.1 seconds through prompt caching and batched API calls.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "demo_specialist__zainab_iqbal.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 2.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 4.0,
+      "cutoff_distance": 1.1,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence describes technical achievements with precise metrics (\"achieved 89% retrieval precision on held-out evaluation set\") but never states these systems were deployed, used by real users, or supported in production\u2014only benchmark and evaluation-set performance.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The strongest relevant evidence\u2014\"Architected multi-agent framework for automating bill summary generation and legislative impact analysis using GPT-4 and Claude with dynamic routing logic\"\u2014shows multi-agent orchestration work but never mentions memory, tool use, or integration into APIs/business systems/automation platforms on cloud-native or hybrid infrastructure as the posting requires.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence quotes any client-facing, cross-functional, or non-technical communication work \u2014 e.g. \"Architected multi-agent framework for automating bill summary generation and legislative impact analysis using GPT-4 and Claude with dynamic routing logic\" describes only technical build work with no mention of stakeholders, clients, or non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__andres_villalobos.md",
       "expected": "hold",
       "predicted": "hold",
       "score": 2.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 2.0,
+      "cutoff_distance": 1.1,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The only agentic/LLM evidence is integration into an existing pipeline\u2014\"integrate their model predictions into our existing data validation layer\"\u2014which shows LLM feature integration and API wrapper work but no mention of memory, tools, or orchestration that define agentic systems as the posting specifies.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence shows only internal technical collaboration\u2014e.g., \"working closely with the ML team to integrate their model predictions into our existing data validation layer\"\u2014with no mention of client engagement, sales/delivery collaboration, or explaining work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__chiara_bellini.md",
       "expected": "hold",
       "predicted": "reject",
       "score": 0.6666666666666666,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The only AI-related evidence is \"Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool,\" which describes testing/documentation of someone else's tool rather than building or owning a production AI system.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The only AI-related evidence is testing/documenting an integration\u2014\"Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool\"\u2014which describes QA/documentation work on a tool built by others, not hands-on construction of agentic systems with memory, tools, or orchestration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence quotes describe explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement -- the closest item, \"Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool,\" describes internal technical testing/documentation, not stakeholder-facing communication or collaboration across functions.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__ingrid_solberg.md",
       "expected": "hold",
       "predicted": "advance",
-      "score": 4.0,
-      "escalated": true
+      "score": 3.6666666666666665,
+      "escalated": false,
+      "panel_spread": 4.0,
+      "cutoff_distance": 0.5666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 6.0,
+          "rationale": "The RAG system quote \u2014 \"Implemented a retrieval-augmented generation (RAG) system using LangChain to assist the support team in searching historical disputes and generating templated responses... accuracy of retrieved cases improved support response time by 22%\" \u2014 describes an AI system actually deployed and used by a live support team with measurable production impact, though it lacks the memory/tools/orchestration agentic depth or explicit ongoing production ownership (on-call, monitoring) the posting emphasizes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The RAG implementation\u2014\"Implemented a retrieval-augmented generation (RAG) system using LangChain to assist the support team in searching historical disputes and generating templated responses\"\u2014shows retrieval/tool-use integration but no evidence of memory or orchestration components, or of integration into business-system APIs beyond an internal support tool.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The closest evidence to cross-functional or client-facing work is internal engineering coordination \u2014 \"worked closely with database and DevOps teams to execute the migration with zero downtime\" and \"coordinated with the payments infrastructure team and drafted post-incident documentation used across the organization\" \u2014 but neither describes non-technical audience communication, sales/delivery collaboration, or direct client engagement as the posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__jonah_steinberg.md",
       "expected": "hold",
       "predicted": "hold",
-      "score": 1.5,
-      "escalated": true
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 3.0,
+      "cutoff_distance": 0.9666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The only evidence resembling AI/LLM production work is thin and unverified in scope or ownership: \"Implemented LLM-powered code review suggestions integrated into GitHub Actions CI pipeline,\" which lacks any mention of memory, tools, orchestration, deployment ownership, monitoring after launch, or real user load, leaving the bulk of evidence (Terraform modules, CLI tool adoption, OpenTelemetry instrumentation) describing solid production infra work but not the agentic/GenAI production systems this posting demands.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The only AI-related evidence is \"Implemented LLM-powered code review suggestions integrated into GitHub Actions CI pipeline,\" which shows a single narrow LLM integration into CI tooling but contains no mention of agentic systems, memory, tools, or orchestration, nor integration into business systems or automation platforms as the posting requires.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Built Python CLI tool for managing containerized local development environments; adopted by 30+ engineers across the organization\"\u2014describes explaining technical work to non-technical audiences, client engagement, or cross-functional work with sales/delivery; it is entirely internal, engineer-to-engineer work.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__rohan_malhotra.md",
       "expected": "hold",
       "predicted": "hold",
-      "score": 2.0,
-      "escalated": true
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 3.0,
+      "cutoff_distance": 0.9666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The only LLM-related work either explicitly failed to reach production (\"I prototyped a solution using prompt engineering and explored a few different API providers, but ultimately the accuracy wasn't sufficient for production\") or is a narrow checkout feature with no mention of agentic memory/tools/orchestration, so while non-AI backend/production engineering is solid, evidence of production AI systems as this posting demands is weak.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The only LLM-related work shown is a narrow, latency-constrained checkout feature and an explicitly failed prototype ('the accuracy wasn't sufficient for production'), with no mention of agentic systems, memory, tools, or orchestration anywhere in the evidence\u2014e.g. 'I integrated a smaller LLM-based product bundling feature that suggests complementary items to customers during checkout; this feature runs inference through an external API and returns suggestions within the strict latency budget required by the checkout flow' is basic API integration, not agentic system design.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"I built out the API logic to surface real-time stock levels across locations, which involved querying multiple backend systems and aggregating results into a single response\"\u2014mentions explaining work to non-technical stakeholders, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "early_career__vera_klimenko.md",
       "expected": "hold",
-      "predicted": "hold",
-      "score": 3.0,
-      "escalated": true
+      "predicted": "advance",
+      "score": 3.6666666666666665,
+      "escalated": false,
+      "panel_spread": 2.0,
+      "cutoff_distance": 0.5666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 5.0,
+          "rationale": "The evidence \"Contributed to a Python-based document processing system that ingested 500+ permit applications monthly; integrated OpenAI API to auto-classify permit types, reducing manual categorization by 40%\" describes a live, running system with real monthly volume and measurable impact, but the word \"contributed\" and absence of any mention of on-call, monitoring, or post-launch iteration keep it short of the sustained production-ownership signal this posting weights heavily.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The strongest evidence\u2014\"integrated OpenAI API to auto-classify permit types, reducing manual categorization by 40%\"\u2014shows a real LLM integration into a production workflow, but there is no mention of agentic components (memory, tools, orchestration) or automation-platform integration, only isolated API/backend/data work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The only relevant evidence is \"Collaborated with policy analysts and procurement teams to translate requirements into technical specifications; attended weekly stakeholder meetings to validate feature scope,\" which shows cross-functional requirement-gathering but no client-facing engagement or evidence of explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__aleksandr_volkov.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.6666666666666666,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence is entirely research, assessment, and exploration language rather than shipped systems\u2014e.g. \"Large language model exploration for script analysis and development. Prompt engineering methodologies for creative brief generation. API integration assessment across various AI platforms\" describes evaluation activity, not a deployed production system with users or ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence only describes assessment, research, and exploration activities like \"API integration assessment across various AI platforms\" and \"Strategic assessment of emerging language models,\" with no mention of building agentic systems with memory, tools, or orchestration, nor any description of actual integration work performed.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence contains only internal, strategic-sounding phrases like \"AI implementation roadmap development across content production pipelines\" with no mention of explaining work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__amara_nwosu.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.6666666666666666,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence consists entirely of unsupported skill/technology lists like \"GPT-4, Claude API, LangChain, LlamaIndex\" and \"RAG systems, prompt engineering frameworks\" with no sentence describing what was built, deployed, or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "All evidence is skills-line listing with no descriptive sentence of what was built, e.g. \"GPT-4, Claude API, LangChain, LlamaIndex\" names tools but never states what agentic system, memory, tool-use, or orchestration was actually engineered or integrated.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the extracted evidence contains any quote describing explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement\u2014only skill-line fragments like \"AI and machine learning strategy development\" and \"Government compliance and data governance considerations\" are present, with no sentence describing actual stakeholder-facing or cross-team work.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__dashiell_monroe.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.0,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every quote is a skills-line or job title/dates (e.g., \"Large language models (LLMs), GPT-4, Claude, and prompt engineering frameworks\") with no sentence describing what was built, shipped, or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The evidence contains only skills-line listings such as \"Large language models (LLMs), GPT-4, Claude, and prompt engineering frameworks\" with no sentence describing an agentic system, memory, tools, orchestration, or actual integration work built by the candidate.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence describes explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement \u2014 the closest items are generic skill/title lines such as \"Senior Fintech Solutions Architect\\nPaymentVault Technologies | Atlanta, GA | March 2023 \u2013 Present\" with no accompanying description of any client-facing or cross-functional activity.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__isaac_mwangi.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.0,
-      "escalated": false
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every piece of evidence is a bare buzzword phrase like \"LLM integration frameworks\" or \"RAG system components\" with no sentence describing what was built, deployed, or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence contains only unsupported skills-line fragments like \"Vector database implementations\" and \"RAG system components\" with no sentence describing what was actually built, integrated, or deployed, so there is no verifiable evidence of agentic system design (memory, tools, orchestration) or real API/business-system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the extracted evidence\u2014titles like \"Senior AI Solutions Architect | Vertex Commerce Solutions\" and skill fragments like \"LLM integration frameworks\" or \"Vector database implementations\"\u2014describes any explanation of technical work to non-technical audiences, cross-functional teamwork, or client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__omar_benali.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.0,
-      "escalated": false
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every quote is a bare skills/keyword fragment with no sentence describing what was built, deployed, or supported in production \u2014 e.g. \"RAG systems, vector databases, semantic search\" names technologies but never states they shipped or were used by real users.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "Every piece of evidence is a bare skills/technology list rather than a description of a built system, as in \"Claude API, GPT-4, LangChain integration points\" \u2014 there is no sentence describing an agentic system with memory, tools, or orchestration, nor any actual integration work performed.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the extracted evidence contains any mention of client-facing work, non-technical communication, or cross-functional collaboration\u2014only skills-line fragments like \"Claude API, GPT-4, LangChain integration points\" and job titles/dates are present.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__rosalind_pike.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.0,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every role is described only as vague phrases or tool lists\u2014e.g., \"Supply chain modernization initiatives. Warehouse automation frameworks. Demand forecasting infrastructure.\"\u2014with no sentence describing what was actually built, deployed, or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The only relevant material is an unsupported technology list\u2014\"ChatGPT, Claude, Gemini, LLaMA, Mistral, Llama 2, GPT-4, Azure OpenAI, Anthropic API, HuggingFace, TensorFlow, PyTorch, Scikit-learn, XGBoost, LangChain, LlamaIndex, RAG frameworks, prompt engineering, fine-tuning, vector databases, embeddings\"\u2014with no sentence describing what was actually built, so there is no evidence of hands-on agentic system construction or API/business-system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no mention of client engagement, non-technical communication, or cross-functional collaboration\u2014only job titles, technology lists, and vague phrases like \"Supply chain modernization initiatives. Warehouse automation frameworks. Demand forecasting infrastructure.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "keyword_stuffer__yuki_tanaka.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.3333333333333333,
-      "escalated": false
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence consists entirely of skills-list fragments like \"AI & Machine Learning: LangChain, LlamaIndex, Hugging Face Transformers, OpenAI API, Anthropic Claude\" with no sentence describing what was built, deployed, or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The only AI-related evidence is a bare skills list\u2014\"AI & Machine Learning: LangChain, LlamaIndex, Hugging Face Transformers, OpenAI API, Anthropic Claude\"\u2014with no sentence describing an agentic system, memory, tools, orchestration, or any actual integration built.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence provided\u2014e.g. \"Kubernetes clusters and container orchestration\" or \"AI & Machine Learning: LangChain, LlamaIndex, Hugging Face Transformers, OpenAI API, Anthropic Claude\"\u2014contains any mention of client engagement, non-technical communication, or cross-functional collaboration with sales/delivery teams.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__anjali_deshmukh.md",
       "expected": "advance",
       "predicted": "advance",
       "score": 6.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 2.9,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence explicitly describes a shipped, live production system with real scale and ongoing operational ownership: \"Designed and deployed autonomous order management agent serving 12,000+ daily transactions across 8 retail partners... On-call for production incidents; implemented monitoring dashboards tracking agent success rate (now 94%)... reduced customer escalations by 31% through iterative prompt refinement.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The strongest evidence of hands-on agentic-system depth is \"Designed and deployed autonomous order management agent serving 12,000+ daily transactions across 8 retail partners; agent uses tool calling to query inventory APIs, trigger fulfillment workflows, and escalate edge cases to human operators,\" which directly demonstrates orchestration, tool use, and production-scale integration rather than a mere skills claim.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The closest the evidence comes is escalating \"edge cases to human operators\" and reducing \"customer escalations by 31%,\" but nothing describes explaining technical work to non-technical stakeholders, cross-functional work with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__cormac_delaney.md",
       "expected": "advance",
       "predicted": "advance",
       "score": 6.0,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 9.0,
+      "cutoff_distance": 2.9,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence explicitly describes production ownership at scale with measured operational impact\u2014\"Shipped customer dispute resolution agent to production, handling 150K+ disputes monthly with 89% autonomous resolution rate\"\u2014which directly matches the posting's demand for systems \"used in production,\" not demos.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The evidence directly demonstrates hands-on agentic system building with memory, tools, and orchestration integrated into real production infrastructure: \"Designed persistent memory layer for agent context, enabling agents to maintain decision history and regulatory audit trails across sessions; integrated with PostgreSQL and Redis for sub-100ms lookups at scale.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Architected and deployed a multi-agent transaction reconciliation system that processes 450M+ transactions monthly\"\u2014mentions explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__delphine_aubert.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 6.0,
-      "escalated": true
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 5.0,
+      "cutoff_distance": 3.233333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The clearest evidence of true production ownership\u2014not just a shipped demo\u2014is \"On-call for the service; managed three production incidents last quarter including a model latency spike that I traced to a downstream API regression and resolved through caching strategy changes,\" which is corroborated by scale and reliability metrics like \"serving Nexus's streaming platform to 2.8M monthly active users\" and \"Deployed to production supporting 40+ live events monthly with 99.2% uptime.\"}",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The clearest evidence of orchestration/tool-chaining and real API integration is \"The agent fetches audio streams, calls OpenAI Whisper for transcription, then chains tool calls to a custom fact-checking service and downstream caption formatting system,\" which describes actual multi-tool orchestration integrated into existing broadcast infrastructure rather than a skills line.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The only evidence touching this dimension is \"Regularly present quarterly metrics and roadmap decisions to non-technical stakeholders including the Head of Product and the executive team,\" which shows internal non-technical communication but no direct client engagement or cross-functional work with sales/delivery as the posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__fatima_zahra.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 6.666666666666667,
-      "escalated": false
+      "score": 7.0,
+      "escalated": false,
+      "panel_spread": 5.0,
+      "cutoff_distance": 3.9,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The evidence explicitly describes a deployed, running system with operational improvements rather than a demo \u2014 \"Deployed agentic system on AWS using ECS with auto-scaling; managed container orchestration and CI/CD pipeline improvements that reduced deployment time from 90 to 15 minutes\" \u2014 which directly satisfies the posting's demand for systems used in production, not prototypes.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The candidate describes concrete multi-agent architecture with specialized orchestration\u2014\"Architected multi-agent system with specialized orchestration layer: intake agent handles document classification and extraction, compliance agent evaluates against state regulations via custom rulebase APIs, and approval agent interfaces with legacy permitting database\"\u2014which directly demonstrates the memory/tools/orchestration depth this posting requires, further reinforced by real API integration work (\"Implemented tool-calling framework integrating 14 external APIs\") and production deployment on cloud infrastructure (\"Deployed agentic system on AWS using ECS with auto-scaling\").",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The only relevant evidence is \"Presented quarterly performance metrics and system roadmap to executive stakeholders in the state water board, translating agent behavior and model confidence thresholds into policy language for non-technical directors,\" which shows one-directional technical-to-non-technical communication but no evidence of client-facing engagement, sales/delivery collaboration, or cross-functional teamwork.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__lucas_ferreira.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 9.0,
-      "escalated": false
+      "score": 6.0,
+      "escalated": false,
+      "panel_spread": 9.0,
+      "cutoff_distance": 2.9,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence explicitly describes a shipped, at-scale production system with ongoing operational monitoring\u2014\"Shipped clinical decision support agent serving 47 hospitals; processes 12,000+ patient cases monthly in production\"\u2014which is corroborated by real usage metrics and monitoring practices rather than demo-stage claims.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates concrete agentic architecture with production integration depth in \"Built multi-turn diagnostic orchestration system with tool calling to EMR APIs, lab result databases, and treatment guidelines,\" which directly names the memory/tools/orchestration triad the posting requires and specifies what was actually built rather than listing skills.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"established monitoring dashboards tracking agent hallucination rates and API latency\"\u2014describes explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__oscar_nakamura.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 8.0,
-      "escalated": false
+      "score": 5.333333333333333,
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 2.233333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The claim \"Owned the full production lifecycle: I built comprehensive monitoring dashboards tracking agent decision latency, tool invocation error rates, and end-to-end resolution times\" paired with a live incident response (\"led the incident response to reroute affected shipments through a fallback orchestration pattern, preventing 8+ hours of service degradation\") describes genuine production ownership rather than demo-stage work, though all evidence is self-reported without corroborating detail on team/role scope.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate describes concrete agentic system construction with clear tool/orchestration integration into real business infrastructure: \"Built and deployed a multi-agent orchestration system that automates end-to-end shipment exception handling across Meridian's network of 40+ regional distribution centers,\" further specified by \"using tool-calling agents that integrate with warehouse management systems, carrier APIs, and customer notification services.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Built and deployed a multi-agent orchestration system that automates end-to-end shipment exception handling across Meridian's network of 40+ regional distribution centers\"\u2014describes explaining work to non-technical audiences, client engagement, or cross-functional collaboration with sales/delivery teams.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_generalist__rafael_duarte.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 7.0,
-      "escalated": true
+      "score": 7.333333333333333,
+      "escalated": false,
+      "panel_spread": 5.0,
+      "cutoff_distance": 4.2333333333333325,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence explicitly describes shipped, live systems under operational ownership rather than demos, as in \"Architected and shipped multi-agent workflow system for document processing; now handles 12K+ documents daily across 40+ enterprise clients with 99.2% uptime\" combined with \"Owned on-call rotation for production infrastructure; reduced mean incident response time from 45min to 12min through custom monitoring dashboards and alert optimization.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The strongest evidence of hands-on agentic depth with memory, tools, and orchestration integrated into real business systems is: \"Implemented tool-calling pipeline for agents to query company APIs, update CRM records, and trigger downstream workflows; integrated with Salesforce and internal legacy systems via REST and gRPC\", which combined with \"Managed agent state using PostgreSQL + Redis; implemented orchestration logic for multi-turn interactions and context window management across 5M+ monthly API calls\" demonstrates concrete, production-grade agentic architecture rather than a skills list.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The only evidence touching non-technical/cross-functional communication is \"Presented quarterly performance metrics and roadmap to C-suite; managed feature requests from top 5 accounts,\" which shows executive/account-level communication but no explicit client-facing engagement, sales/delivery collaboration, or translation of technical concepts for lay audiences as the posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__camila_restrepo.md",
       "expected": "hold",
       "predicted": "reject",
-      "score": 0.5,
-      "escalated": false
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence describes strong production infrastructure work (\"Architect and maintain distributed video streaming infrastructure handling 40M+ monthly active users across three continents\") but contains zero mention of AI, LLMs, agents, or GenAI systems, so there is no production AI evidence to score against this posting's core requirement.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence mentions any AI/agentic system work, memory, tools, orchestration, or LLM integration \u2014 instead it's purely infrastructure/streaming platform work such as \"Architect and maintain distributed video streaming infrastructure handling 40M+ monthly active users across three continents.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence in the candidate's record touches client-facing, cross-functional, or non-technical communication work\u2014only infrastructure claims like \"Led incident response team; reduced mean time to resolution from 45 minutes to 12 minutes via automated alerting and runbooks\" are present.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__emil_kowalczyk.md",
       "expected": "hold",
       "predicted": "reject",
       "score": 0.6666666666666666,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "This evidence describes strong production infrastructure work (\"Manage Kubernetes cluster infrastructure serving 40+ clinical applications with 99.95% uptime SLA\"), but contains zero mention of AI, LLMs, agentic systems, or GenAI deployment, so it provides no basis for scoring production reality specifically for the AI Solutions Engineer role.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence mentions agentic systems, LLMs, memory/tools/orchestration, or AI integration at all \u2014 the closest technical claim is \"Led migration of legacy monolith to containerized microservices architecture on AWS, improving deployment frequency from monthly to daily,\" which is pure infrastructure/DevOps work with no AI component.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The closest the evidence comes is \"Mentored two junior engineers on debugging distributed system failures in healthcare workflows,\" which shows internal technical mentoring but no evidence of explaining work to non-technical audiences, cross-functional work with sales/delivery, or client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__larissa_petrov.md",
       "expected": "hold",
       "predicted": "hold",
-      "score": 2.0,
-      "escalated": false
+      "score": 1.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.6333333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The only AI-related evidence is \"integrated a basic LLM API call to categorize error messages automatically, reducing manual triage time,\" which describes a minor scripted integration rather than the engineered agentic system (memory, tools, orchestration) or production AI Employee offering this posting demands, while the rest of the resume's strong production infrastructure work (Kubernetes, uptime SLAs, API gateways) is irrelevant to AI production reality.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The only AI-related evidence is \"integrated a basic LLM API call to categorize error messages automatically, reducing manual triage time,\" which shows a single trivial API call with no mention of memory, tools, or orchestration required for agentic systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The closest evidence is \"Mentored four junior engineers on incident management and systems design,\" which shows internal engineering-team collaboration but nothing about non-technical audiences, sales/delivery cross-functional work, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__lars_thorvaldsen.md",
       "expected": "hold",
-      "predicted": "reject",
-      "score": 0.6666666666666666,
-      "escalated": false
+      "predicted": "hold",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 2.0,
+      "cutoff_distance": 0.30000000000000004,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every quote describes production logistics/supply-chain infrastructure (order routing, warehouse systems, observability) with zero mention of AI, LLMs, agents, or GenAI, so despite strong production evidence like \"reduced latency p99 from 850ms to 280ms and improved system availability to 99.97%\" there is no evidence at all of shipped AI/agentic systems as this posting requires.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "Every quote describes logistics/supply-chain infrastructure work (order-routing microservices, Kubernetes migration, observability stacks) with zero mention of LLMs, agents, memory, tools, or orchestration\u2014e.g. \"Architected real-time inventory synchronization service connecting 40+ warehouse facilities to central fulfillment hub\" shows distributed-systems skill but no AI/agentic content at all.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The closest evidence to cross-functional or client-facing signal is \"coordinated with warehouse operations, carrier partners, and product to execute zero-downtime cutover,\" which shows internal cross-team coordination but nothing about explaining work to non-technical audiences, sales/delivery collaboration, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__signe_aalborg.md",
       "expected": "hold",
       "predicted": "reject",
-      "score": 0.6666666666666666,
-      "escalated": false
+      "score": 0.5,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.19999999999999996,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "Every quote describes production infrastructure work (APIs, databases, monitoring, Kubernetes) with no mention of AI/LLM/agentic systems whatsoever, e.g. \"Designed and deployed distributed vehicle inspection scheduling API serving 14 regional offices; handles 8,000+ daily requests with 99.97% uptime SLA\" shows solid production ownership but zero relevance to the AI Solutions Engineer role's core requirement of building and deploying AI-driven systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence mentions AI, LLMs, agentic systems, memory, tools, or orchestration at all \u2014 the closest quote, \"Designed and deployed distributed vehicle inspection scheduling API serving 14 regional offices; handles 8,000+ daily requests with 99.97% uptime SLA,\" describes a conventional backend API with no AI component.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        }
+      ]
     },
     {
       "file": "production_light_ai__theo_vandenberg.md",
       "expected": "hold",
       "predicted": "reject",
       "score": 0.0,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "Every quote describes payment-processing infrastructure, databases, and Kubernetes work with no mention of AI, LLMs, agents, or GenAI systems at all, e.g. \"Built Kubernetes cluster management platform supporting 800+ payment processing pods; automated node scaling based on transaction volume forecasts,\" which is production-grade but entirely irrelevant to this posting's AI Solutions Engineer scope.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence describes any AI/agentic system work at all\u2014it's entirely payment infrastructure and DevOps (e.g., \"Built Kubernetes cluster management platform supporting 800+ payment processing pods; automated node scaling based on transaction volume forecasts\"), with no mention of memory, tools, orchestration frameworks, LLMs, or AI integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Led on-call rotation for critical payment APIs; maintained 99.97% uptime SLA through systematic reliability improvements and incident response automation\"\u2014mentions explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "production_light_ai__wren_sutcliffe.md",
       "expected": "hold",
       "predicted": "reject",
-      "score": 0.5,
-      "escalated": false
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "All evidence describes production infrastructure/DevOps work (e.g., \"Owned on-call rotation for 24/7 production support across 12 microservices\") with zero mention of AI/ML, LLMs, agentic systems, or GenAI, so despite genuine production rigor there is no evidence relevant to this posting's core requirement.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence mentions agentic systems, memory, tools, orchestration, LLMs, or AI/GenAI integration at all \u2014 the closest quote, \"Built Kubernetes infrastructure for a containerized order processing system that transitioned from on-premises to AWS; reduced deployment time from 4 hours to 8 minutes,\" describes container orchestration infrastructure, not AI agent orchestration or any AI system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only quasi-relevant evidence is \"Mentored four junior engineers on production troubleshooting, infrastructure-as-code practices, and incident response; led weekly architecture reviews,\" which shows internal engineering leadership but no client-facing, non-technical-audience, or sales/delivery cross-functional engagement as this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__astrid_bergman.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 4.0,
-      "escalated": true
+      "score": 4.333333333333333,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 1.233333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The evidence describes deployed, operating production systems with measurable outcomes\u2014e.g., \"Implemented agentic settlement workflow using Claude API with tool use for dispute resolution, enabling autonomous handling of 73% of chargeback cases\"\u2014rather than demos or proof-of-concept work, though no explicit on-call/monitoring/post-launch iteration language is present.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The candidate describes a concrete agentic build with tool use and measurable production outcome \u2014 \"Implemented agentic settlement workflow using Claude API with tool use for dispute resolution, enabling autonomous handling of 73% of chargeback cases\" \u2014 but the evidence lacks any explicit mention of memory or orchestration architecture, or integration into broader business/automation platforms beyond this one workflow.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g., \"Implemented agentic settlement workflow using Claude API with tool use for dispute resolution, enabling autonomous handling of 73% of chargeback cases\"\u2014mentions client engagement, non-technical communication, or cross-functional collaboration with sales/delivery teams.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__elena_vasquez.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 4.3,
-      "escalated": true
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 1.5666666666666669,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The evidence \"Architected autonomous agent pipeline for license plate recognition across 847 field locations, processing 2.3M images daily with 94% first-pass accuracy\" describes a system operating at real production scale with measurable throughput and accuracy, not a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 7.0,
+          "rationale": "The evidence \"Integrated Claude API with custom state machine for document verification workflows\" combined with \"Implemented retry logic and dead-letter queues for agentic workflows, achieving 99.7% task completion rate\" demonstrates concrete hands-on orchestration and reliability engineering for agentic systems integrated with real APIs, though explicit \"memory\" and multi-tool orchestration details are thinner than tool/orchestration evidence.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence\u2014e.g. \"Architected autonomous agent pipeline for license plate recognition across 847 field locations, processing 2.3M images daily with 94% first-pass accuracy\"\u2014mentions explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__ewan_brackenridge.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 4.0,
-      "escalated": true
+      "score": 3.3,
+      "escalated": true,
+      "panel_spread": 6.0,
+      "cutoff_distance": 0.19999999999999973,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 6.0,
+          "rationale": "The strongest production-reality evidence\u2014\"Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations\u2014the system successfully handled 280+ incidents autonomously\"\u2014directly describes a live, running agentic system in production use rather than a demo, though most other claims describe general infrastructure work without the same explicit production-operation detail.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The strongest agentic-system evidence\u2014\"Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations\u2014the system successfully handled 280+ incidents autonomously\"\u2014shows LLM-driven automation but never describes memory or tool/orchestration architecture, nor integration into business systems or APIs as the posting specifies.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence quotes reference explaining technical work to non-technical audiences, cross-functional collaboration with sales/delivery, or client engagement\u2014for example, even the closest quote, \"Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations\u2014the system successfully handled 280+ incidents autonomously,\" describes purely internal technical automation with no client-facing or cross-functional signal.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__hugo_lindqvist.md",
       "expected": "advance",
       "predicted": "advance",
       "score": 4.666666666666667,
-      "escalated": true
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 1.5666666666666669,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The evidence describes concrete production ownership with operational metrics rather than demos, e.g. \"maintains <300ms latency across 12 regional databases with 99.98% uptime,\" though it lacks explicit mention of post-launch support, on-call, or iteration cycles that would justify a higher score.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 7.0,
+          "rationale": "\"Architected multi-agent supply chain orchestration system using Claude API and LangChain, processing real-time shipment data across 47 distribution centers\" demonstrates concrete hands-on agentic orchestration work integrated with real business systems, though it lacks explicit mention of memory/tool-use design details.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the provided evidence mentions explaining work to non-technical audiences, cross-functional collaboration with sales/delivery, or client engagement\u2014every quote is purely technical, e.g. \"Architected multi-agent supply chain orchestration system using Claude API and LangChain, processing real-time shipment data across 47 distribution centers.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__mateo_guzman.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 6.0,
-      "escalated": true
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 2.566666666666667,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The evidence explicitly describes a live, in-use agentic system rather than a demo: \"Architected and deployed an agentic system for automated drug compound screening that processes 50,000+ chemical structures daily,\" corroborated by the RAG system \"currently serving 150+ daily queries from internal research teams with 94% relevance ratings,\" both indicating ongoing production operation rather than proof-of-concept work.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "\"Architected and deployed an agentic system for automated drug compound screening that processes 50,000+ chemical structures daily. Built multi-turn agent workflows using Claude API with function calling\" directly demonstrates hands-on construction of an agentic system with tools/orchestration integrated into a production business process, though explicit \"memory\" component is not described.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence contains no quotes describing explaining technical work to non-technical audiences, sales/delivery collaboration, or client engagement\u2014only internal technical build descriptions like \"currently serving 150+ daily queries from internal research teams with 94% relevance ratings,\" which speaks to internal usage but not cross-functional or client-facing communication.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__sana_qureshi.md",
       "expected": "advance",
-      "predicted": "hold",
-      "score": 1.3333333333333333,
-      "escalated": false
+      "predicted": "advance",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 1.5666666666666669,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The claim that the candidate \"Designed LLM-powered content tagging pipeline that processes 100K+ media assets monthly, reducing manual metadata work by 78% through autonomous agents\" describes a live, running system with measurable production impact rather than a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest agentic-systems evidence is \"Designed LLM-powered content tagging pipeline that processes 100K+ media assets monthly, reducing manual metadata work by 78% through autonomous agents\" combined with \"Architected PostgreSQL and Redis infrastructure supporting stateful agent conversations, implementing distributed locking mechanisms to handle concurrent processing across 40-node Kubernetes cluster,\" which shows real memory/state and cloud-native infrastructure work but lacks explicit description of tool-use or orchestration frameworks tying it into business APIs.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence in the provided material touches client-facing work, cross-functional collaboration, or communicating to non-technical audiences; every quote is purely technical, e.g. \"Architected PostgreSQL and Redis infrastructure supporting stateful agent conversations, implementing distributed locking mechanisms to handle concurrent processing across 40-node Kubernetes cluster.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "quiet_builder__tobias_reinhardt.md",
       "expected": "advance",
       "predicted": "advance",
-      "score": 4.333333333333333,
-      "escalated": true
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 8.0,
+      "cutoff_distance": 1.5666666666666669,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The candidate describes a live, operating system rather than a demo: \"Architected and deployed production LLM-powered product description generation system processing 180K+ merchandise items monthly.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The candidate describes a concrete agentic system with tool use and orchestration integrated into a production LLM pipeline\u2014\"Designed agentic workflow using Claude API and LangChain that autonomously categorizes products, extracts attributes, and generates SEO-optimized descriptions\"\u2014but there is no mention of memory components or integration into external business/client systems or automation platforms beyond this single internal pipeline, limiting depth relative to the posting's full scope.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no mention of client engagement, non-technical communication, or cross-functional collaboration\u2014only purely technical infrastructure claims such as \"Engineered database sharding strategy for user profiles table (800M+ records) across 16 PostgreSQL instances.\"",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__claire_fontaine.md",
       "expected": "reject",
-      "predicted": "hold",
-      "score": 1.0,
-      "escalated": false
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence describes a QA/test-automation career with no mention of AI/LLM/agentic systems, GenAI, or production AI deployment at all \u2014 the closest to \"production\" evidence is \"Led QA efforts for Prism's flagship streaming platform serving 2.4M monthly active users,\" which is unrelated to the AI Solutions Engineer role's required production AI systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The evidence shows only QA/test-automation work\u2014e.g. \"Built automated test framework in Python to validate file upload, transcoding, and proxy generation workflows\"\u2014with no mention of agentic systems, memory, tools, orchestration, or AI integration whatsoever.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only cross-functional/communication-adjacent evidence is \"Mentored two junior QA engineers on testing methodologies and introduced weekly QA guild meetings to share best practices,\" which reflects internal team knowledge-sharing, not client-facing engagement, sales/delivery collaboration, or non-technical audience communication as this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__grace_okonkwo.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.6666666666666666,
-      "escalated": false
+      "score": 0.5,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.19999999999999996,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "No rationale returned.",
+          "parse_failed": true
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The evidence describes CI/CD, Kubernetes, and infrastructure automation work (e.g., \"Architected a GitLab Runner infrastructure on Kubernetes that reduced average build times from 18 minutes to 6 minutes\") but contains no mention of agentic systems, memory, tools, orchestration, LLMs, or AI integration of any kind.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The closest possible signal is \"Built internal Helm charts and custom operators that allowed non-infrastructure engineers to deploy their applications without requiring deep Kubernetes knowledge,\" but this reflects internal tooling design for engineers, not client-facing communication, cross-functional collaboration with sales/delivery, or explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__imani_robinson.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.3333333333333333,
-      "escalated": false
+      "score": 0.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence shows only payment-operations tooling with no mention of AI, LLMs, agents, or production AI deployment\u2014e.g., \"Automated routine reporting tasks using Python scripts\" describes generic scripting, not an AI system used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The only technical building evidence is generic automation and reporting work\u2014\"Automated routine reporting tasks using Python scripts\"\u2014with no mention of agentic systems (memory, tools, orchestration), LLM/GenAI work, or AI integration into APIs or business systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "None of the evidence quotes any client-facing, cross-functional, or non-technical communication work\u2014the closest items, such as \"Built internal dashboard using SQL and Tableau for real-time reconciliation reporting,\" describe purely internal technical tasks with no mention of stakeholders, sales, delivery, or client engagement.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__malik_johnson.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.6666666666666666,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 2.0,
+      "cutoff_distance": 0.033333333333333326,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The entire evidence set describes SQL reporting, Tableau dashboards, and healthcare data analysis with no mention of AI/LLM/agentic systems whatsoever, as in \"Develop and maintain 15+ recurring SQL reports on claims data, insurance denials, and billing cycles\" \u2014 this is a data analyst profile entirely irrelevant to the AI Solutions Engineer production requirement.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The entire evidence set concerns SQL reporting, Tableau dashboards, and data analyst work such as \"Develop and maintain 15+ recurring SQL reports on claims data, insurance denials, and billing cycles,\" with no mention of agentic systems, memory, tools, orchestration, LLMs, or API/business-system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only quasi-relevant evidence is \"Built Tableau workbooks for executive leadership showing bed capacity forecasting and surgical throughput metrics; presented findings in monthly board reviews,\" which shows presenting to non-technical leadership but reflects a data-analyst reporting context, not the AI client engagement, sales/delivery collaboration, or agentic-systems communication this posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__nadia_haddad.md",
       "expected": "reject",
       "predicted": "reject",
-      "score": 0.6666666666666666,
-      "escalated": false
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 0.36666666666666664,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence describes IT helpdesk/sysadmin work with no AI, agentic systems, or LLM component whatsoever, e.g. \"Managed infrastructure and systems support for 120+ internal users across three regional offices\" is IT operations, not a production AI system.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "None of the evidence describes building agentic systems or AI integration at all \u2014 the closest to technical work is \"Administered Windows Server environments supporting Parks & Recreation and Planning departments,\" which is IT sysadmin work with no mention of memory, tools, orchestration, LLMs, or APIs.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The closest to cross-functional or client-facing signal is \"Managed 300+ support tickets monthly across multiple agencies and departments,\" but this describes internal IT helpdesk volume, not explaining technical work to non-technical audiences or direct client/sales engagement as the posting requires.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__nia_carrington.md",
       "expected": "reject",
       "predicted": "reject",
       "score": 0.0,
-      "escalated": false
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The candidate's entire background is supply chain/logistics with no AI/LLM/agentic system work whatsoever, as evidenced by \"Results-driven supply chain professional with 6 years of experience optimizing logistics operations and warehouse management systems\" \u2014 there is nothing here describing production AI deployment or even AI-related demos.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "The candidate's evidence is entirely supply-chain focused with no mention of agentic systems, memory, tools, orchestration, or AI/LLM integration\u2014e.g., \"Developed automated reporting dashboard in Excel/SQL that tracks KPIs for 15 distribution centers\" describes a basic BI reporting tool, not AI-driven or agentic system engineering.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence anywhere in the resume describes explaining technical work to non-technical audiences, cross-functional collaboration, or client engagement\u2014even the closest item, \"Developed automated reporting dashboard in Excel/SQL that tracks KPIs for 15 distribution centers,\" describes a technical deliverable with no mention of communication, stakeholders, or collaboration.",
+          "parse_failed": false
+        }
+      ]
     },
     {
       "file": "wrong_domain__tariq_mansour.md",
       "expected": "reject",
-      "predicted": "hold",
-      "score": 1.0,
-      "escalated": false
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence describes e-commerce/data engineering production work like \"Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates\" but contains zero mention of AI, LLMs, agents, or GenAI systems, so there is nothing to evaluate against the posting's requirement for production AI deployment.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "No evidence describes agentic systems (memory, tools, orchestration) or LLM/GenAI integration at all; the closest technical work is generic data engineering, e.g. \"Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence in the resume touches client-facing work, cross-functional collaboration, or explaining technical work to non-technical audiences; the closest item, \"Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates,\" is purely technical with no audience or stakeholder dimension.",
+          "parse_failed": false
+        }
+      ]
     }
   ]
 }
