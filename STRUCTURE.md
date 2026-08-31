@@ -11,6 +11,7 @@ removing files rather than editing this by hand.
 │   │   └── (60 rendered PDFs, listed in data/labels.json)
 │   ├── synthetic_resumes/           The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.
 │   │   └── (60 generated resumes, listed in data/labels.json)
+│   ├── bakeoff__anthropic-control-60__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
@@ -33,6 +34,7 @@ removing files rather than editing this by hand.
 │   ├── bakeoff__haiku-panel-unwrapped__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__haiku-panel-unwrapped__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff_sample.json          The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.
+│   ├── bakeoff_sample60.json        The full 60-resume corpus as a bake-off sample, for fitting cutoffs on more than 20 points.
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
 │   ├── eval_run__all-haiku-panel-sonnet-arbiter.json A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__recalibrated.json  A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
@@ -40,7 +42,8 @@ removing files rather than editing this by hand.
 │   ├── eval_run__var2.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__var3.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__var4.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
-│   └── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
+│   ├── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
+│   └── UNUSABLE__anthropic-control-60__run2__partial-15of60.json Quarantined partial run (15/60). Scored 1.000 on the easy survivors. Kept as a worked example, never as data.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
 │   │   └── candidates.png               The candidates view, used in the README.
@@ -48,6 +51,7 @@ removing files rather than editing this by hand.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
 │   ├── COST_ANALYSIS.md             Where the run cost actually goes, the pricing-table bug found 2026-08-27, and why prompt caching is already maxed out here.
+│   ├── CUTOFF_FIT.md                Verdict cutoffs refitted per model, with a held-out test that separates real accuracy from overfitting.
 │   ├── CUTOFF_SWEEP.md              Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.
 │   ├── ESCALATION_SWEEP.md          Output of scripts/sweep_escalation.py: escalation policies compared on cost.
 │   ├── EVAL_RESULTS.md              Headline metrics from the last eval run: macro-F1, per-class P/R/F1, confusion matrix, per-archetype accuracy.
@@ -76,6 +80,7 @@ removing files rather than editing this by hand.
 │   ├── build_resume_pdfs.py         Renders every corpus resume to PDF with reportlab. Deterministic, no model calls.
 │   ├── check_corpus.py              Lints generated resumes for leaked or missing signals against their own archetype's constraints.
 │   ├── evaluate.py                  Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.
+│   ├── fit_cutoffs.py               Refits the score-to-verdict cutoffs per model and cross-validates them. No API calls.
 │   ├── generate_candidate_report.py Builds CANDIDATE_REPORTS.md from the last evaluate.py run.
 │   ├── generate_corpus.py           Generates the synthetic resume corpus from archetypes.py. Idempotent, --limit samples across labels.
 │   ├── make_bakeoff_sample.py       Picks the fixed, stratified 20-resume sample every bake-off arm scores on. No API calls.

@@ -4,6 +4,32 @@ An agent that reads a stack of resumes against a specific job posting, ranks the
 
 Built for the problem of a talent team reading every resume by hand with no ATS. It is not a filter that rejects people quietly. Every verdict comes with the evidence behind it, and anything the system isn't confident about gets handed back to a person rather than decided.
 
+## TL;DR
+
+- **What it does.** Three AI agents each score one hiring dimension of a resume in parallel, a fourth arbitrates only when they disagree on the verdict, and every score cites a verbatim quote from the resume.
+- **How well.** **macro-F1 0.81–0.86** on 60 labelled synthetic resumes, **~$0.95 per 60** (~1.6¢ each), p50 19s. Quoted as a *range* because four identical runs span 0.051.
+- **The honest part.** The cutoffs that turn a score into a verdict were fitted on the same corpus they're scored against. Errors run one direction — below the label. The corpus is synthetic. There is no bias audit. All of it is written down in [LIMITATIONS.md](docs/LIMITATIONS.md).
+- **The most useful thing here** is not the score. It's the measurement discipline: the noise floor is measured, the metric choice is justified, and three of the biggest findings were corrections to earlier findings.
+- **Try it:** `uvicorn resume_screener.adapters.api:app --reload`, password `marco1`. Opens on a recorded run and costs nothing until you submit a posting.
+
+### Where to read next
+
+| If you want | Read |
+|---|---|
+| What the numbers are worth | [LIMITATIONS.md](docs/LIMITATIONS.md) |
+| Why macro-F1, and what it hides | [METRIC_CHOICE.md](docs/METRIC_CHOICE.md) |
+| How noisy the system is | [VARIANCE.md](docs/VARIANCE.md) |
+| Every measured run, and what changed before it | [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md) |
+| Which model to use, and the calibration trap | [BAKEOFF.md](docs/BAKEOFF.md) |
+| Where the money goes | [COST_ANALYSIS.md](docs/COST_ANALYSIS.md) |
+| Why one agent scores everyone low | [SCORE_SCALE.md](docs/SCORE_SCALE.md) |
+| How the cutoffs were chosen | [CUTOFF_SWEEP.md](docs/CUTOFF_SWEEP.md) |
+| When it escalates to the arbiter | [ESCALATION_SWEEP.md](docs/ESCALATION_SWEEP.md) |
+| How the test corpus was built | [corpus_design.md](docs/corpus_design.md) |
+| Per-candidate scores and reasoning | [CANDIDATE_REPORTS.md](docs/CANDIDATE_REPORTS.md) |
+| The full results of the latest run | [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) |
+| Project status and open decisions | [PLAN.md](PLAN.md) · [STRUCTURE.md](STRUCTURE.md) |
+
 ![Submit a posting, see the criteria it wrote, then the ranked results](docs/img/candidates.png)
 
 Submit a posting, and the whole flow runs top to bottom:

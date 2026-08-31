@@ -258,6 +258,11 @@ async def run_once(arm: dict, files: list[str], labels: dict, jd: str, concurren
 async def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(CONFIG))
+    parser.add_argument(
+        "--sample",
+        default=None,
+        help="resume sample file (default data/bakeoff_sample.json)",
+    )
     parser.add_argument("--arm", action="append", help="run only this arm (repeatable)")
     parser.add_argument("--runs", type=int, default=None)
     parser.add_argument("--check", action="store_true", help="validate and exit")
@@ -307,7 +312,8 @@ async def main() -> int:
         )
         return 1
 
-    sample = json.loads(SAMPLE.read_text(encoding="utf-8"))
+    sample_path = Path(args.sample) if args.sample else SAMPLE
+    sample = json.loads(sample_path.read_text(encoding="utf-8"))
 
     if args.report_only:
         # Re-derives every metric from what was already paid for, so the

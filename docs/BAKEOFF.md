@@ -1,6 +1,6 @@
 # Model bake-off
 
-1 arms, 3 runs each, on the same 20 resumes (`data/bakeoff_sample.json`, seed 20260827). Swapped slots: `panel`, `arbiter`. Extraction stays on Haiku in every arm.
+2 arms, 3 runs each, on the same 60 resumes (`data/bakeoff_sample.json`, seed 20260827). Swapped slots: `panel`, `arbiter`. Extraction stays on Haiku in every arm.
 
 **Read this before ranking anything by accuracy.** The macro-F1 noise band on a stratified 20 is roughly **0.098** (median of 2000 resamples of four identical runs; see `docs/VARIANCE.md`). Treat any accuracy gap smaller than the per-arm spread below as unresolved. Cost, latency and parse-failure rate are far more stable and can be read directly.
 
@@ -8,15 +8,15 @@
 
 | Arm | Macro-F1 (range) | Accuracy | Cost/resume | Latency p50 | Parse failures |
 |---|---|---|---|---|---|
-| `anthropic-control` | 0.914 (0.897–0.949) | 0.917 | $0.0159 | 12.3s | 8/180 (4.4%) |
+| `anthropic-control-60` | 0.932 (0.864–1.000) | 0.933 | $0.0157 | 12.0s | 5/225 (2.2%) |
+| `gpt-5.6-luna-60` | — | — | — | — | **no successful run** |
 
 ## Per-run detail
 
 | Arm | Run | n | Macro-F1 | Accuracy | Cost | p50 | Parse failures |
 |---|---|---|---|---|---|---|---|
-| `anthropic-control` | 1 | 20 | 0.949 | 0.950 | $0.325 | 12.4s | 3/60 |
-| `anthropic-control` | 2 | 20 | 0.897 | 0.900 | $0.320 | 12.2s | 3/60 |
-| `anthropic-control` | 3 | 20 | 0.897 | 0.900 | $0.307 | 12.2s | 2/60 |
+| `anthropic-control-60` | 1 | 60 | 0.864 | 0.867 | $0.959 | 11.9s | 2/180 |
+| `anthropic-control-60` | 2 (PARTIAL 15/60) | 15 | 1.000 | 1.000 | $0.232 | 12.1s | 3/45 |
 
 ## Calibration — read this before the ranking above
 
@@ -24,7 +24,7 @@ The verdict cutoffs in `core/pipeline.py` (`ADVANCE_CUTOFF = 4.0`, `HOLD_CUTOFF 
 
 | Arm | Mean score | As shipped (4.0/1.0) | Own best cutoffs | Best macro-F1 |
 |---|---|---|---|---|
-| `anthropic-control` | 2.69 | 0.914 | 3.6/0.7 | 0.914 |
+| `anthropic-control-60` | 2.34 | 0.932 | 3.1/0.6 | 0.950 |
 
 **These fitted cutoffs are an upper bound, not a result.** They are chosen on the same resumes they are scored against, on a sample of 20 — a smaller corpus than the 60 that `docs/LIMITATIONS.md` already calls overfitted. Read the right-hand column as *"this model is not out of the running"*, never as its accuracy. A model that needs its own cutoffs also needs them re-fitted on a corpus it has not seen before any of it counts.
 

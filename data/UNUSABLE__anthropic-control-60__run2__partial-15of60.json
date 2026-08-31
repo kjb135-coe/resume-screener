@@ -1,0 +1,140 @@
+{
+  "arm": "anthropic-control-60",
+  "run": 2,
+  "model_id": "claude-sonnet-5",
+  "provider": "anthropic",
+  "swap_slots": [
+    "panel",
+    "arbiter"
+  ],
+  "n": 15,
+  "requested": 60,
+  "macro_f1": 1.0,
+  "per_class_f1": {
+    "advance": 1.0,
+    "hold": 1.0,
+    "reject": 1.0
+  },
+  "accuracy": 1.0,
+  "cost_total": 0.23193680000000003,
+  "cost_per_resume": 0.015462453333333336,
+  "latency_p50": 12.124352624989115,
+  "latency_mean": 12.233053413790184,
+  "wall_clock_s": 33.13830200000666,
+  "parse_failed": 3,
+  "panel_calls": 45,
+  "escalated": 8,
+  "tokens": {
+    "input": 49699,
+    "output": 17137,
+    "cache_read": 105894,
+    "cache_write": 0
+  },
+  "predictions": [
+    {
+      "file": "academic_researcher__devon_whitaker.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__freya_ashcombe.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.5,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__kwame_asante.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__marcus_feldman.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__ravi_chandrasekar.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__tomas_herrera.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "adjacent_shipper__bennett_cross.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.3,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__bruno_salvatore.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.0,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__dele_adeyemi.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.0,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__julius_amankwah.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.0,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__keiko_yamashita.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.0,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__sofia_marchetti.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.0,
+      "escalated": true
+    },
+    {
+      "file": "demo_specialist__beatrix_hollowell.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 2.3,
+      "escalated": true
+    },
+    {
+      "file": "demo_specialist__hana_novak.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.0,
+      "escalated": false
+    },
+    {
+      "file": "demo_specialist__mei_lin_chow.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 2.0,
+      "escalated": true
+    }
+  ]
+}

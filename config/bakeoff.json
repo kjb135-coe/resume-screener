@@ -23,7 +23,7 @@
   "arms": [
     {
       "name": "anthropic-control",
-      "enabled": true,
+      "enabled": false,
       "provider": "anthropic",
       "model_id": "claude-sonnet-5",
       "api_key_env": "ANTHROPIC_API_KEY",
@@ -37,7 +37,7 @@
     },
     {
       "name": "gpt-5.6-luna-medium",
-      "enabled": true,
+      "enabled": false,
       "provider": "openai_compatible",
       "model_id": "gpt-5.6-luna",
       "base_url": "https://api.openai.com/v1",
@@ -57,7 +57,7 @@
     },
     {
       "name": "haiku-panel-bare",
-      "enabled": true,
+      "enabled": false,
       "provider": "anthropic",
       "model_id": "claude-haiku-4-5-20251001",
       "api_key_env": "ANTHROPIC_API_KEY",
@@ -71,7 +71,7 @@
     },
     {
       "name": "haiku-panel-prefill",
-      "enabled": true,
+      "enabled": false,
       "provider": "anthropic",
       "model_id": "claude-haiku-4-5-20251001",
       "api_key_env": "ANTHROPIC_API_KEY",
@@ -105,7 +105,7 @@
     },
     {
       "name": "haiku-panel-unwrapped",
-      "enabled": true,
+      "enabled": false,
       "provider": "anthropic",
       "model_id": "claude-haiku-4-5-20251001",
       "api_key_env": "ANTHROPIC_API_KEY",
@@ -116,6 +116,40 @@
         "cache_write": 1.25
       },
       "notes": "Same bare Haiku panel as haiku-panel-bare, run AFTER _unwrap_panel_score landed. The pair isolates what the parser fix is worth: 60 of 78 failures in the bare run were valid JSON wrapped in a dimension-keyed envelope."
+    },
+    {
+      "name": "anthropic-control-60",
+      "enabled": true,
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-5",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "pricing": {
+        "in": 2.0,
+        "out": 10.0,
+        "cache_read": 0.2,
+        "cache_write": 2.5
+      },
+      "notes": "Full 60-resume corpus, for re-fitting the verdict cutoffs on more than 20 points and for a held-out cutoff test. Distinct arm name so the 20-resume results for anthropic-control are not overwritten."
+    },
+    {
+      "name": "gpt-5.6-luna-60",
+      "enabled": true,
+      "provider": "openai_compatible",
+      "model_id": "gpt-5.6-luna",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "token_param": "max_completion_tokens",
+      "send_temperature": false,
+      "extra_body": {
+        "reasoning_effort": "medium"
+      },
+      "pricing": {
+        "in": 0.2,
+        "out": 1.2,
+        "cache_read": 0.02,
+        "cache_write": 0.0
+      },
+      "notes": "Full 60-resume corpus, for re-fitting the verdict cutoffs on more than 20 points and for a held-out cutoff test. Distinct arm name so the 20-resume results for gpt-5.6-luna-medium are not overwritten."
     }
   ],
   "run": {

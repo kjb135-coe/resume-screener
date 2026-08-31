@@ -48,6 +48,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", type=int, default=20)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="write here instead of data/bakeoff_sample.json, so a larger "
+             "sample does not orphan results recorded against a smaller one",
+    )
     args = parser.parse_args()
 
     labels = json.loads(LABELS.read_text(encoding="utf-8"))
@@ -138,7 +144,8 @@ def main() -> int:
                 if distance <= 1.0:
                     difficulty["near_cutoff"] += 1
 
-    OUT.write_text(
+    out_path = Path(args.out).resolve() if args.out else OUT
+    out_path.write_text(
         json.dumps(
             {
                 "seed": args.seed,
@@ -162,7 +169,7 @@ def main() -> int:
             f"  {difficulty['near_cutoff']} of {difficulty['scored']} scored within "
             "1.0 of a cutoff in the recorded baseline"
         )
-    print(f"wrote {OUT.relative_to(REPO)}")
+    print(f"wrote {out_path.relative_to(REPO)}")
     return 0
 
 

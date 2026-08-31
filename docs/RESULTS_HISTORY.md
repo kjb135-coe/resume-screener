@@ -502,3 +502,63 @@ came from extraction confidence below 0.4. The branch is live code that
 has never once triggered on this corpus. Either the threshold is too low
 or Haiku never reports low confidence on clean synthetic input — worth
 knowing before that flag is trusted on real, messier resumes.
+
+## Cutoffs refitted per model, and held out — 2026-08-27
+
+The verdict cutoffs (`ADVANCE_CUTOFF = 4.0`, `HOLD_CUTOFF = 1.0`) were
+swept against Sonnet's score distribution, then used to judge every other
+model. `scripts/fit_cutoffs.py` refits them per model on recorded scores
+— offline, free — and, critically, **tests them on resumes they were not
+fitted on.**
+
+| Arm | Mean score | Shipped 4.0/1.0 | Own cutoffs | Fitted (upper bound) | **Held-out (honest)** |
+|---|---|---|---|---|---|
+| `anthropic-control` (20, 3 runs) | 2.69 | 0.914 | 3.6/0.7 | 0.914 | **0.896** |
+| `gpt-5.6-luna-medium` (20, 3 runs) | 4.60 | 0.517 | 5.7/3.1 | 0.897 | **0.814** |
+| `anthropic-control-60` (60, 1 run) | 2.35 | 0.864 | 3.1/0.4 | 0.900 | **0.898** |
+
+**0.30 of Luna's apparent deficit was calibration, not judgment.** It goes
+0.517 → 0.814 with the model untouched. Sonnet still wins honestly
+(0.896 vs 0.814), but the shipped-cutoff number overstated the gap
+roughly fourfold — and Luna costs about a third as much per resume.
+
+### Why "held-out" is the column that counts
+
+Sweeping every cutoff pair and keeping the winner fits the cutoffs to the
+same resumes they are then scored on. `docs/LIMITATIONS.md` has always
+flagged this for the shipped values; the fitted column has the same flaw
+by construction. The held-out column chooses cutoffs on 4/5 of the corpus
+and scores the fold it never saw, averaged over 5 folds. **The gap
+between the two columns is the overfitting, made visible** — and for a
+single run it is large: `var1` alone fits to 0.843 but holds out at
+0.729.
+
+That is also why cutoffs are fitted on runs *pooled*, never one run. With
+a 0.051 noise band, cutoffs fitted to a single run are partly fitted to
+that run's noise.
+
+### The 60-resume comparison is unfinished
+
+Only one of six planned runs completed. The Anthropic credit balance ran
+out mid-batch, and **the Luna arm died with it** — because evidence
+extraction stays on Haiku in every arm, an arm with a perfectly good
+OpenAI key still fails at the extraction step. That dependency is real
+and worth remembering before budgeting a cross-provider run.
+
+One partial run (15 of 60) scored macro-F1 **1.000** and has been
+quarantined as `data/UNUSABLE__anthropic-control-60__run2__partial-15of60.json`
+rather than deleted. It is a textbook example of why partial runs are
+excluded: the survivors are the easy candidates, and the number looks
+perfect.
+
+To finish, with credit available (~$3.80):
+
+    python scripts/bakeoff.py --sample data/bakeoff_sample60.json \
+        --arm anthropic-control-60 --arm gpt-5.6-luna-60
+
+### The generalisable lesson
+
+A fixed score-to-verdict threshold is part of the **harness**, not part of
+the model. Any bake-off that holds it constant across models is partly
+measuring which model happens to share the calibration of whichever model
+the threshold was tuned on. Full detail: `docs/CUTOFF_FIT.md`.
