@@ -66,6 +66,7 @@ Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 | Per-candidate scores and reasoning | [CANDIDATE_REPORTS.md](docs/CANDIDATE_REPORTS.md) |
 | The full results of the latest run | [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) |
 | How the system is built, and why | [ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Deploying it without an unbounded bill | [HOSTING.md](docs/HOSTING.md) |
 | Project status and open decisions | [PLAN.md](PLAN.md) · [STRUCTURE.md](STRUCTURE.md) |
 
 ![Submit a posting, see the criteria it wrote, then the ranked results](docs/img/candidates.png)

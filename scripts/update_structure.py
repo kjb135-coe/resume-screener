@@ -58,6 +58,8 @@ def is_ignored(paths: list[Path]) -> set[Path]:
 
 DESCRIPTIONS: dict[str, str] = {
     # Top level
+    "render.yaml": "Render blueprint for the hosted demo. Secrets are prompted, never stored here.",
+    "tests/test_budget.py": "The hosted spend cap: pricing, the daily ledger, and the day rollover.",
     "README.md": "Front door: what this is, how to run it, why MCP.",
     "PLAN.md": "Living status doc — what's settled, what's built, what's open.",
     "STRUCTURE.md": "This file. Auto-generated map of the repo.",
@@ -102,6 +104,7 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
     "src/resume_screener/adapters/mcp_server.py": "MCP server exposing five tools. The primary interface.",
     "src/resume_screener/adapters/cli.py": "Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.",
+    "src/resume_screener/adapters/budget.py": "Daily spend cap for the hosted demo, priced from real token counts.",
     "src/resume_screener/adapters/api.py": "FastAPI backend: password gate, screening, reviewer decisions, resume PDFs, run stats.",
     "src/resume_screener/adapters/static": "Static assets for the web adapter.",
     "src/resume_screener/adapters/static/index.html": "The whole UI: login, screening, review queue, results. One file, no build step.",
@@ -138,6 +141,7 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
     "data/UNUSABLE__anthropic-control-60__run2__partial-15of60.json": "Quarantined partial run (15/60). Scored 1.000 on the easy survivors. Kept as a worked example, never as data.",
+    "docs/HOSTING.md": "Deploy checklist: the spend caps to set before going live, and what is not protected.",
     "docs/CUTOFF_FIT.md": "Verdict cutoffs refitted per model, with a held-out test that separates real accuracy from overfitting.",
     "docs/METRIC_CHOICE.md": "Why macro-F1 is the headline metric, what was rejected, and what it hides.",
     "docs/VARIANCE.md": "Output of scripts/variance_report.py: how much macro-F1 moves between identical runs.",

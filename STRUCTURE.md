@@ -68,6 +68,7 @@ removing files rather than editing this by hand.
 │   ├── EVAL_RESULTS__var2.md        Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── EVAL_RESULTS__var3.md        Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
 │   ├── EVAL_RESULTS__var4.md        Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md.
+│   ├── HOSTING.md                   Deploy checklist: the spend caps to set before going live, and what is not protected.
 │   ├── job_description.md           The real posting the rubric is built against. Ground truth for scoring criteria.
 │   ├── LIMITATIONS.md               Where the numbers stop meaning what they look like, and where this must not be trusted: the fitted cutoffs, the one-directional errors, the escalation blind spot, and the unmeasured bias audit.
 │   ├── METRIC_CHOICE.md             Why macro-F1 is the headline metric, what was rejected, and what it hides.
@@ -101,6 +102,7 @@ removing files rather than editing this by hand.
 │       │   │   └── index.html                   The whole UI: login, screening, review queue, results. One file, no build step.
 │       │   ├── __init__.py                  Package marker.
 │       │   ├── api.py                       FastAPI backend: password gate, screening, reviewer decisions, resume PDFs, run stats.
+│       │   ├── budget.py                    Daily spend cap for the hosted demo, priced from real token counts.
 │       │   ├── cli.py                       Terminal entry point: rubric, screen, rank. Takes the posting as a file, not a string.
 │       │   └── mcp_server.py                MCP server exposing five tools. The primary interface.
 │       ├── core/                        Domain logic. Knows nothing about MCP, HTTP, or the CLI.
@@ -123,6 +125,7 @@ removing files rather than editing this by hand.
 │   ├── __init__.py                  Package marker.
 │   ├── fakes.py                     Scripted Model implementation so tests are free, deterministic, and key-less.
 │   ├── test_api.py                  Web adapter: the results and rubric endpoints, and every error surface they show.
+│   ├── test_budget.py               The hosted spend cap: pricing, the daily ledger, and the day rollover.
 │   ├── test_cli.py                  Terminal adapter, including that the advertised console script still imports.
 │   ├── test_mcp_server.py           Tool registration, session lifecycle, and the preview-to-screen rubric handoff.
 │   ├── test_pipeline.py             Cascade behaviour: escalation, fallbacks, usage accounting, the caching contract.
@@ -136,6 +139,7 @@ removing files rather than editing this by hand.
 ├── PLAN.md                      Living status doc — what's settled, what's built, what's open.
 ├── pyproject.toml               Package metadata, dependencies, pytest and ruff config.
 ├── README.md                    Front door: what this is, how to run it, why MCP.
+├── render.yaml                  Render blueprint for the hosted demo. Secrets are prompted, never stored here.
 └── STRUCTURE.md                 This file. Auto-generated map of the repo.
 ```
 

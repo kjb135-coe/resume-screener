@@ -48,6 +48,11 @@ from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from resume_screener.adapters.budget import (
+    MAX_RESUMES_PER_RUN,
+    BudgetExceeded,
+    budget,
+)
 from resume_screener.core.ingest import load_resume_text
 from resume_screener.core.models import Verdict
 from resume_screener.core.pipeline import (
@@ -553,6 +558,11 @@ async def _run_screening(job_id: str, job_description: str, count: int) -> None:
         ]
         matched = [c for c in candidates if c["matches_ground_truth"] is not None]
         usage = sum((v.usage for v in verdicts), Usage())
+        # Record what this run actually cost, from the same token counts
+        # the eval prices. Recorded AFTER the fact: a run that has started
+        # is allowed to finish, so the cap can overshoot by at most one
+        # batch -- which is what MAX_RESUMES_PER_RUN bounds.
+        budget.record(usage.by_model)
 
         result = {
             "source": "live",
@@ -801,6 +811,17 @@ async def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
 
 
+@app.get("/api/budget")
+async def get_budget() -> JSONResponse:
+    """What the demo has spent today, and what is left.
+
+    Public on purpose: a visitor who gets refused should be able to see
+    that it was a spend cap and when it resets, rather than guessing the
+    app is broken.
+    """
+    return JSONResponse(budget.snapshot())
+
+
 @app.get("/health")
 async def health() -> dict:
     return {"ok": True}
@@ -908,6 +929,11 @@ async def post_screen_upload(
     do is argue for its own score, and the verdict is advisory in the first
     place. Worth stating rather than assuming.
     """
+    try:
+        budget.check()
+    except BudgetExceeded as exc:
+        return JSONResponse({"error": str(exc)}, status_code=429)
+
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in UPLOAD_SUFFIXES:
         return JSONResponse(
@@ -957,6 +983,7 @@ async def post_screen_upload(
 
         rubric = await rubric_for_posting(job_description)
         verdict = await screen_one(str(tmp_path), job_description, rubric=rubric)
+        budget.record(verdict.usage.by_model)
     except RubricGenerationError as exc:
         return JSONResponse({"error": str(exc)}, status_code=422)
     except RuntimeError as exc:  # no API key
@@ -1020,6 +1047,8 @@ async def post_screen(request: ScreenRequest) -> JSONResponse:
     before, otherwise a job_id to poll. The caller handles both, so a
     cache hit and a cold run look the same from the page's side.
     """
+    # A cached or recorded result costs nothing, so the cap is checked
+    # only on the paths that would actually call a model -- below.
     fingerprint = jd_fingerprint(request.job_description)
 
     if fingerprint == jd_fingerprint(default_job_description()):
@@ -1031,6 +1060,22 @@ async def post_screen(request: ScreenRequest) -> JSONResponse:
     if fingerprint in _run_cache:
         return JSONResponse(
             {"status": "done", "cached": True, "result": _run_cache[fingerprint]}
+        )
+
+    try:
+        budget.check()
+    except BudgetExceeded as exc:
+        return JSONResponse({"error": str(exc)}, status_code=429)
+
+    if request.count > MAX_RESUMES_PER_RUN:
+        return JSONResponse(
+            {
+                "error": (
+                    f"This demo screens at most {MAX_RESUMES_PER_RUN} resumes "
+                    "per run, so one submission cannot exhaust the daily budget."
+                )
+            },
+            status_code=400,
         )
 
     if len(_jobs) >= _MAX_JOBS:

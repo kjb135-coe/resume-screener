@@ -1,0 +1,29 @@
+# Render blueprint. Create the service from this file rather than by
+# hand, so the deploy is reproducible and reviewable in the repo.
+#
+# Secrets are NOT here. Both API keys are set in the Render dashboard as
+# environment variables (sync: false below means "prompt me, do not store
+# it in git"). Never put a key in this file -- it is committed.
+services:
+  - type: web
+    name: resume-screener
+    runtime: python
+    plan: free
+    # Free instances sleep after ~15 minutes idle and take ~30s to wake.
+    # Fine for a demo link; upgrade to `starter` to remove it.
+    buildCommand: pip install -e .
+    startCommand: uvicorn resume_screener.adapters.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: ANTHROPIC_API_KEY
+        sync: false          # extraction runs on Haiku in every config
+      - key: OPENAI_API_KEY
+        sync: false          # the panel and arbiter run on GPT-5.6 Luna
+      - key: APP_PASSWORD
+        sync: false          # shared password gate; change it from the default
+      - key: DAILY_BUDGET_USD
+        value: "3.00"
+      - key: MAX_RESUMES_PER_RUN
+        value: "20"
