@@ -163,6 +163,7 @@ class AnthropicModel(Model):
         api_key: str,
         base_url: str | None = None,
         prefill: str = "",
+        workspace_id: str | None = None,
     ):
         from anthropic import AsyncAnthropic
 
@@ -182,7 +183,20 @@ class AnthropicModel(Model):
         the production config does not get it silently -- it is opt-in
         per arm in config/bakeoff.json until an eval says it helps.
         """
-        self._client = AsyncAnthropic(api_key=api_key, base_url=base_url)
+        headers = {"anthropic-workspace-id": workspace_id} if workspace_id else None
+        """An identity-linked API key must say which workspace it acts in.
+
+        A workspace-scoped key carries that in the key itself and needs
+        no header; an identity-linked one does not, and every request
+        without the header fails with a 400 reading
+        `invalid_request_error`. The two key types are indistinguishable
+        to look at, so the same code worked on a laptop and failed on the
+        deploy until the header was sent. Set `ANTHROPIC_WORKSPACE_ID`
+        and it is added; leave it unset and nothing changes.
+        """
+        self._client = AsyncAnthropic(
+            api_key=api_key, base_url=base_url, default_headers=headers
+        )
 
     async def complete(
         self,

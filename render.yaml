@@ -19,6 +19,8 @@ services:
         value: "3.12"
       - key: ANTHROPIC_API_KEY
         sync: false          # extraction runs on Haiku in every config
+      - key: ANTHROPIC_WORKSPACE_ID
+        sync: false          # ONLY for an identity-linked key; see below
       - key: OPENAI_API_KEY
         sync: false          # the panel and arbiter run on GPT-5.6 Luna
       - key: APP_PASSWORD

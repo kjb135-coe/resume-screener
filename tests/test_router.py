@@ -451,3 +451,33 @@ class TestAnthropicPrefill:
         # touch it, or every cached prefix is invalidated.
         _, fake = _anthropic_with(monkeypatch, "{}", prefill="{")
         assert fake.sent["system"][0]["text"] == "SYSTEM"
+
+
+class TestWorkspaceHeader:
+    """An identity-linked Anthropic key must name the workspace it acts in.
+
+    A workspace-scoped key carries that inside the key. An identity-linked
+    one does not, and every request without the header fails with a 400
+    reading `invalid_request_error` -- which names neither keys nor
+    workspaces. The two key types look identical, so this failed only on
+    the deploy and never on a laptop.
+    """
+
+    def _headers(self, **kwargs):
+        from resume_screener.core.router import AnthropicModel
+
+        model = AnthropicModel("claude-haiku-4-5-20251001", "sk-ant-test", **kwargs)
+        return dict(model._client.default_headers)
+
+    def test_the_header_is_sent_when_a_workspace_is_given(self):
+        assert self._headers(workspace_id="wrkspc_123")["anthropic-workspace-id"] == (
+            "wrkspc_123"
+        )
+
+    def test_no_header_without_one(self):
+        assert "anthropic-workspace-id" not in self._headers()
+
+    def test_an_empty_workspace_id_is_not_sent(self):
+        # An unset env var arrives as "" through a deploy config. Sending
+        # an empty workspace is a different 400, not a fix.
+        assert "anthropic-workspace-id" not in self._headers(workspace_id="")

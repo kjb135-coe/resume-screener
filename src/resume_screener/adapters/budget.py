@@ -147,6 +147,7 @@ _OUT_OF_CREDIT = (
 )
 _BAD_KEY = ("invalid_api_key", "invalid x-api-key", "incorrect api key", "unauthorized")
 _RATE_LIMIT = ("rate_limit", "rate limit", "too many requests")
+_NO_WORKSPACE = ("anthropic-workspace-id is required",)
 _OVERLOADED = ("overloaded", "service unavailable", "502 bad gateway", "503")
 
 
@@ -218,6 +219,13 @@ def explain_provider_failure(exc: BaseException) -> str | None:
         return (
             "The API key behind this site is not being accepted, so nothing "
             "can be scored right now. This is a server configuration "
+            "problem, not something you did."
+        )
+    if any(marker in text for marker in _NO_WORKSPACE):
+        return (
+            "The API key behind this site is identity-linked, so it must "
+            "name a workspace, and the server was not told which one. Set "
+            "ANTHROPIC_WORKSPACE_ID. This is a server configuration "
             "problem, not something you did."
         )
     if any(marker in text for marker in _RATE_LIMIT):

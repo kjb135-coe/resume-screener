@@ -230,7 +230,15 @@ def _build_model(model_id: str) -> Model:
     spec = MODEL_PROVIDERS.get(model_id)
     if spec is None:
         try:
-            return AnthropicModel(model_id, os.environ["ANTHROPIC_API_KEY"])
+            return AnthropicModel(
+                model_id,
+                os.environ["ANTHROPIC_API_KEY"],
+                # Only an identity-linked key needs this, and it is fatal
+                # for that kind of key without it. Optional so a
+                # workspace-scoped key -- the common case, and what a
+                # laptop usually has -- needs no extra setting.
+                workspace_id=os.environ.get("ANTHROPIC_WORKSPACE_ID") or None,
+            )
         except KeyError:
             raise RuntimeError(
                 "ANTHROPIC_API_KEY is not set. Export it, or pass an explicit "

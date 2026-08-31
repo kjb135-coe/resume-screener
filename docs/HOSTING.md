@@ -88,6 +88,7 @@ recent provider error. Read it like this:
 | `permission_error` | The key cannot use that model | Check the model access on the account |
 | `rate_limit_error` | Out of credit, or rate limited | Add credit, or wait a minute |
 | `invalid_request_error` | The provider rejected the request | Read the message — see below |
+| ...saying `anthropic-workspace-id is required` | The key is identity-linked | Set `ANTHROPIC_WORKSPACE_ID` |
 | `api_error`, `overloaded_error` | The provider is refusing requests | Wait; nothing to fix here |
 | `configured` shows `false` | The key was never set | Add it in **Environment** |
 
@@ -99,6 +100,23 @@ When the category is `invalid_request_error`, log in and open
 `/api/diagnostics`. It serves the provider's own message, which is the
 sentence that finally names the cause. It sits behind the password gate
 because that message is the one field that could quote a request.
+
+### Identity-linked Anthropic keys
+
+Anthropic issues two kinds of key and they look the same. A
+**workspace-scoped** key carries its workspace inside the key. An
+**identity-linked** key does not, so every request has to name one, and
+without it Anthropic returns a 400 that mentions neither keys nor
+billing.
+
+If `/api/diagnostics` shows `anthropic-workspace-id is required`, set
+`ANTHROPIC_WORKSPACE_ID` in **Environment** to the workspace id from the
+Anthropic console. Leave it unset for a workspace-scoped key.
+
+This is the failure that is hardest to guess at, because a laptop
+usually holds a workspace-scoped key while a deploy holds an
+identity-linked one. The same code then works locally and fails hosted,
+which reads as a deploy problem and is not one.
 
 Both the rubric step and the screening step need **both** keys: criteria
 generation runs on Opus and evidence extraction runs on Haiku, so
