@@ -887,9 +887,50 @@ about accuracy:
   noise band — so this argument is weaker than it first appears.
 
 **Not switched.** A 10–10 tie means "no difference detected", not
-"single-pass is better", and the explainability story is the product. But
-the cost and latency case for the cascade is now negative, and the
-accuracy case is absent. That is written here rather than buried.
+"single-pass is better", and the explainability story is the product.
+
+### Correction, same day: the tie was hiding two effects that cancel
+
+The comparison above is **confounded**, and the 10–10 tie is not what it
+looked like. The cascade differs from single-pass in *two* ways at once —
+three independent agents **and** a conditional arbiter — so a tie could
+mean "neither matters" or "they cancel". Separating them offline from the
+recorded panel scores:
+
+| Configuration | macro-F1 |
+|---|---|
+| Cascade **with** arbiter | **0.847** (0.804–0.884) |
+| Cascade **without** arbiter (panel mean only) | **0.788** (0.772–0.805) |
+| Single-pass (cannot arbitrate) | 0.821 (0.789–0.845) |
+
+**They cancel.**
+
+- **The three-agent split is not what works.** Panel-only scores 0.788
+  against single-pass's 0.821, and paired per candidate single-pass wins
+  **12 to 6**. Judging the dimensions independently is, if anything,
+  slightly *worse* than judging them together.
+- **The arbiter is what works.** It is worth **+0.059**, which clears the
+  0.051 noise band. Paired per run: −0.001, +0.081, +0.097 — two large
+  positive runs and one null, so it is variable, but the direction is
+  clear and the mean exceeds the band.
+
+This also revises the earlier "the arbiter contributes 0.027, inside the
+noise band" finding. That was measured on Sonnet under the *old*
+escalation policy, which fired on 47% of candidates including many it
+could not help. Now that the margin gate only calls it where it can
+change a verdict, the same stage is worth twice as much.
+
+**The honest headline changes.** It is not "the cascade is unproven". It
+is: **the parallel panel earns nothing, and the arbiter earns more than
+we thought.** The architecture's value sits in the stage we nearly
+deleted.
+
+**The obvious next experiment** — cheap, and not yet run: single-pass
+*plus* an arbiter, escalating on distance-to-cutoff rather than panel
+disagreement (single-pass produces no disagreement signal, but the review
+flag already proves distance-to-cutoff is the better trigger). If that
+matches 0.847 it is the best architecture found: one scoring call, one
+conditional arbiter, no parallel panel.
 
 **Caveats.** Single-pass still runs the extraction step, so this is 2
 calls against 4-5, not 1 against 5. And it is 60 synthetic resumes.

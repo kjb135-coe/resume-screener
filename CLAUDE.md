@@ -93,11 +93,13 @@ is read:
   separate decisions. Queue 53% → 15%, escalation 47% → 23%.
 - ~~**Switch to Luna.**~~ Shipped. Same accuracy, half the queue, a third
   of the cost.
-- ~~**Single-pass arm.**~~ **The cascade is not measurably better than one
-  call** — 0.847 vs 0.821, inside the band, and an exact 10-10 paired
-  tie. Single-pass is 11% cheaper and 38% faster. Not switched, because
-  the three independent rationales are the product, but the accuracy
-  case for the cascade is absent.
+- ~~**Single-pass arm.**~~ The headline tie was confounded and the
+  decomposition matters: cascade **with** arbiter 0.847, cascade
+  **without** 0.788, single-pass 0.821. **The parallel panel earns
+  nothing** (it loses 12-6 to one call, paired) **and the arbiter earns
+  +0.059**, which clears the noise band. Not switched, but the next
+  experiment is obvious: single-pass PLUS an arbiter gated on
+  distance-to-cutoff.
 - ~~**Bias audit.**~~ Name-swap paired test, largest group gap 0.20 points
   against a ~0.88 noise floor. No detectable name effect — and that rules
   out a LARGE effect only. `docs/BIAS_AUDIT.md`.
