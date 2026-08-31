@@ -88,6 +88,28 @@
   .lede{color:var(--muted);font-size:14px;margin:0 0 18px;max-width:70ch}
     .sitefoot{margin:56px 0 24px;padding-top:20px;border-top:1px solid var(--line,#2a2a30);
       color:var(--mut,#8a8a92);font-size:.86rem;line-height:1.6;max-width:62ch}
+    .tj{margin:22px 0;padding:18px;border:1px solid var(--line,#2a2a30);border-radius:12px}
+    .tj svg{width:100%;height:auto;color:var(--fg,#eee)}
+    .tj-line{fill:none;stroke:#e08a5f;stroke-width:2.5}
+    .tj-dot circle{fill:#e08a5f}
+    .tj-ax{fill:var(--mut,#8a8a92);font-size:11px}
+    .tj-val{fill:var(--fg,#eee);font-size:12px;font-weight:600}
+    .tj-note{color:var(--mut,#8a8a92);font-size:.8rem;line-height:1.55;margin:12px 0 0;
+      padding-top:10px;border-top:1px solid var(--line,#2a2a30)}
+    .tj-row{display:flex;align-items:center;gap:12px;margin:7px 0;font-size:.88rem}
+    .tj-row.sp{margin-top:16px}
+    .tj-lbl{width:130px;flex-shrink:0;color:var(--mut,#8a8a92)}
+    .tj-track{flex:1;height:18px;min-width:70px;border-radius:4px;
+      background:var(--line,#2a2a30);overflow:hidden}
+    .tj-fill{display:block;height:100%;border-radius:4px;background:#e08a5f}
+    .tj-fill.good{background:#6fbf94}
+    .tj-num{width:52px;text-align:right;font-variant-numeric:tabular-nums}
+    .tj-tab{width:100%;border-collapse:collapse;font-size:.86rem;margin:22px 0}
+    .tj-tab th,.tj-tab td{text-align:left;padding:9px 10px;
+      border-bottom:1px solid var(--line,#2a2a30);vertical-align:top}
+    .tj-tab th{color:var(--mut,#8a8a92);font-weight:600;font-size:.78rem;
+      text-transform:uppercase;letter-spacing:.05em}
+    .tj-tab td:first-child{white-space:nowrap;color:var(--mut,#8a8a92)}
     .sitefoot p{margin:0 0 10px}
     .sitefoot a{color:inherit;text-decoration:underline}
 
@@ -342,7 +364,63 @@
 
     <!-- ---- STATS ---- -->
     <div id="view-stats" hidden>
-      <p class="lede">The last full evaluation run, measured against the corpus's
+      <p class="lede">How this system changed while it was being measured. Every point
+        is a real run on the same 60 resumes; the jumps are findings, not tuning.</p>
+
+      <div class="tj">
+        <svg viewBox="0 0 640 210" role="img"
+             aria-label="macro-F1 across successive runs, rising from 0.630 to 0.900">
+          <line x1="52" y1="14" x2="52" y2="168" stroke="currentColor" opacity=".25"/>
+          <line x1="52" y1="168" x2="620" y2="168" stroke="currentColor" opacity=".25"/>
+          <text x="44" y="19" class="tj-ax" text-anchor="end">1.0</text>
+          <text x="44" y="172" class="tj-ax" text-anchor="end">0.5</text>
+          <polyline class="tj-line" points="90,105 190,114 290,30 390,40 490,24 590,13"/>
+          <g class="tj-dot">
+            <circle cx="90" cy="105" r="4.5"/><circle cx="190" cy="114" r="4.5"/>
+            <circle cx="290" cy="30" r="4.5"/><circle cx="390" cy="40" r="4.5"/>
+            <circle cx="490" cy="24" r="4.5"/><circle cx="590" cy="13" r="4.5"/>
+          </g>
+          <g text-anchor="middle">
+            <text x="90"  y="188" class="tj-ax">first run</text>
+            <text x="190" y="188" class="tj-ax">parse fixes</text>
+            <text x="290" y="188" class="tj-ax">cutoffs swept</text>
+            <text x="390" y="188" class="tj-ax">noise measured</text>
+            <text x="490" y="188" class="tj-ax">model swap</text>
+            <text x="590" y="188" class="tj-ax">one call</text>
+            <text x="90"  y="96"  class="tj-val">0.630</text>
+            <text x="190" y="105" class="tj-val">0.601</text>
+            <text x="290" y="21"  class="tj-val">0.847</text>
+            <text x="390" y="31"  class="tj-val">0.814</text>
+            <text x="490" y="15"  class="tj-val">0.872</text>
+            <text x="590" y="5"   class="tj-val">0.900</text>
+          </g>
+        </svg>
+        <p class="tj-note">macro-F1 — the share of candidates it sorts into the right
+          bucket, averaged so a rare verdict counts as much as a common one. Axis
+          0.5–1.0. Identical runs span 0.051, so read short hops as noise.</p>
+      </div>
+
+      <div class="tj">
+        <div class="tj-row"><span class="tj-lbl">cost, before</span><span class="tj-track"><span class="tj-fill"     style="width:100%"></span></span><span class="tj-num">$0.95</span></div>
+        <div class="tj-row"><span class="tj-lbl">cost, now</span><span class="tj-track"><span class="tj-fill good" style="width:29%"></span></span><span class="tj-num">$0.28</span></div>
+        <div class="tj-row sp"><span class="tj-lbl">latency, before</span><span class="tj-track"><span class="tj-fill"    style="width:100%"></span></span><span class="tj-num">16.1s</span></div>
+        <div class="tj-row"><span class="tj-lbl">latency, now</span><span class="tj-track"><span class="tj-fill good" style="width:48%"></span></span><span class="tj-num">7.7s</span></div>
+        <div class="tj-row sp"><span class="tj-lbl">to a human, before</span><span class="tj-track"><span class="tj-fill"    style="width:100%"></span></span><span class="tj-num">55%</span></div>
+        <div class="tj-row"><span class="tj-lbl">…now</span><span class="tj-track"><span class="tj-fill good" style="width:24%"></span></span><span class="tj-num">13%</span></div>
+        <p class="tj-note">Per 60 resumes. Costs are at corrected rates throughout —
+          an early pricing table was wrong and inflated every figure before it.</p>
+      </div>
+
+      <table class="tj-tab">
+        <tr><th>Step</th><th>What was found</th></tr>
+        <tr><td>parse fixes</td><td>Lost responses were being scored as a confident zero. Fixing it moved the headline <em>down</em> — the first sign the numbers were noisier than they looked.</td></tr>
+        <tr><td>cutoffs swept</td><td>The score-to-verdict thresholds were guessed. Every strong candidate scored above 4.0 and the bar sat at 7.0, so it was rejecting the people it was meant to advance. The single largest gain.</td></tr>
+        <tr><td>noise measured</td><td>Four identical runs span <strong>0.051</strong> — larger than several differences already treated as conclusions. Those were withdrawn.</td></tr>
+        <tr><td>model swap</td><td>A cheaper model looked 0.26 <em>worse</em> until given thresholds fitted to its own scale. The gap was calibration, not judgment.</td></tr>
+        <tr><td>one call</td><td>The three-agent panel was replaced by a single call. It had been scoring worse than one call at twice the API calls.</td></tr>
+      </table>
+
+      <p class="lede" style="margin-top:34px">The last full run, against the corpus's
         ground-truth labels.</p>
       <div id="stats-body"></div>
     </div>

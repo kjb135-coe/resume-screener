@@ -27,6 +27,9 @@ th{font-weight:600;color:var(--mut);font-size:.8rem;text-transform:uppercase;let
 .row .track{flex:1;background:var(--line);border-radius:4px;height:20px;overflow:hidden;min-width:80px}
 .row .fill{display:block;height:100%;border-radius:4px;background:var(--acc)}
 .row .fill.g{background:var(--good)}
+.ax{fill:var(--mut);font-size:11px}
+.val{fill:var(--fg);font-size:12px;font-weight:600}
+.dot circle{fill:var(--acc)}
 .row .val{width:52px;text-align:right;font-variant-numeric:tabular-nums}
 blockquote{margin:1.4em 0;padding:14px 18px;border-left:3px solid var(--acc);background:var(--card);border-radius:0 8px 8px 0}
 blockquote p{margin:0}
@@ -44,6 +47,55 @@ footer{margin-top:3.5em;padding-top:1.4em;border-top:1px solid var(--line);color
   <div class="stat"><b>$0.28</b><span>per 60 resumes</span></div>
   <div class="stat"><b>16%</b><span>sent to a human</span></div>
   <div class="stat"><b>334</b><span>offline tests</span></div>
+</div>
+
+
+<h2>How it got here</h2>
+<p>Every point below is a measured run on the same 60 resumes, in order. The jumps are not tuning — each one is a specific finding, listed underneath.</p>
+
+<div class="bar">
+  <svg viewBox="0 0 640 220" role="img" aria-label="macro-F1 over successive runs, from 0.630 to 0.900">
+    <line x1="52" y1="18" x2="52" y2="176" stroke="var(--line)"/>
+    <line x1="52" y1="176" x2="618" y2="176" stroke="var(--line)"/>
+    <text x="44" y="24" class="ax" text-anchor="end">1.0</text>
+    <text x="44" y="180" class="ax" text-anchor="end">0.5</text>
+    <polyline fill="none" stroke="var(--acc)" stroke-width="2.5"
+      points="90,109 190,118 290,32 390,42 490,25 590,14"/>
+    <g class="dot">
+      <circle cx="90"  cy="109" r="5"/><circle cx="190" cy="118" r="5"/>
+      <circle cx="290" cy="32"  r="5"/><circle cx="390" cy="42"  r="5"/>
+      <circle cx="490" cy="25"  r="5"/><circle cx="590" cy="14"  r="5"/>
+    </g>
+    <g class="ax" text-anchor="middle">
+      <text x="90"  y="196">first run</text><text x="90"  y="100" class="val">0.630</text>
+      <text x="190" y="196">parse fixes</text><text x="190" y="109" class="val">0.601</text>
+      <text x="290" y="196">cutoffs swept</text><text x="290" y="23" class="val">0.847</text>
+      <text x="390" y="196">recalibrated</text><text x="390" y="33" class="val">0.814</text>
+      <text x="490" y="196">model swap</text><text x="490" y="16" class="val">0.872</text>
+      <text x="590" y="196">one call</text><text x="590" y="6"  class="val">0.900</text>
+    </g>
+  </svg>
+  <div class="axis">macro-F1, axis 0.5–1.0. Identical runs span 0.051, so read short hops as noise and the shape as the result.</div>
+</div>
+
+<table>
+<tr><th>Step</th><th>What was found</th></tr>
+<tr><td>parse fixes</td><td>Lost responses were being scored as a confident zero. Fixing it moved the headline <em>down</em> — the first sign the numbers were noisier than they looked.</td></tr>
+<tr><td>cutoffs swept</td><td>The score-to-verdict thresholds were guessed. Every strong candidate scored above 4.0 and the bar was set at 7.0, so it was rejecting the people it was meant to advance. <strong>+0.246</strong>, the single largest gain.</td></tr>
+<tr><td>recalibrated</td><td>Ran the same config four times to measure the noise floor. It is <strong>0.051</strong> — larger than several differences already treated as conclusions. Those were withdrawn.</td></tr>
+<tr><td>model swap</td><td>A cheaper model looked 0.26 <em>worse</em> until it was given thresholds fitted to its own scale. The gap was calibration, not judgment.</td></tr>
+<tr><td>one call</td><td>The three-agent panel was replaced by a single call. It had been scoring worse than one call while costing twice the API calls.</td></tr>
+</table>
+
+<h2>Cost and speed followed</h2>
+<div class="bar">
+  <div class="row"><span class="lbl">cost, before</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">$0.95</span></div>
+  <div class="row"><span class="lbl">cost, now</span><span class="track"><span class="fill g" style="width:29%"></span></span><span class="val">$0.28</span></div>
+  <div class="row" style="margin-top:14px"><span class="lbl">latency, before</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">16.1s</span></div>
+  <div class="row"><span class="lbl">latency, now</span><span class="track"><span class="fill g" style="width:48%"></span></span><span class="val">7.7s</span></div>
+  <div class="row" style="margin-top:14px"><span class="lbl">sent to a human</span><span class="track"><span class="fill" style="width:100%"></span></span><span class="val">55%</span></div>
+  <div class="row"><span class="lbl">…now</span><span class="track"><span class="fill g" style="width:24%"></span></span><span class="val">13%</span></div>
+  <div class="axis">Per 60 resumes. Cost is at corrected rates throughout — an early pricing table was wrong and inflated every figure before it was caught.</div>
 </div>
 
 <h2>The headline is a range, and that is the point</h2>
