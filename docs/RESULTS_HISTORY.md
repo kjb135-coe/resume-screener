@@ -632,3 +632,51 @@ What it establishes: **Luna is a serious candidate, not the also-ran the
 shipped-cutoff number implied — and no model comparison here is valid
 until the cutoffs are re-fitted per model.** Full detail:
 `docs/CUTOFF_FIT.md`.
+
+## Cutoffs are now per-model — shipped 2026-08-27
+
+`recommendation_from_score` now takes the cutoffs belonging to whichever
+model scored the panel, instead of one global pair.
+
+```python
+MODEL_CUTOFFS = {
+    "claude-sonnet-5": Cutoffs(3.1, 0.7),
+    "gpt-5.6-luna":    Cutoffs(5.8, 2.6),
+}
+```
+
+Re-scoring the recorded 60-resume runs through the shipped code:
+
+| Arm | Cutoffs | Before | After |
+|---|---|---|---|
+| `anthropic-control-60` | 3.1/0.7 | 0.823 | 0.828 (+0.005) |
+| `gpt-5.6-luna-60` | 5.8/2.6 | 0.563 | **0.884 (+0.321)** |
+
+Sonnet barely moves, which is the expected result — the old global pair
+*was* Sonnet's calibration. Luna gains 0.321 with no change to the model,
+the prompt, or the evidence.
+
+A model absent from the table falls back to the historical 4.0/1.0. That
+fallback is honest rather than safe: it means an unfitted model is being
+judged on Sonnet's scale, which is exactly the trap this change exists to
+close. Fit it with `scripts/fit_cutoffs.py` before trusting its score.
+
+`recommendation_from_score(score)` with no cutoffs argument behaves
+exactly as before, so every recorded run and every existing caller is
+unaffected. 7 tests cover the new behaviour, including that the same 5.0
+is an `advance` on Sonnet's scale and a `hold` on Luna's.
+
+### Corrections to the previous entry
+
+Two claims in the write-up above were wrong or overstated:
+
+- **"Luna is faster" is false.** Luna's p50 is **14.2s** against Sonnet's
+  **11.6s** — about 22% slower. It is cheaper and, held out, more
+  accurate. It is not faster.
+- **The Anthropic-key dependency was listed as a reason not to adopt
+  Luna. It is not one.** Extraction runs on Haiku in every arm; that is a
+  fact about the architecture, not a mark against any panel model.
+
+The objections that stand are the escalation rate (70% vs 47%, being
+addressed next), the wide fold spread, and the fact that this is one
+synthetic corpus.

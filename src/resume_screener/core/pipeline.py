@@ -29,6 +29,7 @@ import re
 import statistics
 from collections.abc import Callable, Sequence
 from pathlib import Path
+from typing import NamedTuple
 
 from resume_screener.core.ingest import iter_resume_paths, load_resume_text
 from resume_screener.core.models import (
@@ -60,6 +61,55 @@ DISAGREEMENT_THRESHOLD = 2.0  # spread across panel scores before escalating
 # provisional until the corpus grows.
 ADVANCE_CUTOFF = 4.0
 HOLD_CUTOFF = 1.0
+
+
+class Cutoffs(NamedTuple):
+    """The two thresholds that turn a 0-10 score into a verdict."""
+
+    advance: float
+    hold: float
+
+
+DEFAULT_CUTOFFS = Cutoffs(ADVANCE_CUTOFF, HOLD_CUTOFF)
+
+# Cutoffs are per MODEL, not global.
+#
+# This is the single most load-bearing finding in the bake-off. The
+# thresholds above were swept against Sonnet's score distribution, then
+# used to judge every other model. A model that grades on a different
+# scale then loses macro-F1 to the mismatch rather than to its judgment.
+#
+# Measured 2026-08-27 on 60 resumes, 3 runs per model, cutoffs fitted per
+# model and tested on folds they never saw (scripts/fit_cutoffs.py):
+#
+#   model            shipped 4.0/1.0    own cutoffs   held-out macro-F1
+#   claude-sonnet-5       0.823           3.1/0.7           0.787
+#   gpt-5.6-luna          0.563           5.8/2.6           0.861
+#
+# Luna's mean score is 4.60 against Sonnet's 2.35. Under one global pair
+# it looked 0.26 worse; calibrated to itself it is better, and it won 4
+# of 5 folds while losing none.
+#
+# A model absent from this table falls back to DEFAULT_CUTOFFS, which is
+# honest rather than safe: the fallback is Sonnet's calibration, so an
+# unfitted model is being judged on another model's scale. Fit it before
+# trusting its score -- docs/CUTOFF_FIT.md.
+#
+# These are fitted on 60 synthetic resumes and cross-validated on folds of
+# those same 60. That is better than fitting and scoring on all of them,
+# and it is still not fresh data. See docs/LIMITATIONS.md.
+MODEL_CUTOFFS: dict[str, Cutoffs] = {
+    "claude-sonnet-5": Cutoffs(3.1, 0.7),
+    "gpt-5.6-luna": Cutoffs(5.8, 2.6),
+}
+
+
+def cutoffs_for(model: Model | str | None) -> Cutoffs:
+    """The verdict thresholds for whichever model scored the panel."""
+    if model is None:
+        return DEFAULT_CUTOFFS
+    model_id = model if isinstance(model, str) else getattr(model, "model_id", "")
+    return MODEL_CUTOFFS.get(model_id, DEFAULT_CUTOFFS)
 
 # Caps simultaneous in-flight resumes. Each resume fans out to 1 extraction
 # + 3 panel calls, so 60 unbounded resumes would mean ~240 concurrent
@@ -480,15 +530,25 @@ async def _arbitrate(
     return score, rationale, response.usage
 
 
-def recommendation_from_score(score: float) -> Recommendation:
-    if score >= ADVANCE_CUTOFF:
+def recommendation_from_score(
+    score: float, cutoffs: Cutoffs | None = None
+) -> Recommendation:
+    """Score -> verdict. The single place a recommendation is decided.
+
+    `cutoffs=None` keeps the historical global pair, so every existing
+    caller and every recorded run is unaffected.
+    """
+    bounds = cutoffs or DEFAULT_CUTOFFS
+    if score >= bounds.advance:
         return Recommendation.ADVANCE
-    if score >= HOLD_CUTOFF:
+    if score >= bounds.hold:
         return Recommendation.HOLD
     return Recommendation.REJECT
 
 
-def _verdict_is_in_doubt(scores: list[float]) -> bool:
+def _verdict_is_in_doubt(
+    scores: list[float], cutoffs: Cutoffs | None = None
+) -> bool:
     """Could an arbiter ruling actually change the verdict?
 
     Only if the agents do not already agree on which bucket the candidate
@@ -503,7 +563,7 @@ def _verdict_is_in_doubt(scores: list[float]) -> bool:
     Spread measures variance. This measures decision uncertainty, which is
     the thing actually worth paying to resolve. Both must hold.
     """
-    return len({recommendation_from_score(s) for s in scores}) > 1
+    return len({recommendation_from_score(s, cutoffs) for s in scores}) > 1
 
 
 async def screen_one(
@@ -557,14 +617,15 @@ async def screen_one(
         scores = [0.0]
     spread = max(scores) - min(scores) if len(scores) > 1 else 0.0
 
-    if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores):
+    cutoffs = cutoffs_for(models["panel"])
+    if spread > DISAGREEMENT_THRESHOLD and _verdict_is_in_doubt(scores, cutoffs):
         score, rationale, arb_usage = await _arbitrate(
             candidate, panel, job_description, models["arbiter"], rubric
         )
         return Verdict(
             candidate=candidate,
             score=score,
-            recommendation=recommendation_from_score(score),
+            recommendation=recommendation_from_score(score, cutoffs),
             rationale=rationale,
             panel_scores=panel,
             escalated=True,
@@ -576,7 +637,7 @@ async def screen_one(
     return Verdict(
         candidate=candidate,
         score=avg,
-        recommendation=recommendation_from_score(avg),
+        recommendation=recommendation_from_score(avg, cutoffs),
         rationale=" | ".join(f"[{p.agent_name}] {p.rationale}" for p in panel),
         panel_scores=panel,
         escalated=False,

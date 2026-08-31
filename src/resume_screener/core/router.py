@@ -116,6 +116,16 @@ def _first_text_block(content: list) -> str:
 
 
 class Model(ABC):
+    @property
+    def model_id(self) -> str:
+        """Which model this instance calls.
+
+        Public because the caller needs it BEFORE the call: verdict
+        cutoffs are per-model (see core/pipeline.py MODEL_CUTOFFS), and
+        `Usage.model_id` only exists after a response comes back.
+        """
+        return getattr(self, "_model_id", "")
+
     @abstractmethod
     async def complete(
         self,

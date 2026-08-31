@@ -696,3 +696,79 @@ class TestUnwrapPanelScore:
     def test_top_level_score_wins_over_an_envelope(self):
         data = {"score": 5, "production_reality": {"score": 9}}
         assert self._unwrap(data)["score"] == 5
+
+
+class TestPerModelCutoffs:
+    """Verdict thresholds belong to the model, not the pipeline.
+
+    4.0/1.0 were swept against Sonnet's score distribution. Applying them
+    to a model that grades two points higher measures the calibration
+    mismatch, not the judgment: GPT-5.6 Luna scored 0.563 under them and
+    0.861 held out on cutoffs fitted to itself.
+    """
+
+    def test_default_matches_the_historical_globals(self):
+        from resume_screener.core.pipeline import (
+            ADVANCE_CUTOFF,
+            DEFAULT_CUTOFFS,
+            HOLD_CUTOFF,
+        )
+
+        assert DEFAULT_CUTOFFS == (ADVANCE_CUTOFF, HOLD_CUTOFF)
+
+    def test_unknown_model_falls_back_to_default(self):
+        from resume_screener.core.pipeline import DEFAULT_CUTOFFS, cutoffs_for
+
+        assert cutoffs_for("some-model-we-never-fitted") == DEFAULT_CUTOFFS
+        assert cutoffs_for(None) == DEFAULT_CUTOFFS
+
+    def test_known_models_get_their_own(self):
+        from resume_screener.core.pipeline import MODEL_CUTOFFS, cutoffs_for
+
+        for model_id, expected in MODEL_CUTOFFS.items():
+            assert cutoffs_for(model_id) == expected
+
+    def test_reads_model_id_off_a_model_instance(self):
+        from resume_screener.core.pipeline import cutoffs_for
+        from resume_screener.core.router import Model
+
+        class Fake(Model):
+            _model_id = "gpt-5.6-luna"
+
+            async def complete(self, system, user, **kw):  # pragma: no cover
+                raise NotImplementedError
+
+        assert cutoffs_for(Fake()) == (5.8, 2.6)
+
+    def test_same_score_gets_different_verdicts_per_model(self):
+        # The whole point. A 5.0 is an advance on Sonnet's scale and only
+        # a hold on Luna's, because Luna grades about two points higher.
+        from resume_screener.core.pipeline import (
+            Recommendation,
+            cutoffs_for,
+            recommendation_from_score,
+        )
+
+        sonnet = recommendation_from_score(5.0, cutoffs_for("claude-sonnet-5"))
+        luna = recommendation_from_score(5.0, cutoffs_for("gpt-5.6-luna"))
+        assert sonnet is Recommendation.ADVANCE
+        assert luna is Recommendation.HOLD
+
+    def test_omitting_cutoffs_preserves_old_behaviour(self):
+        # Every recorded run and every existing caller predates this
+        # parameter; none of them may shift.
+        from resume_screener.core.pipeline import Recommendation, recommendation_from_score
+
+        assert recommendation_from_score(4.0) is Recommendation.ADVANCE
+        assert recommendation_from_score(3.9) is Recommendation.HOLD
+        assert recommendation_from_score(1.0) is Recommendation.HOLD
+        assert recommendation_from_score(0.9) is Recommendation.REJECT
+
+    def test_escalation_check_respects_the_models_cutoffs(self):
+        from resume_screener.core.pipeline import _verdict_is_in_doubt, cutoffs_for
+
+        # 3.0 / 5.0 straddles Sonnet's 3.1 advance line but sits entirely
+        # inside Luna's hold band (2.6 to 5.8), so only Sonnet is in doubt.
+        scores = [3.0, 5.0]
+        assert _verdict_is_in_doubt(scores, cutoffs_for("claude-sonnet-5")) is True
+        assert _verdict_is_in_doubt(scores, cutoffs_for("gpt-5.6-luna")) is False
