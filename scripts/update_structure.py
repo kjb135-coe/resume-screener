@@ -141,6 +141,8 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
     "data/UNUSABLE__anthropic-control-60__run2__partial-15of60.json": "Quarantined partial run (15/60). Scored 1.000 on the easy survivors. Kept as a worked example, never as data.",
+    "docs/overview": "A single self-contained results page, for readers who will not clone anything.",
+    "docs/overview/index.html": "The whole project on one page: headline numbers, the noise band, calibration, and the caveats.",
     "docs/HOSTING.md": "Deploy checklist: the spend caps to set before going live, and what is not protected.",
     "docs/CUTOFF_FIT.md": "Verdict cutoffs refitted per model, with a held-out test that separates real accuracy from overfitting.",
     "docs/METRIC_CHOICE.md": "Why macro-F1 is the headline metric, what was rejected, and what it hides.",

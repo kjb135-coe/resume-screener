@@ -49,6 +49,11 @@ distribution. Skipping that made a good model look 0.26 worse than it was.
 
 Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+**In a hurry?** [`docs/overview/index.html`](docs/overview/index.html) is a
+single self-contained page with the headline results, the noise band, the
+calibration finding, and the four things this project does *not* prove.
+Open it locally, or serve it with GitHub Pages.
+
 ### Where to read next
 
 | If you want | Read |
