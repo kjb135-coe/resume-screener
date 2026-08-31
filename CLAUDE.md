@@ -69,7 +69,9 @@ not read the model's JSON reply — not that a resume failed to parse.**
 **Read `docs/LIMITATIONS.md` before making any accuracy claim.** The
 short version: the noise band is 0.051 so any smaller difference is
 unresolved, the cutoffs were fitted on the same 60 resumes they are
-scored against, the errors run below the label, and no bias audit exists.
+scored against, the errors run BOTH ways (3 below the label and 3 above,
+so there is no safe direction any more), and the only bias audit swaps
+names and nothing else.
 
 **Before comparing two runs, check they share the same code.** Run
 `scripts/variance_report.py`, and read its **Run health** table first — a

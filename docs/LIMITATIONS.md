@@ -18,7 +18,7 @@ least once. Full detail in [VARIANCE.md](VARIANCE.md).
 **Any comparison in this repo that turns on less than 0.051 is
 unresolved.** That includes the aggregation sweep (0.018 across five
 schemes) and most of the cutoff sweep's internal differences. The
-model-tier bake-off in [PLAN.md §8a](../PLAN.md) survives, because a
+model-tier bake-off in [RESULTS_HISTORY.md](RESULTS_HISTORY.md) survives, because a
 0.847 -> 0.516 collapse is far outside the band.
 
 **The band is a floor.** It widened from 0.042 at two runs to 0.051 at
@@ -26,17 +26,17 @@ four. More runs will widen it further. Four runs give a rough spread, not
 a confidence interval.
 
 **All 9 unstable candidates sat within 1.0 of a score cutoff.** The
-scores bunch against the 4.0 and 1.0 thresholds, so small jitter crosses
-a line. This is a property of the design, not bad luck: 44 of 60 scores
-sit within 1.0 of a cutoff.
+scores bunch against the thresholds, so small jitter crosses a line. This
+is a property of the design, not bad luck.
 
 **The cutoffs were fitted on the same 60 resumes they are scored
-against.** `ADVANCE_CUTOFF = 4.0` and `HOLD_CUTOFF = 1.0` came from
-sweeping thresholds over recorded scores until macro-F1 peaked. There is
-no held-out set. That is the ordinary definition of overfitting, and the
-plateau on the `advance` side is narrow — a corpus of different resumes
-would very likely want different cutoffs. Treat 4.0/1.0 as informed
-rather than validated.
+against.** Each model gets its own pair in `core/cutoffs.py` — Luna ships
+5.8/2.6, Sonnet 4.0/1.0 — and every pair came from sweeping thresholds
+over recorded scores until macro-F1 peaked. `scripts/fit_cutoffs.py` also
+reports a held-out number, which is the honest one; the shipped pair is
+still chosen on the whole corpus. That is the ordinary definition of
+overfitting. Treat the cutoffs as informed rather than validated, and
+read [CUTOFF_FIT.md](CUTOFF_FIT.md) for the size of the gap.
 
 **A bias audit now exists, and found nothing — which is weaker than it
 sounds.** Swapping only the candidate's name across 8 names and 12
@@ -53,47 +53,66 @@ describes what the generator *intended* to write, which is not always
 what it wrote. A model agreeing with that key is weaker evidence than a
 model agreeing with a hiring manager.
 
-**The cascade has never been compared to the obvious alternative.** The
-claim that three specialist agents plus an arbiter beat one large
-single-pass call is the architectural premise of the whole project, and
-it is currently asserted rather than measured. The single-pass and
-flat-ensemble arms of [PLAN.md §8](../PLAN.md) are unrun.
+**The comparison that mattered went against the original design.** The
+project's founding premise was that three specialist agents plus an
+arbiter beat one large single-pass call. Measured, the parallel panel
+scored *below* a single call (0.788 against 0.821) and only the arbiter
+earned its keep (+0.059). The architecture changed to match the result.
+The lesson is that the premise was asserted for weeks before anyone
+measured it — other premises in this repo may still be in that state.
 
 ## 2. Where it is wrong, and in which direction
 
-All **9 errors in the recorded run run the same direction: the model
-scored below the label.** Never above. In a hiring context that is the
-more harmful direction — the failure mode is holding or rejecting someone
-who should have advanced, and the person never learns it happened.
+**The errors no longer run one way, and that is a downgrade in safety.**
+Under the old cascade all 9 errors scored *below* the label, so the
+failure mode was one-directional and easy to describe. The current
+single-pass architecture makes 6 errors on the same 60 resumes, split
+**3 below the label and 3 above**. Advancing someone who should be held
+is cheap; rejecting someone who should advance is not, and that still
+happens. The overall error count fell, but the shape of the risk got
+harder to reason about.
 
-Two archetypes account for 8 of those 9:
+The six errors, in full:
 
-| Archetype | Correct | The profile |
-|---|---|---|
-| `production_light_ai` | **1/7** | Real production engineering, shallow AI depth |
-| `adjacent_shipper` | 4/6 | Ships real systems, adjacent domain |
+| True label | Predicted | Archetype | Score |
+|---|---|---|---|
+| `hold` | `advance` | `early_career` | 6.33 |
+| `hold` | `advance` | `early_career` | 6.00 |
+| `hold` | `reject` | `early_career` | 2.00 |
+| `advance` | `hold` | `quiet_builder` | 5.00 |
+| `advance` | `reject` | `quiet_builder` | 2.00 |
+| `reject` | `hold` | `wrong_domain` | 3.00 |
 
-Both describe the same candidate: someone with genuine production
-experience whose AI work is thin. That is the specific judgment this
-rubric still gets wrong, and it is exactly the population a growing team
-hires from most often.
+Two things to read off that table.
 
-`hold` remains the weakest class at 0.65 recall, against 0.90 for
-`advance` and 1.00 for `reject`. Separating strong from weak is easy;
-identifying the middle is the hard part and it is still the hard part.
+**`hold` is involved in five of the six.** Separating clearly strong from
+clearly weak is easy; placing the middle is the hard part, and it is
+still the hard part. `hold` recall is **0.85**, against 0.90 for
+`advance` and 0.95 for `reject`.
 
+**One error crosses two bands.** A `quiet_builder` labelled `advance`
+scored 2.00 and was rejected. That is the single most damaging outcome
+this system can produce, and it is not caught by the review flag, because
+2.00 sits nowhere near a cutoff. See §3.
+
+**The weak archetype changed when the architecture changed.**
+`production_light_ai` used to be the failure case at 1/7; it is now
+**7/7**. `early_career` took its place at **3/6**. That swap is a warning
+about reading archetype-level numbers at all: 6 or 7 resumes per
+archetype is far too few to separate a real weakness from noise, and this
+is the evidence that they move around.
 ## 3. Escalation cannot catch the error that matters most
 
-Escalation fires when the panel disagrees. That is a real signal and it
-covers the common case, but it is structurally blind to the dangerous
-one: **a panel that is unanimously and confidently wrong.**
+Escalation fires when the score sits near a cutoff. That is a good
+signal — it catches the cases where a small difference in judgment
+changes the answer — but it is blind by construction to the dangerous
+one: **a confident answer that is confidently wrong.**
 
-If all three agents miss the same thing for the same reason — a rubric
-that underweights a background, an unusual resume format, a domain none
-of the personas were written to recognise — they produce no disagreement,
-no escalation, and no flag. The candidate is rejected quietly and
-confidently, which is precisely the outcome this system was built to
-avoid.
+A score of 2.00 on a candidate the corpus labels `advance` is far from
+every cutoff, so nothing escalates and nothing is flagged. §2 has exactly
+that case. The candidate is rejected quietly and confidently, which is
+precisely the outcome this system was built to avoid. The old
+panel-disagreement rule did not catch it either, and cost more.
 
 There is no code fix for this, because the signal genuinely is not
 present. The mitigation is a governance practice: **audit a random sample
@@ -121,23 +140,23 @@ applicant, the fairer version is probably the better judge. The
 comparison only establishes which version matches synthetic labels
 better, and the stricter one was kept for a number, not for fairness.
 
-## 5. Bias and fairness are not measured
+## 5. Bias and fairness are barely measured
 
-**No fairness audit has been run.** This is a hiring tool, which makes
-this the most serious gap in the document.
+**One audit exists and it tests one variable.** `docs/BIAS_AUDIT.md`
+swaps only the candidate's name — heading, email address, and LinkedIn
+handle — across 8 names and 12 resumes, and finds a largest group gap of
+**0.20 points** on a 0-10 scale against a per-score noise floor of ~0.88.
+That rules out a *large* name effect. It rules out nothing smaller, and
+the corpus is far too small to detect one.
 
-The corpus uses varied fictional names drawn independently of the label,
-so no name pattern predicts the verdict by construction
-([corpus_design.md](corpus_design.md)). That prevents the *corpus* from
-encoding a correlation. It does nothing to establish that the *model*
-scores identical resumes identically when the name at the top changes.
-That test has not been run, and until it has, no claim about differential
-accuracy across demographic proxies is supported in either direction.
+**Everything else is untested.** School, employer, address, employment
+gaps, phrasing, non-US education and work history, career breaks, and
+resumes written in a second language. Nothing in the rubric targets
+these. Nothing has verified they are handled neutrally.
 
-Related and equally untested: non-US education and employment histories,
-career gaps, and resumes written in a second language. Nothing in the
-rubric targets these; nothing has verified they are handled neutrally.
-
+This is a hiring tool, so this remains the most serious gap in the
+document. One passed test on one variable is not a fairness audit in any
+sense a regulator would accept. See §8.
 ## 6. Resumes are untrusted input
 
 A resume is a document written by the person being evaluated, which makes
@@ -161,11 +180,12 @@ as an unusually high score with weak citations.
 
 ## 7. Ingestion and scale
 
-- **~1 panel call in 180 loses its score to malformed JSON.** Those are
+- **A scoring call can lose a dimension to malformed JSON.** Those are
   flagged as parse failures and excluded from the average rather than
-  being scored as a silent zero — the recorded run has 3 candidates with
-  at least one — but the affected candidate is scored on fewer than three
-  dimensions.
+  being scored as a silent zero, but the affected candidate is then
+  scored on fewer than three dimensions. "Parse failure" here means our
+  code could not read the model's JSON reply. It never means a resume
+  failed to parse.
 - **Text extraction only.** Layout, columns, tables, and graphics are
   flattened. A heavily designed resume extracts worse than a plain one,
   and the system cannot tell the difference between "no evidence of X"
@@ -175,10 +195,9 @@ as an unusually high score with weak citations.
   spending limit, not a technical one, but it means the demo has never
   been exercised at the scale a real pool would need.
 - **Cost and latency scale linearly per resume.** There is no
-  pre-filtering: every resume gets a full extraction plus three panel
-  calls, whether or not it was obviously off-target from the first line.
-  An embedding pre-filter is designed but not built ([PLAN.md
-  §6](../PLAN.md)).
+  pre-filtering: every resume gets a full extraction plus a scoring call,
+  whether or not it was obviously off-target from the first line.
+  An embedding pre-filter is designed but not built.
 
 ## 8. What it should not be used for
 
@@ -190,7 +209,8 @@ as an unusually high score with weak citations.
 - **Compliance evidence.** Nothing here is validated against EEOC
   guidance, NYC Local Law 144, the EU AI Act's high-risk obligations, or
   any other regime governing automated employment decision tools. Several
-  of those require a published bias audit, which §5 says does not exist.
+  of those require a published bias audit covering protected classes. The
+  name-swap test in §5 is not that.
 
 
 ## The human-review flag catches about half the errors
@@ -215,8 +235,9 @@ errors cannot be in the reviewed set. Raising the margin trades queue size
 for recall roughly linearly and cannot approach full recall at any
 tolerable queue size.
 
-**What the flag does not model at all:** a panel that is unanimously and
-confidently wrong. Those land far from a cutoff, so nothing flags them.
+**What the flag does not model at all:** a score that is confident and
+wrong. Those land far from a cutoff, so nothing flags them — §2 has one
+such case, an `advance` candidate scored 2.00.
 The errors this catches are the borderline ones, which is where a human
 adds most value — but it means the confident mistakes are exactly the
 ones that ship.

@@ -39,7 +39,7 @@ Every `advance` scored ≥ 4.0. Every `reject` scored ≤ 1.0. The panel was ran
 
 Moving to **4.0/1.0** took macro-F1 from 0.601 to **0.847**, with `hold` recall going 0.20 → 0.65. The sweep predicted 0.846; the run measured 0.847.
 
-**Escalation and human review were later unwelded** — that turned out to matter more than either. Escalating used to auto-flag a candidate for a human, so ~half the stack landed in a queue. But panel disagreement barely predicts a wrong answer: the old flag queued 53% of candidates and caught 36% of errors, while a *near-cutoff* flag at the same queue size catches 82%. And the arbiter itself was mostly ceremony — it moves a score by 0.33 on average, so **92% of escalations returned a different number and the same verdict**. Now the arbiter fires only when the panel mean sits within 0.5 of a cutoff, and a human is asked only when the *final* score sits within 0.4 of one. Measured live: escalation fell **47% → 5%**, the human queue **53% → 30%**, macro-F1 unchanged. The review margin is a fraction of each model's own score band, not a fixed number of points — a flat margin queued 43% of Sonnet's stack and 15% of Luna's, because they grade on different scales. [docs/RESULTS_HISTORY.md](RESULTS_HISTORY.md)
+**Escalation and human review were later unwelded** — that turned out to matter more than either. Escalating used to auto-flag a candidate for a human, so ~half the stack landed in a queue. But panel disagreement barely predicts a wrong answer: the old flag queued 53% of candidates and caught 36% of errors, while a *near-cutoff* flag at the same queue size catches 82%. And the arbiter itself was mostly ceremony — it moves a score by 0.33 on average, so **92% of escalations returned a different number and the same verdict**. Now the arbiter fires only when the panel mean sits within 0.5 of a cutoff, and a human is asked only when the *final* score sits near one. Measured live: escalation fell **47% → 5%**, the human queue **53% → 30%**, macro-F1 unchanged. The review margin is a fraction of each model's own score band, not a fixed number of points — a flat margin queued 43% of Sonnet's stack and 15% of Luna's, because they grade on different scales. [docs/RESULTS_HISTORY.md](RESULTS_HISTORY.md)
 
 Two things landed with it. The arbiter now returns a **score only** — previously an escalated 6.5 could be `advance` because the arbiter said so while an unescalated 6.5 was `hold`, the same score getting different answers depending on a coin flip. And escalation now requires the agents to disagree on the *verdict*, not merely to vary: a 9.0/7.0/6.0 panel has a wide spread but nothing an arbiter returns changes the outcome.
 
@@ -47,10 +47,10 @@ Caveat worth keeping: those cutoffs were fitted on the same 60 resumes they are 
 
 Other things named rather than hidden:
 
-- The three-way architecture bake-off in the results history is unfinished. Only this design has been measured, so "the cascade beats one big call" is asserted, not shown.
+- The three-way architecture bake-off has since been run, and the cascade lost. The parallel panel scored 0.788 against a single call's 0.821; only the arbiter earned its keep. The architecture changed to match. See [ARCHITECTURE.md](ARCHITECTURE.md).
 - **A third of the stack still reaches a human, and half the errors still get through.** The system is wrong on ~13% of candidates and a reviewer sees ~30%; reviewing a third of a stack cannot catch most of the mistakes in it. That is arithmetic, not a tuning failure — raising the review margin trades queue size for recall roughly linearly, and cannot reach high recall at any tolerable queue size.
 - Disagreement-based escalation can't catch a panel that is unanimously and confidently wrong, because there is no disagreement to detect. That and the rest of the failure modes are in [docs/LIMITATIONS.md](LIMITATIONS.md).
-- Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [PLAN.md §3b](../docs/RESULTS_HISTORY.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
+- Roughly 1 panel call in 180 still loses its score to malformed JSON. Those get flagged for review, never silently scored zero. [RESULTS_HISTORY.md](RESULTS_HISTORY.md) has the two parsing bugs that only appeared once this ran against the real API, including one that was fabricating confident zeros and not flagging them.
 
 Every measured run, what changed before it, and why the number moved is tracked in [docs/RESULTS_HISTORY.md](RESULTS_HISTORY.md).
 
@@ -63,7 +63,7 @@ Of the three panel agents, `client_communication` scores a mean of **1.00**, ver
 
 The honest caveat: the synthetic archetypes were generated with an intended `client_communication` level, so a harsh reading of silence correlates with the answer key on *this* corpus specifically. On a real applicant, the fairer version is probably the better judge — this comparison only says which one matches synthetic labels better. Full numbers in [docs/SCORE_SCALE.md](SCORE_SCALE.md).
 
-The design decisions and their tradeoffs are in [PLAN.md](../docs/RESULTS_HISTORY.md), including what's deliberately unfinished and why.
+The design decisions and their tradeoffs are in [RESULTS_HISTORY.md](RESULTS_HISTORY.md), including what's deliberately unfinished and why.
 
 
 ## Local models

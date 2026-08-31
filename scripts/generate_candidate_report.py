@@ -10,6 +10,10 @@ individual score and reasoning, untruncated.
 Generated from the raw run data rather than hand-written so it can't
 drift from what evaluate.py actually produced, and regenerates for free
 after every future run.
+
+The output is gitignored on purpose: it is ~1500 lines derived entirely
+from data/eval_run.json, so committing it would add bulk that can go
+stale. Run this locally when you want the per-candidate detail.
 """
 
 from __future__ import annotations
