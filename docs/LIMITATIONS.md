@@ -183,3 +183,44 @@ as an unusually high score with weak citations.
   guidance, NYC Local Law 144, the EU AI Act's high-risk obligations, or
   any other regime governing automated employment decision tools. Several
   of those require a published bias audit, which §5 says does not exist.
+
+
+## The human-review flag catches about half the errors
+
+Changed 2026-08-27. Escalation used to trigger review; now the flag fires
+when the final score sits within `REVIEW_MARGIN_FRACTION` (0.125) of the
+model's own verdict band.
+
+It is a better flag than the old one — at the same queue size a
+near-cutoff test catches 82% of errors against the old rule's 36% — but
+it is not a safety net:
+
+| | Sonnet | Luna |
+|---|---|---|
+| Share of stack queued | 30% | 15% |
+| Errors it catches | ~50% | ~33% |
+
+**About half the system's mistakes reach a decision with no human
+involved.** That is arithmetic, not a tuning failure: the system is wrong
+on roughly 13% of candidates and a reviewer sees 15-30% of them, so most
+errors cannot be in the reviewed set. Raising the margin trades queue size
+for recall roughly linearly and cannot approach full recall at any
+tolerable queue size.
+
+**What the flag does not model at all:** a panel that is unanimously and
+confidently wrong. Those land far from a cutoff, so nothing flags them.
+The errors this catches are the borderline ones, which is where a human
+adds most value — but it means the confident mistakes are exactly the
+ones that ship.
+
+## The escalation margin rests on 7 events
+
+`ESCALATION_MARGIN = 0.5` was chosen because all 7 escalations that ever
+changed a verdict had a panel mean within 0.33 of a cutoff, across 84
+recorded escalations. Seven is a small number to fit a threshold on.
+
+The backstop is that it is also justified by a distribution rather than
+by those outcomes: the arbiter moves a score off the panel mean by a
+median of 0.33, p95 1.00, max 1.50, so a mean further away than that is a
+call it cannot win. If 0.5 proves too tight, 1.0 is the principled
+retreat and still cuts calls 39%.

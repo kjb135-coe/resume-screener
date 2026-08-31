@@ -7,10 +7,13 @@ piece before we can move on).
 
 ## Start here — updated 2026-08-27
 
-**State:** macro-F1 **0.81–0.86** (a range, measured over four runs;
-the band is 0.051), **~$0.95** per 60-resume run, 249 offline tests,
-everything committed and pushed. Nothing is half-finished in the working
-tree.
+**State:** macro-F1 **0.81–0.86** (a range; the noise band is 0.051),
+**~$0.85** per 60-resume run on Sonnet or **~$0.31** on GPT-5.6 Luna,
+**308 offline tests**, everything committed and pushed. Nothing is
+half-finished in the working tree.
+
+Human-review queue is **30%** (Sonnet) / **15%** (Luna), down from 53%.
+Escalation is **5%** / **23%**, down from 47% / ~70%.
 
 **Next, in order** (full reasoning in §10):
 
@@ -19,13 +22,19 @@ tree.
    four). `docs/VARIANCE.md`. **Any comparison in this document turning
    on less than 0.051 is unresolved** — the aggregation sweep's 0.018 is
    now inside the noise; §8a's 0.847→0.516 survives.
-2. **Single-pass arm of the bake-off** (§8) — the cascade's entire
+2. ~~**Re-fit cutoffs per model**~~ and ~~**fix the escalation rate**~~ —
+   both **done 2026-08-27**. Cutoffs are per model (`core/cutoffs.py`);
+   escalation and the human-review flag are now separate decisions.
+3. **DECIDE: switch the panel to GPT-5.6 Luna?** Same accuracy, half the
+   review queue, a third of the cost. Every objection previously raised
+   has been answered. See `docs/CUTOFF_FIT.md` and §8b.
+4. **Single-pass arm of the bake-off** (§8) — the cascade's entire
    justification, still unmeasured. No single-pass code path exists yet.
    To count, it must differ by more than 0.051, which means several runs
    per arm, not one.
-3. **Batch API** — ~50% off, natural fit, see `docs/COST_ANALYSIS.md`.
-4. **Cut output tokens** — 69% of spend; try lower effort on the panel.
-5. **Walkthrough mode** (§11) and the **hosting spend cap** — both
+5. **Batch API** — ~50% off, natural fit, see `docs/COST_ANALYSIS.md`.
+6. **Cut output tokens** — 69% of spend; try lower effort on the panel.
+7. **Walkthrough mode** (§11) and the **hosting spend cap** — both
    specified, neither built.
 
 **Read before quoting any number:** `docs/VARIANCE.md` (the 0.051 band —

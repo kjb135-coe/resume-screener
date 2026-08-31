@@ -91,22 +91,33 @@ understates the noise.
    0.823 under the shipped 4.0/1.0. The threshold is part of the harness,
    not the model. **Any new model must be fitted with
    `scripts/fit_cutoffs.py` before its score means anything** — an
-   unlisted model falls back to Sonnet's calibration. Luna escalates 70%
-   vs 47%, which is the open blocker on adopting it. `docs/CUTOFF_FIT.md`.
-3. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
+   unlisted model falls back to Sonnet's calibration. Lives in
+   `core/cutoffs.py`. `docs/CUTOFF_FIT.md`.
+3. ~~**Fix the escalation rate.**~~ **Done 2026-08-27.** Escalation and
+   the human-review flag were one decision and are now two. Sonnet 47% →
+   **5%** escalation, queue 53% → **30%**; Luna 23% and **15%**.
+   macro-F1 unchanged.
+4. **DECIDE: switch the panel to Luna?** Every objection raised against
+   it has now been answered. On the full 60, held out: Luna **0.853**
+   macro-F1, **15%** review queue, **23%** escalation, **$0.309** per run
+   against Sonnet's 0.857 / 30% / 5% / **$0.841**. Same accuracy, half
+   the human queue, a third of the cost. The remaining arguments for
+   Sonnet are latency (11s vs 13s p50) and that all of this is one
+   synthetic corpus. **This is the biggest open call in the project.**
+5. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
    justification is that it beats one big call. That is asserted, never
    measured. **No single-pass code path exists** — this is implementation
    plus a run, not just a run. It must beat the cascade by more than
    0.051 to count, which likely means several runs per arm.
-3. **Batch API** — roughly 50% off input and output, and the eval is
+6. **Batch API** — roughly 50% off input and output, and the eval is
    exactly the offline fixed-corpus job Batch exists for. Biggest
    available cost win; changes latency only. See `docs/COST_ANALYSIS.md`.
-4. **Cut output tokens** — 69% of the bill. Try `effort: "low"|"medium"`
+7. **Cut output tokens** — 69% of the bill. Try `effort: "low"|"medium"`
    on panel calls, and stop generating reasoning the UI truncates to two
    bullets anyway. Needs an eval run to confirm accuracy holds.
-5. **Walkthrough mode** (PLAN §11) — fully specified, zero code. Only
+8. **Walkthrough mode** (PLAN §11) — fully specified, zero code. Only
    matters if the app gets hosted.
-6. **Hosting spend cap.** Option 2 was chosen (shared password + hard
+9. **Hosting spend cap.** Option 2 was chosen (shared password + hard
    daily cap). The password gate is built; the cap and the deploy are
    not. Do not deploy with a live key until the cap exists.
 
