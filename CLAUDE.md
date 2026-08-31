@@ -80,46 +80,50 @@ understates the noise.
 
 ## What's next — in order
 
-1. ~~**Variance estimate.**~~ **Done 2026-08-27.** Four runs. The band is
-   **macro-F1 0.051**, and it is a floor — it grew from 0.042 at two
-   runs. See `docs/VARIANCE.md`. **Any comparison turning on less than
-   0.051 is unresolved.**
-2. ~~**Re-fit the cutoffs per model.**~~ **Done 2026-08-27** — shipped as
-   `MODEL_CUTOFFS` in `core/pipeline.py`. Measured
-   2026-08-27: on 60 resumes, held out, GPT-5.6 Luna scores **0.861** vs
-   Sonnet's **0.787** at a third of the cost — after scoring 0.563 vs
-   0.823 under the shipped 4.0/1.0. The threshold is part of the harness,
-   not the model. **Any new model must be fitted with
-   `scripts/fit_cutoffs.py` before its score means anything** — an
-   unlisted model falls back to Sonnet's calibration. Lives in
-   `core/cutoffs.py`. `docs/CUTOFF_FIT.md`.
-3. ~~**Fix the escalation rate.**~~ **Done 2026-08-27.** Escalation and
-   the human-review flag were one decision and are now two. Sonnet 47% →
-   **5%** escalation, queue 53% → **30%**; Luna 23% and **15%**.
-   macro-F1 unchanged.
-4. **DECIDE: switch the panel to Luna?** Every objection raised against
-   it has now been answered. On the full 60, held out: Luna **0.853**
-   macro-F1, **15%** review queue, **23%** escalation, **$0.309** per run
-   against Sonnet's 0.857 / 30% / 5% / **$0.841**. Same accuracy, half
-   the human queue, a third of the cost. The remaining arguments for
-   Sonnet are latency (11s vs 13s p50) and that all of this is one
-   synthetic corpus. **This is the biggest open call in the project.**
-5. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
-   justification is that it beats one big call. That is asserted, never
-   measured. **No single-pass code path exists** — this is implementation
-   plus a run, not just a run. It must beat the cascade by more than
-   0.051 to count, which likely means several runs per arm.
-6. **Batch API** — roughly 50% off input and output, and the eval is
-   exactly the offline fixed-corpus job Batch exists for. Biggest
-   available cost win; changes latency only. See `docs/COST_ANALYSIS.md`.
-7. **Cut output tokens** — 69% of the bill. Try `effort: "low"|"medium"`
-   on panel calls, and stop generating reasoning the UI truncates to two
-   bullets anyway. Needs an eval run to confirm accuracy holds.
-8. **Walkthrough mode** (PLAN §11) — fully specified, zero code. Only
-   matters if the app gets hosted.
-9. **Hosting spend cap.** Option 2 was chosen (shared password + hard
-   daily cap). The password gate is built; the cap and the deploy are
-   not. Do not deploy with a live key until the cap exists.
+**Done 2026-08-27/31**, kept here because each one changed how a number
+is read:
+
+- ~~**Variance estimate.**~~ Band is **macro-F1 0.051** and it is a floor.
+  Any comparison turning on less is unresolved. `docs/VARIANCE.md`.
+- ~~**Per-model cutoffs.**~~ A fixed threshold is part of the harness, not
+  the model. **Any new model must be fitted with
+  `scripts/fit_cutoffs.py` before its score means anything** — an
+  unlisted model falls back to Sonnet's calibration. `core/cutoffs.py`.
+- ~~**Escalation rate.**~~ Escalation and the human-review flag are now
+  separate decisions. Queue 53% → 15%, escalation 47% → 23%.
+- ~~**Switch to Luna.**~~ Shipped. Same accuracy, half the queue, a third
+  of the cost.
+- ~~**Single-pass arm.**~~ **The cascade is not measurably better than one
+  call** — 0.847 vs 0.821, inside the band, and an exact 10-10 paired
+  tie. Single-pass is 11% cheaper and 38% faster. Not switched, because
+  the three independent rationales are the product, but the accuracy
+  case for the cascade is absent.
+- ~~**Bias audit.**~~ Name-swap paired test, largest group gap 0.20 points
+  against a ~0.88 noise floor. No detectable name effect — and that rules
+  out a LARGE effect only. `docs/BIAS_AUDIT.md`.
+- ~~**Output tokens.**~~ `reasoning_effort` is the lever, not rationale
+  length (~75% of output is reasoning). `low` adopted: unchanged
+  accuracy, 16% faster. The predicted 30-50% cost win did not arrive — it
+  moved cost 3.5%.
+- ~~**Hosting spend cap.**~~ Built: `adapters/budget.py`, `render.yaml`,
+  `docs/HOSTING.md`. **Set the provider-level caps before deploying.**
+- ~~**Batch API**~~ and ~~**walkthrough mode**~~ — both dropped. Batch
+  saves ~$0.15 on a $0.30 run; walkthrough is README prose now.
+
+**Open, in order:**
+
+1. **Deploy it.** Everything is built. Set the two provider caps, then
+   Render → New → Blueprint. `docs/HOSTING.md` is the checklist.
+2. **ATS comparison research** (PLAN §8c) — price, accuracy, and above
+   all *adaptability*: a keyword ATS is configured against a fixed
+   taxonomy, this writes its criteria from the posting you paste. That is
+   the axis worth leading with. Requested, not started.
+3. **A real corpus.** Every number here is agreement with a generator's
+   intended verdict on 60 synthetic resumes. Nothing else on this list
+   matters as much, and nothing can be done about it cheaply.
+4. **`client_communication` discrimination** — knowingly left alone. Two
+   attempts made it worse or moved nothing; `docs/SCORE_SCALE.md`
+   explains why, and that is currently the better asset.
 
 `docs/ARCHITECTURE.md` is referenced but unwritten, and is lower priority
 than it looks — the README's "How it works" and `STRUCTURE.md` already

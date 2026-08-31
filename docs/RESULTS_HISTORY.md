@@ -895,41 +895,43 @@ accuracy case is absent. That is written here rather than buried.
 calls against 4-5, not 1 against 5. And it is 60 synthetic resumes.
 
 
-## Cutting output tokens — analysed, run blocked — 2026-08-31
+## Cutting output tokens — 2026-08-31
 
-Output is ~69% of the bill, so it is the biggest remaining cost lever.
-The obvious move was to shorten the rationale. **Measurement says that is
-the wrong lever.**
+Output is ~69% of the bill, so it looked like the biggest remaining cost
+lever. The obvious move was shortening the rationale. **Measurement said
+that was the wrong lever:**
 
 | | Per panel call |
 |---|---|
 | Visible rationale | 271 chars ≈ **68 tokens** |
 | Total output | ≈ **290 tokens** |
 
-So roughly **75% of output tokens are Luna's reasoning, not text anyone
-reads.** Shortening a one-sentence rationale cannot touch that. The
-prompt already caps it at one sentence and the UI renders a single
-bullet, so there was never much to reclaim there.
+Roughly **75% of output is reasoning nobody reads.** The prompt already
+caps the rationale at one sentence and the UI renders a single bullet, so
+there was never much to reclaim there. The lever is `reasoning_effort`.
 
-The lever is `reasoning_effort`. A `luna-effort-low` arm is configured
-in `config/bakeoff.json` and ready to run.
+### `low` vs `medium`, 3 runs each on all 60
 
-**The run is blocked, and not on anything about the experiment.** The
-Anthropic credit balance ran out mid-batch. Evidence extraction runs on
-Haiku in *every* arm, so an arm that is otherwise entirely OpenAI still
-dies at the extraction step. That is the third time this dependency has
-stopped a run; it is documented in `scripts/bakeoff.py` and
-`docs/HOSTING.md`, and it is the strongest practical argument for
-eventually moving extraction onto the same provider as the panel.
+| | medium | **low** |
+|---|---|---|
+| macro-F1 | 0.847 (0.804–0.884) | **0.872** (0.832–0.901) |
+| Output tokens | 74,617 | **65,469** (−12%) |
+| p50 latency | 13.5s | **11.3s** (−16%) |
+| Cost per 60 | $0.310 | $0.299 (−3.5%) |
 
-One partial run (8 of 60) is quarantined as
-`data/UNUSABLE__luna-effort-low__run1.json`. Its macro-F1 of 0.667 on 8
-survivors and accuracy of 1.000 are exactly the artefact partial runs
-produce, and it is kept as an example rather than deleted.
+The +0.025 is inside the 0.051 noise band, so accuracy is unchanged. The
+paired test over the same 60 resumes has low ahead **9 to 6**, which is
+enough to say it is certainly not worse.
 
-To finish, with Anthropic credit available (~$1):
+**Adopted.** Free latency, slightly cheaper, no accuracy cost.
 
-    python scripts/bakeoff.py --sample data/bakeoff_sample60.json --runs 3
+### The predicted win did not arrive
 
-**Accept/reject:** macro-F1 must hold within 0.051 of 0.847. Expected
-saving is roughly 30-50% of output tokens, so ~$0.31 → ~$0.20 per run.
+Reasoning was ~75% of output, so `low` looked like a 30-50% cost lever.
+**It moved cost 3.5%.** Output tokens fell only 12% — the reasoning
+budget shrinks far less than the name "low" suggests — and what remains
+of the bill is input and cache tokens, which effort does not touch.
+
+That closes out the cost work honestly: after the pricing correction, the
+model switch, and this, a 60-resume run went **$1.80 → $0.30**. The
+remaining levers are small.

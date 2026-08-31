@@ -204,7 +204,22 @@ MODEL_PROVIDERS: dict[str, dict] = {
         "api_key_env": "OPENAI_API_KEY",
         "token_param": "max_completion_tokens",
         "send_temperature": False,
-        "extra_body": {"reasoning_effort": "medium"},
+        # "low", not "medium". Measured 2026-08-31 over 3 runs of 60:
+        #
+        #             macro-F1              out-tokens   p50      cost
+        #   medium  0.847 (0.804-0.884)       74,617    13.5s    $0.310
+        #   low     0.872 (0.832-0.901)       65,469    11.3s    $0.299
+        #
+        # Accuracy is unchanged -- the +0.025 sits inside the 0.051 noise
+        # band -- but the paired test over the same 60 resumes has low
+        # ahead 9 to 6, so it is certainly not worse. 12% fewer output
+        # tokens and 16% faster.
+        #
+        # Worth recording that the predicted win did NOT arrive. Output is
+        # 69% of the bill and ~75% of it is reasoning, so effort looked
+        # like a 30-50% cost lever. It moved cost 3.5%. The reasoning
+        # budget shrank far less than "low" suggests.
+        "extra_body": {"reasoning_effort": "low"},
     },
 }
 
