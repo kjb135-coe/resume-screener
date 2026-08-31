@@ -98,7 +98,7 @@
       padding-top:10px;border-top:1px solid var(--line,#2a2a30)}
     .tj-row{display:flex;align-items:center;gap:12px;margin:7px 0;font-size:.88rem}
     .tj-row.sp{margin-top:16px}
-    .tj-lbl{width:130px;flex-shrink:0;color:var(--mut,#8a8a92)}
+    .tj-lbl{width:152px;flex-shrink:0;color:var(--mut,#8a8a92)}
     .tj-track{flex:1;height:18px;min-width:70px;border-radius:4px;
       background:var(--line,#2a2a30);overflow:hidden}
     .tj-fill{display:block;height:100%;border-radius:4px;background:#e08a5f}
@@ -369,7 +369,10 @@
         is a real run on the same 60 resumes; the jumps are findings, not tuning.</p>
 
       <div class="tj">
-        <svg viewBox="0 0 640 210" role="img"
+        <!-- Top of the box is -12, not 0: the highest value label has its
+             baseline at y=5, so its ascenders sit above zero and were
+             clipped. Padding the box moves nothing on the chart. -->
+        <svg viewBox="0 -12 640 222" role="img"
              aria-label="macro-F1 across successive runs, rising from 0.630 to 0.900">
           <line x1="52" y1="14" x2="52" y2="168" stroke="currentColor" opacity=".25"/>
           <line x1="52" y1="168" x2="620" y2="168" stroke="currentColor" opacity=".25"/>
@@ -406,8 +409,8 @@
         <div class="tj-row"><span class="tj-lbl">cost, now</span><span class="tj-track"><span class="tj-fill good" style="width:29%"></span></span><span class="tj-num">$0.28</span></div>
         <div class="tj-row sp"><span class="tj-lbl">latency, before</span><span class="tj-track"><span class="tj-fill"    style="width:100%"></span></span><span class="tj-num">16.1s</span></div>
         <div class="tj-row"><span class="tj-lbl">latency, now</span><span class="tj-track"><span class="tj-fill good" style="width:48%"></span></span><span class="tj-num">7.7s</span></div>
-        <div class="tj-row sp"><span class="tj-lbl">to a human, before</span><span class="tj-track"><span class="tj-fill"    style="width:100%"></span></span><span class="tj-num">55%</span></div>
-        <div class="tj-row"><span class="tj-lbl">…now</span><span class="tj-track"><span class="tj-fill good" style="width:24%"></span></span><span class="tj-num">13%</span></div>
+        <div class="tj-row sp"><span class="tj-lbl">human review, before</span><span class="tj-track"><span class="tj-fill"    style="width:100%"></span></span><span class="tj-num">55%</span></div>
+        <div class="tj-row"><span class="tj-lbl">human review, now</span><span class="tj-track"><span class="tj-fill good" style="width:24%"></span></span><span class="tj-num">13%</span></div>
         <p class="tj-note">Per 60 resumes. Costs are at corrected rates throughout —
           an early pricing table was wrong and inflated every figure before it.</p>
       </div>

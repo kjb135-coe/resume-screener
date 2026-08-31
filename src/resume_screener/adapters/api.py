@@ -783,6 +783,18 @@ class DecisionRequest(BaseModel):
     note: str = Field(default="", max_length=2000)
 
 
+def corpus_files() -> set[str]:
+    """Filenames from the recorded run -- the only candidates on record.
+
+    An uploaded resume is deliberately not one of them. It is screened in
+    memory and never stored, so it exists for exactly one browser tab.
+    """
+    try:
+        return {c["file"] for c in load_recorded_run()["candidates"]}
+    except (FileNotFoundError, KeyError):
+        return set()
+
+
 @app.post("/api/decision")
 async def post_decision(request: DecisionRequest) -> JSONResponse:
     """Record a human's verdict on a flagged candidate.
@@ -792,7 +804,24 @@ async def post_decision(request: DecisionRequest) -> JSONResponse:
     that silently replaced the score would destroy the only record of
     where the model and a person disagreed, which is the most useful data
     this thing produces.
+
+    Only a candidate from the recorded run can be decided on. An uploaded
+    resume is screened in memory and never stored, so a verdict on one
+    would write somebody's FILE NAME into a store every logged-in visitor
+    can read, and it would point at a candidate nobody else can see. The
+    page hides the buttons for an upload; this is the guard that does not
+    depend on the page. `clear` is exempt so a name already in the store
+    can always be removed.
     """
+    if request.decision != "clear" and request.file not in corpus_files():
+        return JSONResponse(
+            {
+                "error": "Verdicts can only be recorded for candidates in the "
+                "recorded run. An uploaded resume is screened in memory and "
+                "never stored, so there is nothing to attach a verdict to."
+            },
+            status_code=422,
+        )
     decisions = load_decisions()
     if request.decision == "clear":
         decisions.pop(request.file, None)

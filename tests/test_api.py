@@ -797,20 +797,46 @@ class TestDecisions:
     def isolate(self, monkeypatch, tmp_path):
         monkeypatch.setattr(api, "DECISIONS_JSON", tmp_path / "decisions.json")
 
-    def test_records_and_returns_a_decision(self, client):
+    @pytest.fixture
+    def known(self, client) -> str:
+        """A file name from the recorded run. Only those can be decided on."""
+        return client.get("/api/results").json()["candidates"][0]["file"]
+
+    def test_records_and_returns_a_decision(self, client, known):
         body = client.post("/api/decision", json={
-            "file": "x.md", "decision": "approve", "note": "strong",
+            "file": known, "decision": "approve", "note": "strong",
         }).json()
-        assert body["decisions"]["x.md"]["decision"] == "approve"
-        assert body["decisions"]["x.md"]["note"] == "strong"
+        assert body["decisions"][known]["decision"] == "approve"
+        assert body["decisions"][known]["note"] == "strong"
 
-    def test_decision_survives_a_reread(self, client):
-        client.post("/api/decision", json={"file": "x.md", "decision": "reject"})
-        assert client.get("/api/decisions").json()["x.md"]["decision"] == "reject"
+    def test_decision_survives_a_reread(self, client, known):
+        client.post("/api/decision", json={"file": known, "decision": "reject"})
+        assert client.get("/api/decisions").json()[known]["decision"] == "reject"
 
-    def test_clear_removes_it(self, client):
-        client.post("/api/decision", json={"file": "x.md", "decision": "approve"})
-        client.post("/api/decision", json={"file": "x.md", "decision": "clear"})
+    def test_clear_removes_it(self, client, known):
+        client.post("/api/decision", json={"file": known, "decision": "approve"})
+        client.post("/api/decision", json={"file": known, "decision": "clear"})
+        assert client.get("/api/decisions").json() == {}
+
+    def test_a_verdict_on_an_upload_is_refused(self, client):
+        """An uploaded resume is screened in memory and never stored.
+
+        Recording a verdict on one would write somebody's own FILE NAME
+        into a store every logged-in visitor can read, pointing at a
+        candidate nobody else can see. The page hides the buttons; this
+        is the guard that does not depend on the page.
+        """
+        response = client.post("/api/decision", json={
+            "file": "Keegan_Borig_Resume.pdf", "decision": "approve", "note": "",
+        })
+        assert response.status_code == 422
+        assert "never stored" in response.json()["error"]
+        assert client.get("/api/decisions").json() == {}
+
+    def test_clear_still_works_on_a_name_already_stored(self, client):
+        """So a name that predates the guard can always be removed."""
+        api.save_decisions({"old-upload.pdf": {"decision": "approve"}})
+        client.post("/api/decision", json={"file": "old-upload.pdf", "decision": "clear"})
         assert client.get("/api/decisions").json() == {}
 
     def test_invalid_decision_is_refused(self, client):
@@ -949,8 +975,9 @@ class TestDecisionsSurviveAReadOnlyDisk:
         assert api.save_decisions({"a.md": {"decision": "reject"}}) is True
 
     def test_the_endpoint_tells_the_page_which_happened(self, client):
+        known = client.get("/api/results").json()["candidates"][0]["file"]
         body = client.post(
             "/api/decision",
-            json={"file": "x.md", "decision": "reject", "note": ""},
+            json={"file": known, "decision": "reject", "note": ""},
         ).json()
         assert "persisted" in body, "the UI cannot warn about what it is not told"
