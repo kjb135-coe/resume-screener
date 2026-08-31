@@ -848,3 +848,28 @@ class TestCitationMatching:
     def test_still_returns_prose_when_nothing_can_be_cited(self):
         bullets = api.bullets_from("No evidence at all.", self.RESUME)
         assert bullets and bullets[0]["citations"] == []
+
+
+class TestAccessPassword:
+    """There must be no committed default.
+
+    A password in a public repo is a published password, and this one is
+    the only thing between a shared link and an API bill.
+    """
+
+    def test_env_value_is_used_when_set(self, monkeypatch):
+        monkeypatch.setenv("APP_PASSWORD", "chosen-by-the-operator")
+        assert api._access_password() == "chosen-by-the-operator"
+
+    def test_no_hardcoded_fallback(self, monkeypatch):
+        monkeypatch.delenv("APP_PASSWORD", raising=False)
+        first = api._access_password()
+        second = api._access_password()
+        assert first != second, "must not be a fixed default"
+        assert len(first) >= 10
+        assert first not in {"screener", "password", "changeme", ""}
+
+    def test_an_empty_env_value_does_not_disable_the_gate(self, monkeypatch):
+        # APP_PASSWORD="" in a deploy config must not mean "no password".
+        monkeypatch.setenv("APP_PASSWORD", "")
+        assert len(api._access_password()) >= 10

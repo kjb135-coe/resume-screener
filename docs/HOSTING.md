@@ -52,7 +52,9 @@ combined $30 provider cap is the backstop that survives any bug here.
    `render.yaml`.
 4. Fill in the three prompted secrets: `ANTHROPIC_API_KEY`,
    `OPENAI_API_KEY`, `APP_PASSWORD`.
-5. **Change `APP_PASSWORD` from the default `screener`.**
+5. **Set `APP_PASSWORD`.** There is no default. Left unset, the app
+   generates a random password per process and prints it to the log —
+   which means it changes on every restart and every redeploy.
 6. Deploy. Check `/health`, then log in and confirm `/api/budget`
    returns the expected limit.
 

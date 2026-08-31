@@ -36,6 +36,7 @@ import json
 import logging
 import os
 import re
+import secrets
 import shutil
 import tempfile
 import uuid
@@ -89,7 +90,33 @@ DECISIONS_JSON = REPO / "data" / "reviewer_decisions.json"
 # link is not an open invoice: every live screening call costs money, and
 # an ungated public page with an API key behind it is a page anyone can
 # spend from. See PLAN.md 11.
-ACCESS_PASSWORD = os.environ.get("APP_PASSWORD", "screener")
+def _access_password() -> str:
+    """The shared password, from the environment or generated on the spot.
+
+    There is deliberately no hardcoded fallback. A default committed to a
+    public repo is not a password -- it is a published one, and it would
+    be the single credential standing between a shared link and an API
+    bill.
+
+    Unset, this generates a random one per process and prints it to the
+    log. Local development still works with no setup (read it off your
+    own terminal), and a deployment that forgets to set APP_PASSWORD
+    fails closed with an unguessable value rather than open with a known
+    one.
+    """
+    from_env = os.environ.get("APP_PASSWORD")
+    if from_env:
+        return from_env
+    generated = secrets.token_urlsafe(9)
+    log.warning(
+        "APP_PASSWORD is not set. Generated one for this process: %s\n"
+        "Set APP_PASSWORD to choose your own; it changes on every restart.",
+        generated,
+    )
+    return generated
+
+
+ACCESS_PASSWORD = _access_password()
 SESSION_COOKIE = "rs_session"
 
 DEFAULT_SAMPLE = 12

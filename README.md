@@ -11,7 +11,7 @@ Built for a team screening by hand with no ATS. It is not a filter that rejects 
 - **Why a range, not a number.** Four identical runs — same code, same corpus — span **0.051** macro-F1. Any smaller difference is unresolved. → [VARIANCE.md](docs/VARIANCE.md)
 - **It replaced its own architecture.** It ran as three parallel agents plus an arbiter. Measured, the parallel panel scored *worse* than a single call (0.788 vs 0.821) at twice the API calls; the arbiter was the part earning its keep. → [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md)
 - **What it does not prove.** The corpus is synthetic, the cutoffs were fitted on it, and about half the errors ship unreviewed. → [LIMITATIONS.md](docs/LIMITATIONS.md)
-- **Run it:** `uvicorn resume_screener.adapters.api:app --reload`, password `screener`. Opens on a recorded run and costs nothing until you submit a posting.
+- **Run it:** `uvicorn resume_screener.adapters.api:app --reload`. It prints a generated password to the console — or set `APP_PASSWORD` to pick your own. Opens on a recorded run and costs nothing until you submit a posting.
 
 ## How it works
 

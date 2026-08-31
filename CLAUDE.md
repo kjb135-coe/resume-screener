@@ -130,7 +130,8 @@ is read:
 ## Conventions
 
 - Run the app: `uvicorn resume_screener.adapters.api:app --reload`,
-  password `screener`. It opens on a recorded run and costs nothing until
+  which prints a generated password to the console. It opens on a
+  recorded run and costs nothing until
   you submit a posting.
 - `scripts/sweep_cutoffs.py` and `sweep_escalation.py` re-threshold
   recorded scores offline. Free. Use them before spending on a run.
