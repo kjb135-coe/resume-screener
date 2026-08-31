@@ -27,3 +27,8 @@ STRUCTURE.md
 # and the raw numbers in data/*.json; these are derived and bulky.
 docs/CANDIDATE_REPORTS.md
 docs/EVAL_RESULTS__*.md
+
+# Real resumes from a public dataset. NOT committed: they are other
+# people's career histories, and republishing them in a public repo is
+# not ours to do. See docs/LIMITATIONS.md.
+data/real_resumes/
