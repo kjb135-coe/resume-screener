@@ -826,3 +826,110 @@ failure is reachable: extraction can return nothing at all, and the panel
 then scores an empty evidence list and produces a confident-looking number
 about nothing. The replacement condition is objective rather than tuned —
 **no evidence extracted** — and the test pins that it fires.
+
+## The cascade vs one call — 2026-08-31
+
+The cascade's entire justification is that four-to-five calls per resume
+beat asking one model once. That was asserted for the life of this
+project and never tested. `screen_one_single_pass` is the control: same
+model, same cached system block, same extraction step, same personas
+verbatim, same cutoffs — the **only** difference is whether the three
+dimensions are judged independently or together.
+
+3 runs each, all 60 resumes:
+
+| | Cascade | Single-pass |
+|---|---|---|
+| macro-F1 | 0.847 (0.804–0.884) | 0.821 (0.789–0.845) |
+| Cost per 60 | $0.310 | **$0.277** (−11%) |
+| p50 latency | 13.5s | **8.4s** (−38%) |
+| Output tokens | 74,617 | **57,629** (−23%) |
+| Parse failures | 0/540 | 0/540 |
+
+**The 0.026 gap is inside the 0.051 noise band**, and the ranges overlap
+heavily. So the means do not separate them.
+
+### The paired test is decisive, and it is a tie
+
+Comparing means wastes the fact that both arms scored the *same 60
+resumes*. Per candidate, across 3 runs each:
+
+| | Count |
+|---|---|
+| Cascade more often correct | **10** |
+| Single-pass more often correct | **10** |
+| Both always correct | 37 |
+| Tied otherwise | 3 |
+
+**Exactly 10–10.** Of the 20 candidates where the two architectures
+disagree, the cascade wins half. This is the sensitive test — it holds
+candidate difficulty constant — and it finds nothing.
+
+### What this means
+
+**On accuracy, the cascade is unproven.** It is not measurably better
+than one call, while costing 11% more and taking 38% longer. After
+today, that is measured rather than assumed.
+
+**The burden has moved.** The remaining arguments for the cascade are not
+about accuracy:
+
+- **Explainability.** Three independent agents produce three rationales
+  that did not see each other. A single call produces three rationales
+  that anchored on one another. For a tool whose pitch is "every verdict
+  shows its evidence", that is a real product difference — but it is a
+  judgment call, not a measurement.
+- **The disagreement signal.** Single-pass structurally cannot produce
+  one: a single response cannot disagree with itself, so `panel_spread`
+  is always 0.0 and it can never escalate. The cascade's spread is the
+  only signal of genuine uncertainty the system has. Worth noting that
+  escalation itself contributes only 0.027 macro-F1 — also inside the
+  noise band — so this argument is weaker than it first appears.
+
+**Not switched.** A 10–10 tie means "no difference detected", not
+"single-pass is better", and the explainability story is the product. But
+the cost and latency case for the cascade is now negative, and the
+accuracy case is absent. That is written here rather than buried.
+
+**Caveats.** Single-pass still runs the extraction step, so this is 2
+calls against 4-5, not 1 against 5. And it is 60 synthetic resumes.
+
+
+## Cutting output tokens — analysed, run blocked — 2026-08-31
+
+Output is ~69% of the bill, so it is the biggest remaining cost lever.
+The obvious move was to shorten the rationale. **Measurement says that is
+the wrong lever.**
+
+| | Per panel call |
+|---|---|
+| Visible rationale | 271 chars ≈ **68 tokens** |
+| Total output | ≈ **290 tokens** |
+
+So roughly **75% of output tokens are Luna's reasoning, not text anyone
+reads.** Shortening a one-sentence rationale cannot touch that. The
+prompt already caps it at one sentence and the UI renders a single
+bullet, so there was never much to reclaim there.
+
+The lever is `reasoning_effort`. A `luna-effort-low` arm is configured
+in `config/bakeoff.json` and ready to run.
+
+**The run is blocked, and not on anything about the experiment.** The
+Anthropic credit balance ran out mid-batch. Evidence extraction runs on
+Haiku in *every* arm, so an arm that is otherwise entirely OpenAI still
+dies at the extraction step. That is the third time this dependency has
+stopped a run; it is documented in `scripts/bakeoff.py` and
+`docs/HOSTING.md`, and it is the strongest practical argument for
+eventually moving extraction onto the same provider as the panel.
+
+One partial run (8 of 60) is quarantined as
+`data/UNUSABLE__luna-effort-low__run1.json`. Its macro-F1 of 0.667 on 8
+survivors and accuracy of 1.000 are exactly the artefact partial runs
+produce, and it is kept as an example rather than deleted.
+
+To finish, with Anthropic credit available (~$1):
+
+    python scripts/bakeoff.py --sample data/bakeoff_sample60.json --runs 3
+
+**Accept/reject:** macro-F1 must hold within 0.051 of 0.847. Expected
+saving is roughly 30-50% of output tokens, so ~$0.31 → ~$0.20 per run.

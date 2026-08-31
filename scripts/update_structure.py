@@ -65,6 +65,7 @@ DESCRIPTIONS: dict[str, str] = {
     "STRUCTURE.md": "This file. Auto-generated map of the repo.",
     "pyproject.toml": "Package metadata, dependencies, pytest and ruff config.",
     ".gitignore": "Excludes venv, caches, .env, and generated databases.",
+    "data/UNUSABLE__luna-effort-low__run1.json": "Quarantined partial run (8/60), killed by credit exhaustion. Kept as an example, never as data.",
     "data/bias_audit.json": "Raw per-variant scores from the name-swap audit.",
     "data/bakeoff_sample60.json": "The full 60-resume corpus as a bake-off sample, for fitting cutoffs on more than 20 points.",
     "data/bakeoff_sample.json": "The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.",

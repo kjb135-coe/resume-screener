@@ -133,7 +133,7 @@
     },
     {
       "name": "gpt-5.6-luna-60",
-      "enabled": true,
+      "enabled": false,
       "provider": "openai_compatible",
       "model_id": "gpt-5.6-luna",
       "base_url": "https://api.openai.com/v1",
@@ -153,7 +153,7 @@
     },
     {
       "name": "luna-single-pass",
-      "enabled": true,
+      "enabled": false,
       "provider": "openai_compatible",
       "model_id": "gpt-5.6-luna",
       "base_url": "https://api.openai.com/v1",
@@ -174,7 +174,7 @@
     },
     {
       "name": "luna-effort-low",
-      "enabled": false,
+      "enabled": true,
       "provider": "openai_compatible",
       "model_id": "gpt-5.6-luna",
       "base_url": "https://api.openai.com/v1",

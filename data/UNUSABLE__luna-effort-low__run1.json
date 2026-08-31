@@ -1,0 +1,268 @@
+{
+  "arm": "luna-effort-low",
+  "run": 1,
+  "model_id": "gpt-5.6-luna",
+  "provider": "openai_compatible",
+  "swap_slots": [
+    "panel",
+    "arbiter"
+  ],
+  "single_pass": false,
+  "n": 8,
+  "requested": 60,
+  "macro_f1": 0.6666666666666666,
+  "per_class_f1": {
+    "advance": 1.0,
+    "hold": 0.0,
+    "reject": 1.0
+  },
+  "accuracy": 1.0,
+  "cost_total": 0.037998599999999993,
+  "cost_per_resume": 0.004749824999999999,
+  "latency_p50": 10.66099545895122,
+  "latency_mean": 10.84739583874034,
+  "wall_clock_s": 16.078427334025037,
+  "parse_failed": 0,
+  "panel_calls": 24,
+  "escalated": 0,
+  "tokens": {
+    "input": 18785,
+    "output": 7811,
+    "cache_read": 26730,
+    "cache_write": 0
+  },
+  "predictions": [
+    {
+      "file": "academic_researcher__devon_whitaker.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 2.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence is exclusively research-focused, including \u201cDeveloping machine learning approaches for protein structure prediction validation within a team of 8 researchers,\u201d with no indication of a system shipped or used in production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence describes research rather than hands-on agentic or integrated AI systems: \"Developing machine learning approaches for protein structure prediction validation within a team of 8 researchers.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence provides no client-facing or cross-functional communication signal, describing only work \"within a team of 8 researchers.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__freya_ashcombe.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence is research-focused rather than production-focused, exemplified by \"Developed graph neural network architecture for supply chain disruption prediction; evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence describes research and benchmarking rather than production agentic systems or integrations, as shown by \"Developed graph neural network architecture for supply chain disruption prediction; evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "I score this dimension 0 because the only relevant evidence is \u201cInvestigated attention mechanisms for time-series forecasting in logistics networks,\u201d which provides no evidence of explaining technical work, cross-functional collaboration, or client engagement.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__kwame_asante.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.3333333333333333,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 2.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence is research-focused rather than production-focused, centered on \u201cDesigned and implemented novel deep learning architectures for detecting payment fraud patterns in synthetic transaction datasets; achieved 94.2% AUC on internal benchmark against 89% baseline.\u201d",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence only shows research evaluation\u2014\"Evaluated state-of-the-art LLM-based approaches for generating compliance narratives in fintech scenarios; conducted ablation studies on prompt engineering strategies\"\u2014with no demonstrated hands-on agentic systems, tools, orchestration, production APIs, business-system integration, or cloud infrastructure.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no client engagement, non-technical communication, or cross-functional collaboration signal, and instead describes research activities such as \"Published 4 peer-reviewed papers in top-tier venues: 'Graph Neural Networks for Market Microstructure' NeurIPS 2023 (78 citations), 'Robust Sequence Modeling Under Distribution Shift' ICLR 2023 (64 citations)\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__marcus_feldman.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence is research-focused rather than production-focused: \"ML systems researcher with 6 years of experience designing and evaluating compiler optimization frameworks and runtime systems for deep learning workloads.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The score is 1/10 because the evidence is research-focused and only describes benchmarking synthetic workloads: \"Implemented reverse-mode AD compiler in LLVM; benchmarked against PyTorch and JAX on synthetic operator graphs\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no client-facing or cross-functional signal, and instead describes a research-focused role: \"ML systems researcher with 6 years of experience designing and evaluating compiler optimization frameworks and runtime systems for deep learning workloads.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__ravi_chandrasekar.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence supports research rather than shipped production systems, describing work that \"achieved 91.2% F1 on internal NILT-Policy-2025 benchmark\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence shows research rather than hands-on agentic or production integration work: \"Lead development of named entity recognition models for government policy document analysis; achieved 91.2% F1 on internal NILT-Policy-2025 benchmark\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "Score 0 because the only collaboration evidence is \u201cMentored 2 junior researchers on experiment design and reproducibility standards,\u201d which does not demonstrate client engagement, communication with non-technical audiences, or cross-functional collaboration with engineering, sales, or delivery.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__tomas_herrera.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 1.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence describes research rather than shipped or supported systems: \"Conducted research on recommendation systems and user behavior modeling in e-commerce contexts, with focus on neural architectures for product ranking.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence only describes research and recommendation modeling\u2014\"Developed and evaluated multiple sequence-to-sequence models on proprietary e-commerce datasets, achieving 12% improvement over baseline collaborative filtering approaches\"\u2014with no demonstrated agentic systems, memory, tools, orchestration, API/business-system integration, or production deployment.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no indication of explaining technical work to non-technical audiences, cross-functional collaboration, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__bruno_salvatore.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "escalated": false,
+      "panel_spread": 5.0,
+      "cutoff_distance": 1.2000000000000002,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "\"Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers\" is strong evidence of a production system with substantial real-user scale rather than a demo or prototype.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates strong hands-on agent and business-logic integration depth by having \"Engineered the agentic layer using Claude API with function calling to handle dynamic product queries, pricing lookups, and promotional logic,\" though memory and orchestration are not explicitly evidenced.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The evidence shows indirect client-oriented impact through \"this work directly reduced onboarding time for new clients by 35%\" but does not demonstrate explaining technical work to non-technical audiences, cross-functional collaboration, or direct client engagement.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__dele_adeyemi.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 7.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "\"Architected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehouses\" demonstrates a deployed system operating at substantial real-world scale.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates strong production LLM and retrieval-based agent experience through \u201cArchitected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehouses.\u201d",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The evidence provides little direct client-facing or cross-functional signal, with the closest indication being that the system \"routed 94% of exceptions to appropriate departments without human review.\"",
+          "parse_failed": false
+        }
+      ]
+    }
+  ]
+}

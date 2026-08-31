@@ -1,6 +1,6 @@
 # Model bake-off
 
-2 arms, 1 runs each, on the same 60 resumes (`data/bakeoff_sample.json`, seed 20260827). Swapped slots: `panel`, `arbiter`. Extraction stays on Haiku in every arm.
+1 arms, 3 runs each, on the same 60 resumes (`data/bakeoff_sample.json`, seed 20260827). Swapped slots: `panel`, `arbiter`. Extraction stays on Haiku in every arm.
 
 **Read this before ranking anything by accuracy.** The macro-F1 noise band on a stratified 20 is roughly **0.098** (median of 2000 resamples of four identical runs; see `docs/VARIANCE.md`). Treat any accuracy gap smaller than the per-arm spread below as unresolved. Cost, latency and parse-failure rate are far more stable and can be read directly.
 
@@ -8,15 +8,13 @@
 
 | Arm | Macro-F1 (range) | Accuracy | Cost/resume | Latency p50 | Parse failures |
 |---|---|---|---|---|---|
-| `anthropic-control-60` | 0.857 (1 run) | 0.867 | $0.0140 | 10.6s | 5/180 (2.8%) |
-| `gpt-5.6-luna-60` | 0.853 (1 run) | 0.850 | $0.0051 | 12.5s | 0/180 (0.0%) |
+| `luna-effort-low` | 0.667 (1 run) | 1.000 | $0.0047 | 10.7s | 0/24 (0.0%) |
 
 ## Per-run detail
 
 | Arm | Run | n | Macro-F1 | Accuracy | Cost | p50 | Parse failures |
 |---|---|---|---|---|---|---|---|
-| `anthropic-control-60` | 1 | 60 | 0.857 | 0.867 | $0.841 | 10.6s | 5/180 |
-| `gpt-5.6-luna-60` | 1 | 60 | 0.853 | 0.850 | $0.309 | 12.5s | 0/180 |
+| `luna-effort-low` | 1 (PARTIAL 8/60) | 8 | 0.667 | 1.000 | $0.038 | 10.7s | 0/24 |
 
 ## Calibration — read this before the ranking above
 
@@ -24,8 +22,7 @@ The verdict cutoffs in `core/pipeline.py` (`ADVANCE_CUTOFF = 4.0`, `HOLD_CUTOFF 
 
 | Arm | Mean score | As shipped (4.0/1.0) | Own best cutoffs | Best macro-F1 |
 |---|---|---|---|---|
-| `anthropic-control-60` | 2.36 | 0.857 | 3.1/0.7 | 0.857 |
-| `gpt-5.6-luna-60` | 4.02 | 0.853 | 5.1/2.1 | 0.853 |
+| `luna-effort-low` | 2.12 | 0.667 | 1.2/1.1 | 0.667 |
 
 **These fitted cutoffs are an upper bound, not a result.** They are chosen on the same resumes they are scored against, on a sample of 20 — a smaller corpus than the 60 that `docs/LIMITATIONS.md` already calls overfitted. Read the right-hand column as *"this model is not out of the running"*, never as its accuracy. A model that needs its own cutoffs also needs them re-fitted on a corpus it has not seen before any of it counts.
 

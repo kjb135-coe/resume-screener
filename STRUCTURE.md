@@ -38,6 +38,9 @@ removing files rather than editing this by hand.
 │   ├── bakeoff__haiku-panel-unwrapped__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__haiku-panel-unwrapped__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__haiku-panel-unwrapped__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__luna-single-pass__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__luna-single-pass__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__luna-single-pass__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff_sample.json          The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.
 │   ├── bakeoff_sample60.json        The full 60-resume corpus as a bake-off sample, for fitting cutoffs on more than 20 points.
 │   ├── bias_audit.json              Raw per-variant scores from the name-swap audit.
@@ -49,7 +52,8 @@ removing files rather than editing this by hand.
 │   ├── eval_run__var3.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__var4.json          A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── labels.json                  Ground-truth label + archetype + target dimension levels per resume, written at generation time.
-│   └── UNUSABLE__anthropic-control-60__run2__partial-15of60.json Quarantined partial run (15/60). Scored 1.000 on the easy survivors. Kept as a worked example, never as data.
+│   ├── UNUSABLE__anthropic-control-60__run2__partial-15of60.json Quarantined partial run (15/60). Scored 1.000 on the easy survivors. Kept as a worked example, never as data.
+│   └── UNUSABLE__luna-effort-low__run1.json Quarantined partial run (8/60), killed by credit exhaustion. Kept as an example, never as data.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
 │   │   └── candidates.png               The candidates view, used in the README.

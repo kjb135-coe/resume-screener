@@ -1,0 +1,1776 @@
+{
+  "arm": "luna-single-pass",
+  "run": 1,
+  "model_id": "gpt-5.6-luna",
+  "provider": "openai_compatible",
+  "swap_slots": [
+    "panel",
+    "arbiter"
+  ],
+  "single_pass": true,
+  "n": 60,
+  "requested": 60,
+  "macro_f1": 0.8305117168818746,
+  "per_class_f1": {
+    "advance": 0.7647058823529412,
+    "hold": 0.7999999999999999,
+    "reject": 0.9268292682926829
+  },
+  "accuracy": 0.8333333333333334,
+  "cost_total": 0.27702609999999994,
+  "cost_per_resume": 0.004617101666666666,
+  "latency_p50": 8.707977209007367,
+  "latency_mean": 8.362712144496617,
+  "wall_clock_s": 102.47020699997665,
+  "parse_failed": 0,
+  "panel_calls": 180,
+  "escalated": 0,
+  "tokens": {
+    "input": 83940,
+    "output": 57705,
+    "cache_read": 71685,
+    "cache_write": 0
+  },
+  "predictions": [
+    {
+      "file": "academic_researcher__devon_whitaker.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence describes academic research rather than deployed systems, including \"Thesis defended with distinction on deep learning for protein dynamics prediction\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The candidate demonstrates hands-on deep-learning design but no agentic systems or business integrations, as shown by \"Designed graph neural network architectures to capture long-range atomic interactions\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence supports client engagement, cross-functional collaboration, or communication with non-technical audiences, while the only communication-related evidence is \"Published results in Nature Machine Intelligence (18 citations) and Bioinformatics (12 citations)\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__freya_ashcombe.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.3333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.2666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence indicates research evaluation rather than production deployment: \"Developed graph neural network architecture for supply chain disruption prediction; evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The candidate demonstrates neural-network research depth but no evidence of agentic systems, APIs, business integrations, or cloud deployment: \"Developed graph neural network architecture for supply chain disruption prediction; evaluated on benchmark dataset of 15,000+ real-world inventory trajectories achieving 23% MAPE improvement over baseline LSTM\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only communication evidence is academic presentation experience, not client-facing or cross-functional communication: \"Presented research at 6 international conferences including ICML, NeurIPS, and INFORMS Annual Meeting\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__kwame_asante.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence is research-focused, including \"Designed and implemented novel deep learning architectures for detecting payment fraud patterns in synthetic transaction datasets; achieved 94.2% AUC on internal benchmark against 89% baseline,\" with no indication of production deployment or operational ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The candidate demonstrates model-building depth through \"Designed and implemented novel deep learning architectures for detecting payment fraud patterns in synthetic transaction datasets; achieved 94.2% AUC on internal benchmark against 89% baseline,\" but this does not evidence agentic systems, tools, orchestration, APIs, or business-system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence provides no client-facing or cross-functional communication signal, and the closest related item is \"Published 4 peer-reviewed papers in top-tier venues,\" which does not establish communication with clients, non-technical audiences, sales, or delivery teams.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__marcus_feldman.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence is research and benchmarking rather than shipped operational systems, as shown by \"Published research on tensor scheduling and memory allocation strategies with 340+ combined citations.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "Although the candidate demonstrates substantial compiler and runtime engineering, the evidence does not describe agentic systems, LLMs, APIs, business integrations, or automation workflows, as reflected in \"Implemented reverse-mode AD compiler in LLVM; benchmarked against PyTorch and JAX on synthetic operator graphs.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence identifies the candidate as an \"ML systems researcher with 6 years of experience designing and evaluating compiler optimization frameworks and runtime systems for deep learning workloads\" but provides no evidence of client engagement, non-technical communication, or cross-functional delivery.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__ravi_chandrasekar.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.9333333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "\"Lead development of named entity recognition models for government policy document analysis; achieved 91.2% F1 on internal NILT-Policy-2025 benchmark\" shows model development and evaluation, but not deployment, production usage, monitoring, or operational ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "\"Lead development of named entity recognition models for government policy document analysis; achieved 91.2% F1 on internal NILT-Policy-2025 benchmark\" demonstrates hands-on NLP modeling, but provides no evidence of agentic systems, memory, tools, orchestration, APIs, business-system integration, or cloud infrastructure.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "\"Mentored 2 junior researchers on experiment design and reproducibility standards\" demonstrates mentoring, but not client engagement, communication with non-technical audiences, or cross-functional collaboration with sales, delivery, or engineering teams.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "academic_researcher__tomas_herrera.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 0.0,
+          "rationale": "The evidence is exclusively research-oriented, including \"Conducted research on recommendation systems and user behavior modeling in e-commerce contexts, with focus on neural architectures for product ranking.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The candidate demonstrates model-development depth but no evidence of agentic systems or production integrations, with the strongest example being \"Developed and evaluated multiple sequence-to-sequence models on proprietary e-commerce datasets, achieving 12% improvement over baseline collaborative filtering approaches on held-out test sets.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence of client engagement, cross-functional collaboration, or communication with technical or non-technical stakeholders, and the closest evidence is \"Published findings on attention mechanisms for fashion recommendation in the ICML 2025 Workshop on Machine Learning for E-Commerce (currently at 8 citations).\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__bennett_cross.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.2000000000000002,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The strongest production evidence is: \"Architected and deployed a multi-agent document analysis service for compliance workflows, integrating Claude API with internal document retrieval system; system processes 15,000+ documents monthly with 99.2% uptime SLA\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The strongest technical-integration evidence is: \"Architected and deployed a multi-agent document analysis service for compliance workflows, integrating Claude API with internal document retrieval system; system processes 15,000+ documents monthly with 99.2% uptime SLA\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The limited client-facing evidence is: \"Recently led the architecture and deployment of an agent-based document processing system serving 2,000+ daily users across financial services clients.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__bruno_salvatore.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.8666666666666671,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence strongly indicates production ownership because the candidate \"Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The clearest technical evidence is that the candidate \"Engineered the agentic layer using Claude API with function calling to handle dynamic product queries.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The only client-facing signal is indirect, with the candidate reporting that \"this work directly reduced onboarding time for new clients by 35%.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__dele_adeyemi.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence indicates a deployed, actively used production system processing real operational volume: \"Architected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehouses\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates hands-on LLM and agentic retrieval implementation integrated with business data: \"Built RAG pipeline indexing 18 months of historical shipment data, enabling the agent to retrieve relevant precedents and regulations for each exception decision\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no direct indication of client engagement, non-technical communication, or cross-functional collaboration, with the closest evidence being \"Built event-driven architecture using Kafka to synchronize inventory, billing, and customer notification systems across 4 distribution centers\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__julius_amankwah.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7999999999999998,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The strongest production evidence is \"Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 5.0,
+          "rationale": "The evidence confirms hands-on LLM implementation but does not specify agent memory, tools, orchestration, or business-system integration: \"Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only indirect scale-related signal is \"Owned the data ingestion and transformation pipeline that powered Cascade's core analytics platform, serving 150+ enterprise clients,\" with no direct evidence of client engagement or explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__keiko_yamashita.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.13333333333333286,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence strongly indicates production ownership because it states, \"Architected and shipped real-time transaction dispute resolution agent serving 50K+ daily users, integrating GPT-4 with internal risk models via API layer.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates substantial hands-on integration depth by \"integrating GPT-4 with internal risk models via API layer,\" although memory, tools, and orchestration are not explicitly described.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence \"Designed and maintained distributed payment routing system handling $2B+ annual transaction volume across 12 payment processors\" shows technical scale but provides no direct evidence of client engagement, non-technical communication, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "adjacent_shipper__sofia_marchetti.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.2000000000000002,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The strongest production evidence is: \"Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL systems via REST layers and handles asynchronous job workflows.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The clearest evidence of agentic and business-system integration is: \"Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL systems via REST layers and handles asynchronous job workflows.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "Limited cross-functional evidence is shown by: \"Built data platform ingesting GPS, ridership, and maintenance logs from 3,000+ vehicles; established Elasticsearch pipelines enabling city planners and operations teams to identify service gaps.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__beatrix_hollowell.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7333333333333334,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows benchmarking and evaluation rather than deployment or operational use, with the strongest indication being \"measured latency at 340ms per request on benchmarking hardware.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates strong hands-on agentic and integration depth by \"implement[ing] agentic workflow orchestration using LangGraph to handle product comparison, inventory lookup, and pricing logic in sequence.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, cross-functional collaboration, or explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__hana_novak.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.4,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows substantial development work but no verified production deployment or operational ownership, with the strongest relevant evidence being \"Senior Machine Learning Engineer | Meridian Health Systems | Cleveland, OH | Jan 2024 \u2013 Present\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates strong hands-on agentic and LLM system building through \"Architected multi-agent framework for clinical decision support using LangGraph and Claude API\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only direct communication evidence is technical knowledge sharing rather than client or cross-functional engagement: \"Presented \\\"Scaling RAG for Domain-Specific Applications\\\" at ML Systems Workshop 2023\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__mei_lin_chow.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.4,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence describes benchmark and evaluation results rather than shipped systems, notably \"achieved 94.7% F1 on internal benchmark dataset of 50K labeled transactions\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The strongest evidence is \"Designed multi-agent system for payment reconciliation using Claude and GPT-4; agent successfully routes queries across three independent financial APIs with 99.2% accuracy on evaluation set\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only communication-related evidence is \"published technical blog post on LLM evaluation methodologies that reached 8K readers,\" with no direct evidence of client engagement or cross-functional communication.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__priya_raghunathan.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7333333333333334,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows substantial development work but no deployment, operational ownership, or production usage, with the clearest example being \"I designed and executed a comprehensive evaluation framework for the agents using 2,400 manually annotated scenes\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The candidate demonstrates strong hands-on agentic and LLM depth through \"I architected our agentic reasoning layer using a custom implementation of tool-use patterns with Claude and GPT-4, enabling agents to iteratively refine scene analysis\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence of client engagement, non-technical communication, or cross-functional collaboration in the provided material, which consists of technical work such as \"I fine-tuned Mistral 7B and Llama 2 70B models using QLoRA on AWS SageMaker\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__rina_matsumoto.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.1333333333333329,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 5.0,
+          "rationale": "The strongest production signal is \"Designed and shipped fine-tuning pipeline orchestration using Ray distributed training; reduced wall-clock time for instruction-tuned models from 8 hours to 2.5 hours on 4xA100 setup,\" but the evidence does not explicitly establish production use, monitoring, on-call ownership, or real-user load.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The clearest evidence of agentic integration depth is \"Implemented function-calling orchestration layer enabling tool composition across 40+ API integrations; benchmarked at 78% tool selection accuracy on held-out test set of 200 complex multi-step tasks.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence describing client engagement, communication with non-technical audiences, or cross-functional collaboration with sales or delivery.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__saoirse_lachlan.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.3999999999999999,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence describes implementation and evaluation but does not establish production deployment or operational use: \"Designed and implemented a multi-agent retrieval-augmented generation system to optimize supply chain document analysis and route planning.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 7.0,
+          "rationale": "The candidate demonstrates strong hands-on AI and data-pipeline depth through multi-agent RAG, vector search, embeddings, and Python/dbt workflows: \"Implemented semantic search over vectorized regulatory documents using pgvector and Anthropic's embeddings API, achieving 94% retrieval accuracy on a curated eval set of 500 supply chain queries.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, non-technical communication, or cross-functional collaboration; the closest evidence is purely technical: \"Built ETL workflows in Python and dbt to aggregate shipment records, GPS telemetry, and warehouse sensors into feature stores optimized for model training.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "demo_specialist__zainab_iqbal.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.3999999999999999,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence does not establish production deployment or operational ownership, despite stating, \"Senior AI Engineer with 4+ years building sophisticated language model systems and multi-agent frameworks in government technology.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 7.0,
+          "rationale": "The candidate demonstrates substantial hands-on agentic and LLM system development through, \"Architected multi-agent framework for automating bill summary generation and legislative impact analysis using GPT-4 and Claude with dynamic routing logic.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, cross-functional collaboration, or communicating technical work to non-technical audiences, and the only collaboration-related evidence is absent from the resume excerpts.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__andres_villalobos.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 5.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.4666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The strongest production evidence is: \"The extraction workflow now runs daily across roughly 2,000 facilities, handling approximately 50,000 documents per day.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest integration evidence is: \"I've contributed to the addition of a new LLM-based feature that extracts structured clinical findings from unstructured radiology reports, working closely with the ML team to integrate their model predictions into our existing data validation layer.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The evidence provides no direct client-facing or cross-functional communication signal, with the closest statement being: \"working closely with the ML team to integrate their model predictions into our existing data validation layer.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__chiara_bellini.md",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 2.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The evidence is limited to pre-launch testing rather than ownership of a deployed, supported system: \"Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool; identified 3 critical data mapping issues before production rollout\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The candidate demonstrated hands-on integration of an LLM system with a legacy business database, but there is no evidence of agent memory, tools, orchestration, or cloud deployment: \"Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool; identified 3 critical data mapping issues before production rollout\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, communication with non-technical audiences, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__ingrid_solberg.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 5.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7999999999999998,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The strongest production evidence is \"Built and maintained Python microservices that validate incoming transaction metadata against compliance rules, catching 94% of malformed payment data before downstream processing.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest technical evidence is \"Implemented a retrieval-augmented generation (RAG) system using LangChain to assist the support team in searching historical disputes and generating templated responses.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only indirect stakeholder evidence is \"Developed backend features for an encrypted credential storage platform serving 200+ enterprise clients in financial services,\" which does not demonstrate direct client communication or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__jonah_steinberg.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7333333333333334,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 4.0,
+          "rationale": "The evidence suggests operational infrastructure work but does not explicitly establish production ownership or real-user operation: \"Developed monitoring and alerting for build infrastructure using Prometheus and Grafana\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The candidate demonstrates hands-on LLM integration into an automation workflow and supporting cloud infrastructure, though memory, tools, and orchestration are not evidenced: \"Implemented LLM-powered code review suggestions integrated into GitHub Actions CI pipeline\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No direct client engagement, non-technical communication, or cross-functional collaboration with sales or delivery is evidenced; the closest signal is \"Infrastructure engineer with 2+ years building developer-facing tools and deployment systems\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__rohan_malhotra.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.1333333333333329,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 6.0,
+          "rationale": "The strongest evidence of deployed usage is, \"I integrated a smaller LLM-based product bundling feature that suggests complementary items to customers during checkout; this feature runs inference through an external API and returns suggestions within the strict latency budget required by the checkout flow.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The candidate demonstrates hands-on LLM and API integration through, \"I integrated a smaller LLM-based product bundling feature that suggests complementary items to customers during checkout; this feature runs inference through an external API and returns suggestions within the strict latency budget required by the checkout flow.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only client-related evidence is technical data integration: \"I wrote Python scripts to ingest order data from a client's e-commerce system via their API and transform it into a standardized format for analysis.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "early_career__vera_klimenko.md",
+      "expected": "hold",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "Evidence of real usage is provided by \"Built REST endpoints for a public-facing licensing status portal used by 12,000+ monthly users; worked with backend team to optimize query performance\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 6.0,
+          "rationale": "The strongest technical evidence is \"Contributed to a Python-based document processing system that ingested 500+ permit applications monthly; integrated OpenAI API to auto-classify permit types, reducing manual categorization by 40%\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 6.0,
+          "rationale": "Cross-functional requirements communication is demonstrated by \"Collaborated with policy analysts and procurement teams to translate requirements into technical specifications; attended weekly stakeholder meetings to validate feature scope\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__aleksandr_volkov.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.3333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.2666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence describes strategy and research rather than deployed systems, stating \"AI implementation roadmap development across content production pipelines. Strategic assessment of emerging language models for creative workflows.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The strongest technical evidence is assessment-oriented rather than hands-on implementation, stating \"API integration assessment across various AI platforms.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "There is no direct evidence of client engagement, cross-functional collaboration, or explaining technical work to non-technical audiences, with the closest evidence being \"AI implementation roadmap development across content production pipelines.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__amara_nwosu.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.3333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.2666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence provides no shipped-system or production-operations detail, only the role listing \"Senior AI Solutions Architect | Oregon Department of Administrative Services | Portland, OR\\n*March 2024 \u2013 Present*\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The strongest technical evidence is the skills description \"GPT-4, Claude API, LangChain, LlamaIndex\\nPython, TensorFlow, PyTorch implementations\", but it does not explain what agentic systems, tools, memory, orchestration, APIs, or business integrations were built.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence of client engagement, cross-functional collaboration, or explaining technical work to non-technical audiences in the provided resume evidence.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__dashiell_monroe.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.9333333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows relevant professional roles but does not describe shipped, monitored, or supported production AI systems, stating only \"Senior Fintech Solutions Architect PaymentVault Technologies | Atlanta, GA | March 2023 \u2013 Present\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence names relevant technologies but does not explain what was built or how AI was integrated, listing only \"Large language models (LLMs), GPT-4, Claude, and prompt engineering frameworks\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The title suggests a potentially client-facing role but provides no direct evidence of client engagement or cross-functional communication, stating only \"Senior Fintech Solutions Architect PaymentVault Technologies | Atlanta, GA | March 2023 \u2013 Present\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__isaac_mwangi.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence does not describe shipped, monitored, or user-facing systems, providing only the role listing \"Senior AI Solutions Architect | Vertex Commerce Solutions | Atlanta, GA | March 2023 \u2013 Present\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence names an area of expertise but does not explain what was built or integrated, stating only \"LLM integration frameworks\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No client engagement, non-technical communication, or cross-functional collaboration is evidenced, with the resume providing only \"Senior AI Solutions Architect | Vertex Commerce Solutions | Atlanta, GA | March 2023 \u2013 Present\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__omar_benali.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence identifies a current senior role but does not describe shipped or supported production systems, stating only \"Senior AI Solutions Architect | BioTech Innovations Labs | Boston, MA | January 2024 \u2013 Present\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence lists relevant technologies but does not explain what was built or integrated, stating only \"Claude API, GPT-4, LangChain integration points\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no direct indication of client engagement, cross-functional collaboration, or communication with technical or non-technical audiences, and the closest listed evidence is \"Senior AI Solutions Architect | BioTech Innovations Labs | Boston, MA | January 2024 \u2013 Present\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__rosalind_pike.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The evidence provides no production ownership or deployed-system detail, only \"Machine learning model assessment for distribution networks. Data pipeline architecture exploration. Predictive analytics for shipment routing.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The strongest technical evidence is exploratory rather than implementation-focused: \"Machine learning model assessment for distribution networks. Data pipeline architecture exploration. Predictive analytics for shipment routing.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, non-technical communication, or cross-functional collaboration, and the closest role evidence is only \"Senior AI Solutions Architect | Nexus Logistics Group | January 2024 \u2013 Present.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "keyword_stuffer__yuki_tanaka.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence identifies a current infrastructure role, \"Senior Infrastructure Engineer | Vertex Systems Inc. | June 2023 \u2013 Present,\" but does not describe shipped, monitored, or supported production AI systems.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The AI evidence is only a tools list, \"AI & Machine Learning: LangChain, LlamaIndex, Hugging Face Transformers, OpenAI API, Anthropic Claude, Mistral AI, Cohere, Ollama, CrewAI, AutoGen, LiteLLM, Ray, Weights & Biases,\" without describing built agentic systems, memory, tools, orchestration, or business integrations.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no client-facing or cross-functional communication signal beyond the role title, \"Senior Infrastructure Engineer | Vertex Systems Inc. | June 2023 \u2013 Present.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__anjali_deshmukh.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The candidate demonstrates substantial production ownership by stating, \"Designed and deployed autonomous order management agent serving 12,000+ daily transactions across 8 retail partners; agent uses tool calling to query inventory APIs, trigger fulfillment workflows, and escalate edge cases to human operators.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The strongest evidence is, \"Integrated Shopify, WooCommerce, and custom POS APIs into agent orchestration layer; handled authentication, rate limiting, and retry logic across heterogeneous systems,\" which directly demonstrates agent orchestration and robust business-system integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The provided evidence contains no direct statement of client engagement, non-technical communication, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__cormac_delaney.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.8666666666666671,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence states, \"Shipped customer dispute resolution agent to production, handling 150K+ disputes monthly with 89% autonomous resolution rate.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 10.0,
+          "rationale": "The evidence states, \"Architected and deployed a multi-agent transaction reconciliation system that processes 450M+ transactions monthly, reducing manual reconciliation overhead by 68%.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The only cross-functional evidence states, \"Collaborated with compliance team to ensure model decisions met regulatory requirements,\" with no direct evidence of client engagement or explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__delphine_aubert.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 7.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The candidate demonstrates substantial production ownership by stating, \"Built and shipped an autonomous content recommendation agent serving Nexus's streaming platform to 2.8M monthly active users.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 10.0,
+          "rationale": "The strongest technical evidence is, \"The agent fetches audio streams, calls OpenAI Whisper for transcription, then chains tool calls to a custom fact-checking service and downstream caption formatting system,\" demonstrating multi-tool orchestration and REST-based integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only client-related evidence is, \"Prototyped and launched an anomaly detection agent that monitored client infrastructure logs,\" which indicates work involving client infrastructure but does not show direct client engagement, cross-functional collaboration, or communication to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__fatima_zahra.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 9.666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 3.8666666666666663,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The evidence directly demonstrates production deployment and real usage: \"Led design and deployment of an intelligent permitting agent for water rights allocation, now processing 12,000+ monthly requests\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 10.0,
+          "rationale": "The strongest evidence shows substantial agentic orchestration and business-system integration: \"Architected multi-agent system with specialized orchestration layer: intake agent handles document classification and extraction, compliance agent evaluates against state regulations via custom rulebase APIs, and approval agent interfaces with legacy permitting database\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates communication with non-technical stakeholders by \"Presenting quarterly performance metrics and system roadmap to executive stakeholders in the state water board, translating agent behavior and model confidence thresholds into policy language for non-technical directors\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__lucas_ferreira.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The strongest production evidence is: \"Shipped clinical decision support agent serving 47 hospitals; processes 12,000+ patient cases monthly in production.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The strongest technical evidence is: \"Built multi-turn diagnostic orchestration system with tool calling to EMR APIs, lab result databases, and treatment guidelines.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No provided evidence describes client engagement, communication with non-technical audiences, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__oscar_nakamura.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.8666666666666671,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The candidate demonstrates strong production ownership, stating, \"Owned the full production lifecycle: I built comprehensive monitoring dashboards tracking agent decision latency, tool invocation error rates, and end-to-end resolution times.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 10.0,
+          "rationale": "The candidate provides direct evidence of agentic architecture and business-system integration, stating, \"The system processes approximately 12,000 shipment events daily, using tool-calling agents that integrate with warehouse management systems, carrier APIs, and customer notification services.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The provided evidence contains no direct statement about client engagement, non-technical communication, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_generalist__rafael_duarte.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 9.333333333333334,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 3.533333333333334,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The candidate demonstrates substantial production ownership, stating, \"Architected and shipped multi-agent workflow system for document processing; now handles 12K+ documents daily across 40+ enterprise clients with 99.2% uptime.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 10.0,
+          "rationale": "The candidate shows deep agentic and business-system integration experience, stating, \"Implemented tool-calling pipeline for agents to query company APIs, update CRM records, and trigger downstream workflows; integrated with Salesforce and internal legacy systems via REST and gRPC.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 8.0,
+          "rationale": "The candidate provides strong executive and customer-account communication evidence, stating, \"Presented quarterly performance metrics and roadmap to C-suite; managed feature requests from top 5 accounts.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__camila_restrepo.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.1333333333333329,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The strongest production evidence is: \"Architect and maintain distributed video streaming infrastructure handling 40M+ monthly active users across three continents.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The candidate demonstrates substantial API and distributed-systems depth but no evidence of LLMs or agentic memory, tools, or orchestration: \"Built REST APIs for content recommendation system; handled 500k daily requests with sub-200ms p99 latency.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "There is no direct evidence of client engagement, non-technical communication, or collaboration with sales or delivery teams; the closest evidence is \"Led incident response team; reduced mean time to resolution from 45 minutes to 12 minutes via automated alerting and runbooks.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__emil_kowalczyk.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.1333333333333329,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates strong ownership of live, supportable systems through \"On-call rotation lead; handled 200+ production incidents annually with average resolution time of 18 minutes.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence shows cloud infrastructure and scripting but no hands-on agentic, LLM, or AI-business-system integration, with the closest example being \"Automated routine backup and recovery procedures using bash and Python; reduced manual administrative overhead by 30 hours per month.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The evidence supports internal technical collaboration and mentoring but not client-facing or non-technical communication, as shown by \"Mentored two junior engineers on debugging distributed system failures in healthcare workflows.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__larissa_petrov.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 5.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7999999999999998,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates substantial production ownership through \"On-call rotation support with 99.97% uptime SLA achievement over 28 consecutive months\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The strongest AI integration evidence is \"Collaborated with the data team to add simple text classification to API logging\u2014integrated a basic LLM API call to categorize error messages automatically, reducing manual triage time\", but it does not demonstrate agentic memory, tools, or orchestration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The only cross-functional signal is \"Collaborated with the data team to add simple text classification to API logging\u2014integrated a basic LLM API call to categorize error messages automatically, reducing manual triage time\", with no evidence of client engagement or explaining technical work to non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__lars_thorvaldsen.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.13333333333333286,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates substantial production ownership by stating, \"Production engineering leader with 7 years building and operating mission-critical logistics and supply-chain systems at scale.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 4.0,
+          "rationale": "The evidence shows strong distributed-systems and cloud integration experience but no demonstrated agentic or LLM work, with the strongest support being, \"Drove migration of legacy monolithic warehouse management system to containerized services on Kubernetes; coordinated with warehouse operations, carrier partners, and product to execute zero-downtime cutover for $120M annual fulfillment volume.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The candidate shows cross-functional coordination with operational and product stakeholders, but no direct client engagement or communication of AI concepts, as evidenced by, \"Drove migration of legacy monolithic warehouse management system to containerized services on Kubernetes; coordinated with warehouse operations, carrier partners, and product to execute zero-downtime cutover for $120M annual fulfillment volume.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__signe_aalborg.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.4666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 10.0,
+          "rationale": "The strongest evidence is \"Built real-time monitoring and alerting infrastructure using Prometheus and Grafana; on-call rotation covers 24/7 operations for three production services,\" demonstrating deployed systems with ongoing operational ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence supports general cloud and API engineering through \"Designed and deployed distributed vehicle inspection scheduling API serving 14 regional offices; handles 8,000+ daily requests with 99.97% uptime SLA,\" but does not demonstrate LLMs, agents, memory, tools, or orchestration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The only collaboration-related evidence is \"Mentored four junior engineers on production debugging, capacity planning, and incident response protocols,\" which does not establish client engagement or communication with non-technical audiences.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__theo_vandenberg.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.4,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates strong production ownership through \"Architected and operated payment processing infrastructure handling 2.3M transactions daily across 47 regions; designed circuit breaker patterns reducing cascading failures by 94%\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence shows substantial infrastructure engineering but no described hands-on LLM, agentic-system, or AI-business-system integration, with the closest evidence being \"Managed AWS infrastructure hosting core settlement systems; optimized costs by 32% through Reserved Instance strategy and spot instance automation\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The provided evidence contains no direct client engagement, non-technical communication, or cross-functional collaboration example, and only identifies the role as \"Senior Production Engineer | Meridian Financial Systems | Denver, CO | Mar 2023 \u2013 Present\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "production_light_ai__wren_sutcliffe.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 4.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.1333333333333329,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates strong production ownership through \"Architected and deployed a multi-region e-commerce platform handling 8,000+ concurrent users during peak sales events; reduced latency from 450ms to 180ms through strategic CloudFront configuration and database query optimization\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 3.0,
+          "rationale": "The evidence shows hands-on cloud automation but no LLM, agentic memory/tools/orchestration, or AI-business-system integration, with the strongest relevant example being \"Automated infrastructure health checks using Python scripts and Lambda functions; proactively detected capacity issues 3\u20135 days before they would impact customers\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The resume provides limited internal collaboration evidence but no direct client or non-technical communication signal, aside from \"Mentored four junior engineers on production troubleshooting, infrastructure-as-code practices, and incident response; led weekly architecture reviews\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__astrid_bergman.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.4666666666666668,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The strongest production signal is \"Architected real-time transaction reconciliation engine processing 2.3M+ daily settlement records across 47 payment corridors,\" although the evidence does not explicitly mention deployment, monitoring, or post-launch support.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The candidate demonstrates direct agentic implementation through \"Implemented agentic settlement workflow using Claude API with tool use for dispute resolution, enabling autonomous handling of 73% of chargeback cases.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence of client engagement, non-technical communication, or cross-functional collaboration; the only role context provided is \"Senior Backend Engineer | Nexus Financial Systems | Seattle, WA | Jan 2024 \u2013 Present.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__elena_vasquez.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.13333333333333286,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 7.0,
+          "rationale": "The strongest production-scale evidence is \"Architected autonomous agent pipeline for license plate recognition across 847 field locations, processing 2.3M images daily with 94% first-pass accuracy,\" though the resume does not explicitly mention post-launch support, monitoring, or on-call ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The clearest evidence of hands-on agentic and integration depth is \"Engineered LLM-powered claim summarization agent that processes 15k documents per day; integrated with legacy SOAP APIs through custom adapter layer.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no direct client-facing or cross-functional communication example, and the closest available statement is only \"Senior Systems Engineer | Texas Department of Public Safety | Austin, TX | March 2023 \u2013 Present.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__ewan_brackenridge.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence strongly demonstrates production use: \"The system processes approximately 2,400 deployments monthly and has reduced mean time to recovery by 34%.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The candidate shows hands-on agentic automation integrated with infrastructure operations: \"Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no direct client-facing or cross-functional communication signal, and the closest available evidence is purely technical: \"Architected a multi-region Kubernetes orchestration layer that handles failover across AWS, GCP, and on-premises infrastructure.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__hugo_lindqvist.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.333333333333333,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.5333333333333332,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "The evidence describes substantial operational scale and deployment, including \"Developed REST and gRPC APIs supporting warehouse management system used by 340+ facilities moving 8M pallets annually\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 9.0,
+          "rationale": "The strongest evidence is \"Architected multi-agent supply chain orchestration system using Claude API and LangChain, processing real-time shipment data across 47 distribution centers\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no direct client-facing or cross-functional communication example, with the closest signal being \"Backend engineer with 6+ years building high-scale production systems in logistics and supply chain operations.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__mateo_guzman.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.13333333333333286,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 8.0,
+          "rationale": "The evidence states, \"Architected and deployed an agentic system for automated drug compound screening that processes 50,000+ chemical structures daily,\" demonstrating deployment and substantial real-world usage, though ongoing operational ownership is not specified.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "The evidence states, \"Built multi-turn agent workflows using Claude API with function calling,\" directly demonstrating hands-on agent orchestration and tool integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 1.0,
+          "rationale": "The evidence provides no direct client-facing or cross-functional communication example, with the strongest collaboration-related evidence limited to \"Contributed to infrastructure migration from single-tenant monolith to multi-tenant Kubernetes architecture.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__sana_qureshi.md",
+      "expected": "advance",
+      "predicted": "reject",
+      "score": 1.6666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.9333333333333333,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The only production signal is the unsupported summary claim, \"Backend engineer with 6 years of experience building production AI systems and media infrastructure,\" with no evidence of deployment, usage, monitoring, or post-launch ownership.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The evidence only lists capabilities\u2014\"AI/ML Systems: LLM APIs, prompt engineering, embedding models, multi-agent orchestration, reward modeling\"\u2014without describing any systems they built or integrations they implemented.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No client-facing or cross-functional communication evidence is provided; the evidence only identifies a role as \"Senior Systems Engineer | Lumina Media Labs | Portland, OR | March 2023 \u2013 Present.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "quiet_builder__tobias_reinhardt.md",
+      "expected": "advance",
+      "predicted": "hold",
+      "score": 5.666666666666667,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.13333333333333286,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 9.0,
+          "rationale": "Strong production evidence is provided by \"Architected and deployed production LLM-powered product description generation system processing 180K+ merchandise items monthly with average latency of 340ms per item\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 8.0,
+          "rationale": "Hands-on agentic and cloud-native depth is demonstrated by \"Designed agentic workflow using Claude API and LangChain that autonomously categorizes products, extracts attributes, and generates SEO-optimized descriptions\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "No evidence describes client engagement, non-technical communication, or cross-functional collaboration with customer-facing teams.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__claire_fontaine.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 2.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The candidate has evidence of work on a live, high-scale system, stating they \"Led QA efforts for Prism's flagship streaming platform serving 2.4M monthly active users, managing test cycles for iOS, Android, and web clients,\" but no production AI system ownership is described.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The strongest integration evidence is testing rather than building AI or agentic systems, as shown by \"Tested integration points with third-party ad networks and publishers using Postman and custom curl scripts.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The evidence supports internal knowledge sharing but not client-facing or cross-functional business communication, with the candidate having \"Mentored two junior QA engineers on testing methodologies and introduced weekly QA guild meetings to share best practices.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__grace_okonkwo.md",
+      "expected": "reject",
+      "predicted": "hold",
+      "score": 3.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.7333333333333334,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 6.0,
+          "rationale": "Evidence of deployed, operational infrastructure comes from \"Led the design and rollout of a new CI/CD platform serving 80+ engineers across four offices.\"",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The strongest integration evidence is infrastructure-focused rather than AI-agent-focused: \"Architected a GitLab Runner infrastructure on Kubernetes that reduced average build times from 18 minutes to 6 minutes\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 2.0,
+          "rationale": "The resume shows limited internal collaboration through \"Mentored two junior engineers on containerization best practices and infrastructure fundamentals\" but provides no direct client or non-technical communication evidence.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__imani_robinson.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 1.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.6,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows operational work but not production AI ownership: \"Monitor transaction flows across ACH, wire, and card networks; resolve settlement discrepancies\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The only described automation is limited to scripting, with no evidence of agentic systems or AI integration: \"Automated routine reporting tasks using Python scripts\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "There is no evidence of client engagement, non-technical communication, or cross-functional collaboration in the provided resume evidence.",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__malik_johnson.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 2.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 2.0,
+          "rationale": "The evidence shows recurring operational reporting but no deployed AI or agentic production system, as stated in \"Develop and maintain 15+ recurring SQL reports on claims data, insurance denials, and billing cycles; identified $240K in annual revenue leakage through pattern analysis\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence demonstrates data analytics and migration work but provides no hands-on evidence of LLMs, agents, memory, tools, orchestration, or AI integration, as stated in \"Assisted with migration of legacy reporting system to Snowflake; tested data accuracy post-migration and validated 99.2% match rate\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 4.0,
+          "rationale": "The candidate shows communication with executive stakeholders but no direct client or cross-functional sales and delivery engagement, as stated in \"Built Tableau workbooks for executive leadership showing bed capacity forecasting and surgical throughput metrics; presented findings in monthly board reviews\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__nadia_haddad.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 2.0,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.6000000000000001,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 3.0,
+          "rationale": "The evidence shows operational ownership of live infrastructure, but not AI systems, as indicated by \"Manage infrastructure and systems support for 120+ internal users across three regional offices\".",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 0.0,
+          "rationale": "No evidence describes building agentic systems, LLM applications, APIs, automation workflows, or cloud-based AI integrations.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 3.0,
+          "rationale": "The evidence suggests coordination with an external-facing function but does not demonstrate client communication, as shown by \"Coordinate with procurement on hardware refresh cycles and vendor contract renewals\".",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__nia_carrington.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 1.9333333333333336,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 1.0,
+          "rationale": "The only operational-system evidence is \"Developed automated reporting dashboard in Excel/SQL that tracks KPIs for 15 distribution centers; cut manual reporting time from 12 hours to 2 hours weekly,\" which demonstrates useful automation but not production AI deployment or ongoing support.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 1.0,
+          "rationale": "The evidence describes \"Developed automated reporting dashboard in Excel/SQL\" but provides no evidence of building agentic systems, LLMs, APIs, orchestration, memory, or AI integration.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no direct client, customer-facing, non-technical communication, or cross-functional collaboration signal, and the closest relevant description is only \"Results-driven supply chain professional with 6 years of experience optimizing logistics operations and warehouse management systems.\"",
+          "parse_failed": false
+        }
+      ]
+    },
+    {
+      "file": "wrong_domain__tariq_mansour.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 2.3333333333333335,
+      "escalated": false,
+      "panel_spread": 0.0,
+      "cutoff_distance": 0.2666666666666666,
+      "panel": [
+        {
+          "agent": "production_reality",
+          "score": 5.0,
+          "rationale": "The candidate shows operational experience in real systems through \"Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates,\" but provides no evidence of AI systems deployed to production.",
+          "parse_failed": false
+        },
+        {
+          "agent": "technical_integration",
+          "score": 2.0,
+          "rationale": "The strongest integration evidence is \"Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates,\" with no evidence of LLMs, agents, memory, tools, orchestration, or AI integrations.",
+          "parse_failed": false
+        },
+        {
+          "agent": "client_communication",
+          "score": 0.0,
+          "rationale": "The evidence contains no direct indication of client engagement, non-technical communication, or cross-functional collaboration.",
+          "parse_failed": false
+        }
+      ]
+    }
+  ]
+}
