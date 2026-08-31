@@ -445,6 +445,9 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
+// Filled from /api/default-jd on load. Cutoffs are per model, so a
+// hardcoded pair here is wrong for any model but the default -- it
+// printed "advance line 4.0" beside scores judged at 5.8.
 const CUTOFFS = { advance: 4.0, hold: 1.0 };
 let DATA = null, DECISIONS = {}, filter = "all", selected = null, qSelected = null, polling = null;
 
@@ -1020,11 +1023,17 @@ async function boot() {
     ]);
     const jd = await jdRes.json();
     $("jd").value = jd.job_description;
+    if (jd.cutoffs) { CUTOFFS.advance = jd.cutoffs.advance; CUTOFFS.hold = jd.cutoffs.hold; }
     $("count").replaceChildren(...[6, jd.default_count, 18, jd.max_count]
       .filter((v,i,a)=>v && a.indexOf(v)===i)
       .map((v) => {
         const o = document.createElement("option");
-        o.value = v; o.textContent = `${v} resumes · ~$${(v*0.016).toFixed(2)}`;
+        // Priced from the last recorded run, not a constant baked in
+        // here -- that one drifted 3x out of date after the model change.
+        o.value = v;
+        o.textContent = jd.cost_per_resume
+          ? `${v} resumes · ~$${(v * jd.cost_per_resume).toFixed(2)}`
+          : `${v} resumes`;
         if (v === jd.default_count) o.selected = true;
         return o;
       }));

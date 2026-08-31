@@ -930,11 +930,32 @@ async def health() -> dict:
 
 @app.get("/api/default-jd")
 async def get_default_jd() -> dict:
-    """The bundled posting, used to prefill the box on first load."""
+    """The bundled posting, used to prefill the box on first load.
+
+    `cost_per_resume` comes from the last recorded run rather than a
+    constant in the page. A hardcoded estimate drifts the moment the
+    model or the architecture changes -- it sat at 1.6c per resume for a
+    while after the real figure had fallen to 0.5c, quoting a run cost
+    three times what it actually was.
+    """
+    cost, model_ids = None, {}
+    try:
+        recorded = json.loads(RUN_JSON.read_text(encoding="utf-8"))
+        cost = recorded.get("cost_per_resume")
+        model_ids = recorded.get("model_ids") or {}
+    except (OSError, json.JSONDecodeError, KeyError):
+        pass
+    live = cutoffs_for(model_ids.get("panel", ""))
     return {
         "job_description": default_job_description(),
         "default_count": DEFAULT_SAMPLE,
         "max_count": MAX_SAMPLE,
+        "cost_per_resume": cost,
+        # The page prints the cutoffs next to every score. They are per
+        # model now, so a hardcoded pair in the JS is wrong for any model
+        # but the default -- it was showing 4.0/1.0 beside scores that had
+        # been judged at 5.8/2.6.
+        "cutoffs": {"advance": live.advance, "hold": live.hold},
     }
 
 
