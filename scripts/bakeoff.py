@@ -56,6 +56,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from resume_screener.core.pipeline import (
     DEFAULT_MODEL_IDS,
     screen_one,
+    screen_one_single_pass,
 )
 from resume_screener.core.router import (
     AnthropicModel,
@@ -234,12 +235,18 @@ async def run_once(arm: dict, files: list[str], labels: dict, jd: str, concurren
     for slot in arm["_swap_slots"]:
         models[slot] = replacement
 
+    # An arm can opt out of the cascade entirely. `single_pass: true`
+    # scores all three dimensions in ONE call instead of three parallel
+    # ones plus a conditional arbiter -- the control that tests whether
+    # the cascade's extra calls buy anything. See PLAN.md section 8.
+    screen = screen_one_single_pass if arm.get("single_pass") else screen_one
+
     semaphore = asyncio.Semaphore(concurrency)
 
     async def one(filename: str):
         async with semaphore:
             try:
-                verdict = await screen_one(str(CORPUS / filename), jd, models)
+                verdict = await screen(str(CORPUS / filename), jd, models)
                 print(
                     f"  {labels[filename]['label']:8} -> "
                     f"{verdict.recommendation.value:8} {verdict.score:4.1f}  {filename}"
@@ -374,6 +381,7 @@ async def main() -> int:
                 "model_id": arm["model_id"],
                 "provider": arm["provider"],
                 "swap_slots": swap_slots,
+                "single_pass": bool(arm.get("single_pass")),
                 "n": len(rows),
                 "requested": len(files),
                 "macro_f1": f1,

@@ -38,6 +38,14 @@ plateau on the `advance` side is narrow — a corpus of different resumes
 would very likely want different cutoffs. Treat 4.0/1.0 as informed
 rather than validated.
 
+**A bias audit now exists, and found nothing — which is weaker than it
+sounds.** Swapping only the candidate's name across 8 names and 12
+resumes moved group means by at most **0.20 points** on a 0-10 scale,
+against a run-to-run noise floor of ~0.88 on an individual score. That
+rules out a *large* name effect. It does not rule out a small one, and it
+says nothing about bias this test cannot see: school, employer, address,
+employment gaps, or phrasing. See `docs/BIAS_AUDIT.md`.
+
 **The corpus is synthetic.** All 60 resumes were generated, and their
 ground-truth labels were assigned at generation time from an archetype
 spec rather than by a human recruiter reading them. So the answer key

@@ -82,6 +82,7 @@ __all__ = [
     "recommendation_from_score",
     "rubric_for",
     "screen_one",
+    "screen_one_single_pass",
 ]
 
 RUBRIC = (Path(__file__).parent.parent / "prompts" / "rubric.md").read_text(encoding="utf-8")
@@ -614,6 +615,110 @@ def _verdict_is_in_doubt(
     the thing actually worth paying to resolve. Both must hold.
     """
     return len({recommendation_from_score(s, cutoffs) for s in scores}) > 1
+
+
+SINGLE_PASS_MAX_TOKENS = 4000
+
+
+async def screen_one_single_pass(
+    resume_path: str,
+    job_description: str,
+    models: dict[str, Model] | None = None,
+    rubric: GeneratedRubric | None = None,
+) -> Verdict:
+    """The control arm: one call scores all three dimensions at once.
+
+    This exists to test the cascade's own justification. `screen_one`
+    makes 4-5 calls per resume (extract, three panel agents in parallel,
+    sometimes an arbiter) and the entire argument for that cost is that
+    it beats asking one model once. That was asserted for the life of
+    this project and never measured. PLAN.md section 8.
+
+    Deliberately kept as close to the cascade as possible so the
+    comparison isolates ARCHITECTURE rather than prompt quality:
+
+    - Same cached system block (`rubric + job_description`), so the
+      caching contract and the standard being scored against are
+      identical.
+    - Same extraction step, on the same model. Feeding this arm the raw
+      resume while the cascade gets curated evidence would confound the
+      shape of the pipeline with the quality of its input.
+    - Same personas, verbatim, concatenated into one user turn instead of
+      split across three calls.
+    - Same cutoffs and the same `recommendation_from_score`.
+
+    So the ONLY difference is whether the three dimensions are judged
+    independently or together. The expected weakness of judging them
+    together is anchoring: one call sees all three lenses at once and
+    cannot help letting a strong answer on one colour the others. Whether
+    that costs anything is the question.
+
+    There is no arbiter here, and there is nothing to arbitrate -- a
+    single response cannot disagree with itself. Its `panel_spread` is
+    therefore 0.0 and it never escalates, which is part of what makes it
+    cheap.
+    """
+    models = models or default_models()
+    personas = _personas_for(rubric)
+
+    candidate, usage = await extract_candidate(resume_path, models["triage"])
+
+    evidence_json = json.dumps(
+        [{"quote": e.quote, "rubric_dimension": e.rubric_dimension} for e in candidate.evidence]
+    )
+    lenses = "\n\n".join(f"{name}: {lens}" for name, lens in personas.items())
+    user = (
+        f"Score this candidate on ALL THREE dimensions below.\n\n"
+        f"{lenses}\n\n"
+        f"Candidate evidence:\n{evidence_json}\n\n"
+        "Respond as JSON: an object whose keys are the three dimension "
+        "names above, each mapping to {score (0-10), rationale}. The "
+        "rationale must be ONE sentence that quotes verbatim the single "
+        "piece of resume evidence that decided that score. No preamble."
+    )
+    response = await models["panel"].complete(
+        _panel_prefix(job_description, rubric), user, max_tokens=SINGLE_PASS_MAX_TOKENS
+    )
+    usage = usage + response.usage
+    data = _parse_json(response.text) or {}
+    if not isinstance(data, dict):
+        data = {}
+
+    scores: list[RubricScore] = []
+    for name in personas:
+        entry = data.get(name)
+        entry = entry if isinstance(entry, dict) else {}
+        value = _maybe_float(entry.get("score"))
+        if value is None:
+            log.warning(
+                "Single-pass response had no usable score for %s: %.200s",
+                name,
+                response.text,
+            )
+        scores.append(
+            RubricScore(
+                agent_name=name,
+                score=value if value is not None else 0.0,
+                rationale=str(entry.get("rationale") or "No rationale returned."),
+                parse_failed=value is None,
+            )
+        )
+
+    usable = [p.score for p in scores if not p.parse_failed] or [0.0]
+    mean_score = statistics.mean(usable)
+    cutoffs = cutoffs_for(models["panel"])
+    return Verdict(
+        candidate=candidate,
+        score=mean_score,
+        recommendation=recommendation_from_score(mean_score, cutoffs),
+        rationale=" | ".join(f"[{p.agent_name}] {p.rationale}" for p in scores),
+        panel_scores=scores,
+        escalated=False,
+        panel_spread=0.0,
+        cutoff_distance=distance_to_cutoff(mean_score, cutoffs),
+        cutoff_band_width=band_width(cutoffs),
+        usage=usage,
+    )
 
 
 async def screen_one(

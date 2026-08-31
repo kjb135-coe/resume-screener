@@ -59,6 +59,7 @@ Open it locally, or serve it with GitHub Pages.
 | If you want | Read |
 |---|---|
 | What the numbers are worth | [LIMITATIONS.md](docs/LIMITATIONS.md) |
+| Whether the name changes the score | [BIAS_AUDIT.md](docs/BIAS_AUDIT.md) |
 | Why macro-F1, and what it hides | [METRIC_CHOICE.md](docs/METRIC_CHOICE.md) |
 | How noisy the system is | [VARIANCE.md](docs/VARIANCE.md) |
 | Every measured run, and what changed before it | [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md) |

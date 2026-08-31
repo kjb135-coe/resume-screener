@@ -40,6 +40,7 @@ removing files rather than editing this by hand.
 │   ├── bakeoff__haiku-panel-unwrapped__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff_sample.json          The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.
 │   ├── bakeoff_sample60.json        The full 60-resume corpus as a bake-off sample, for fitting cutoffs on more than 20 points.
+│   ├── bias_audit.json              Raw per-variant scores from the name-swap audit.
 │   ├── eval_run.json                Raw output of the last scripts/evaluate.py run -- per-candidate predictions, panel detail, usage. Source for CANDIDATE_REPORTS.md.
 │   ├── eval_run__all-haiku-panel-sonnet-arbiter.json A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
 │   ├── eval_run__recalibrated.json  A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md.
@@ -56,6 +57,7 @@ removing files rather than editing this by hand.
 │   │   └── index.html                   The whole project on one page: headline numbers, the noise band, calibration, and the caveats.
 │   ├── ARCHITECTURE.md              Why the system is shaped this way: the cascade, the caching contract, and what each decision cost.
 │   ├── BAKEOFF.md                   Output of scripts/bakeoff.py: macro-F1, cost, speed and JSON reliability per model.
+│   ├── BIAS_AUDIT.md                Does the score change when only the name changes? Paired name-swap test and its limits.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.
 │   ├── COST_ANALYSIS.md             Where the run cost actually goes, the pricing-table bug found 2026-08-27, and why prompt caching is already maxed out here.
@@ -86,6 +88,7 @@ removing files rather than editing this by hand.
 ├── scripts/                     Developer utilities. Not part of the installed package.
 │   ├── archetypes.py                The 9 archetype specs (label, per-dimension targets, must-include/avoid) that generate_corpus.py writes from.
 │   ├── bakeoff.py                   Runs the multi-model bake-off from config/bakeoff.json. --check validates without spending.
+│   ├── bias_audit.py                Swaps only the candidate name and re-scores, to test for a name effect.
 │   ├── build_resume_pdfs.py         Renders every corpus resume to PDF with reportlab. Deterministic, no model calls.
 │   ├── check_corpus.py              Lints generated resumes for leaked or missing signals against their own archetype's constraints.
 │   ├── evaluate.py                  Scores the pipeline against the labeled corpus. --tag baseline (default) writes the canonical files; any other tag is a comparison run written elsewhere. Model slots overridable per-run.

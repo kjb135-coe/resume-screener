@@ -872,6 +872,27 @@ cost comparison slightly favours Anthropic.
 All of this is blocked on the synthetic corpus existing — nothing above
 can be measured until those 60 resumes and their labels exist.
 
+## 8c. ATS comparison research — planned, not started
+
+Requested 2026-08-31. A structured comparison against real applicant
+tracking systems, on three axes rather than one:
+
+- **Price.** Per-seat/per-post ATS pricing against this system's measured
+  ~$0.005 per resume. The interesting number is total cost of screening
+  a real pipeline, not a licence fee.
+- **Accuracy.** Hard, and the honest framing matters: most ATS vendors
+  publish no accuracy figures at all, and there is no shared benchmark.
+  The comparison may end up being "we publish a number with a noise band
+  and they publish none", which is itself the finding.
+- **Adaptability.** The differentiator. A keyword ATS is configured
+  against a fixed taxonomy; this writes its scoring dimensions *from the
+  posting you paste*, so the criteria change when the job changes. That
+  is the axis where the architecture actually earns its cost, and it is
+  the one to lead with.
+
+Do this as research with citations in `research/`, in the style of the
+existing files there. Not started.
+
 ## 9. Not started at all
 
 - `ARCHITECTURE.md`. `LIMITATIONS.md` was the urgent one and now exists

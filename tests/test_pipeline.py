@@ -15,6 +15,7 @@ from resume_screener.core.pipeline import (
     recommendation_from_score,
     rubric_for,
     screen_one,
+    screen_one_single_pass,
 )
 from resume_screener.core.router import Usage
 from resume_screener.core.rubric_gen import parse_rubric
@@ -927,3 +928,90 @@ class TestReviewFlagIsDecoupledFromEscalation:
 
     def test_unflagged_when_band_width_is_unknown(self):
         assert self._verdict(3.9, 0.1, band=None).review_reason is None
+
+
+class TestSinglePassArm:
+    """The control that tests the cascade's own justification.
+
+    screen_one makes 4-5 calls per resume and the entire argument for
+    that cost is that it beats asking one model once. This arm is kept
+    deliberately close to the cascade so the comparison isolates
+    architecture rather than prompt quality.
+    """
+
+    def _single_pass_json(self, a=8.0, b=6.0, c=2.0):
+        return json.dumps(
+            {
+                "production_reality": {"score": a, "rationale": "shipped"},
+                "technical_integration": {"score": b, "rationale": "built"},
+                "client_communication": {"score": c, "rationale": "quiet"},
+            }
+        )
+
+    def _models(self, payload):
+        return {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel([payload]),
+            "arbiter": FakeModel([arbiter_json(9.0)]),
+        }
+
+    async def test_one_panel_call_scores_all_three_dimensions(self):
+        models = self._models(self._single_pass_json())
+        verdict = await screen_one_single_pass(FIXTURE, JD, models)
+
+        assert len(models["panel"].calls) == 1, "the whole point is ONE call"
+        assert [p.agent_name for p in verdict.panel_scores] == [
+            "production_reality",
+            "technical_integration",
+            "client_communication",
+        ]
+        assert verdict.score == pytest.approx((8.0 + 6.0 + 2.0) / 3)
+
+    async def test_it_never_escalates(self):
+        # A single response cannot disagree with itself, so there is
+        # nothing for an arbiter to resolve. This is part of why it is
+        # cheap, and it has to be true for the cost comparison to be fair.
+        models = self._models(self._single_pass_json())
+        verdict = await screen_one_single_pass(FIXTURE, JD, models)
+
+        assert not verdict.escalated
+        assert verdict.panel_spread == 0.0
+        assert models["arbiter"].calls == []
+
+    async def test_it_shares_the_cascades_cached_system_block(self):
+        # Same standard, same cache entry. A different system string would
+        # make this a prompt comparison rather than an architecture one.
+        models = self._models(self._single_pass_json())
+        await screen_one_single_pass(FIXTURE, JD, models)
+
+        assert models["panel"].calls[0]["system"] == _panel_prefix(JD)
+
+    async def test_it_still_extracts_evidence_first(self):
+        # Feeding this arm the raw resume while the cascade gets curated
+        # evidence would confound pipeline shape with input quality.
+        models = self._models(self._single_pass_json())
+        verdict = await screen_one_single_pass(FIXTURE, JD, models)
+
+        assert len(models["triage"].calls) == 1
+        assert verdict.candidate.evidence
+
+    async def test_a_missing_dimension_is_a_parse_failure_not_a_zero(self):
+        partial = json.dumps({"production_reality": {"score": 9, "rationale": "x"}})
+        verdict = await screen_one_single_pass(FIXTURE, JD, self._models(partial))
+
+        failed = [p for p in verdict.panel_scores if p.parse_failed]
+        assert len(failed) == 2
+        # The mean is over the ONE usable score, not polluted by two 0.0s.
+        assert verdict.score == pytest.approx(9.0)
+        assert "unreadable" in verdict.review_reason
+
+    async def test_garbage_response_does_not_crash(self):
+        verdict = await screen_one_single_pass(FIXTURE, JD, self._models("not json"))
+        assert all(p.parse_failed for p in verdict.panel_scores)
+        assert verdict.score == 0.0
+
+    async def test_usage_covers_extraction_and_the_single_call(self):
+        models = self._models(self._single_pass_json())
+        verdict = await screen_one_single_pass(FIXTURE, JD, models)
+        # 1 extraction + 1 panel call, 100 input tokens each in the fake.
+        assert verdict.usage.input_tokens == 200
