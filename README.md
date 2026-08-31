@@ -13,6 +13,42 @@ Built for the problem of a talent team reading every resume by hand with no ATS.
 - **The most useful thing here** is not the score. It's the measurement discipline: the noise floor is measured, the metric choice is justified, and three of the biggest findings were corrections to earlier findings.
 - **Try it:** `uvicorn resume_screener.adapters.api:app --reload`, password `marco1`. Opens on a recorded run and costs nothing until you submit a posting.
 
+### How it actually works, in 60 seconds
+
+You paste a job posting. An **Opus** agent reads it and writes three
+scoring dimensions, each with a brief for the agent that will own it —
+so the criteria come from *your* posting, not a generic checklist.
+
+Then, per resume:
+
+1. **A Haiku agent pulls out quoted evidence.** Not a summary — verbatim
+   lines from the file. Everything downstream scores those quotes, so no
+   verdict can be based on an impression the resume never supported.
+2. **Three agents score in parallel, one dimension each.** They never see
+   each other. They read the same evidence, so when they disagree they
+   disagree about *judgment*, not about which half of the resume they
+   happened to read.
+3. **A fourth agent arbitrates — but only when it could change the
+   answer.** If the three scores straddle a verdict boundary *and* the
+   average sits close enough to that boundary to be moved, an arbiter
+   reads the three rationales and returns a score. Otherwise it is not
+   called: 92% of the time it used to be, it changed nothing.
+4. **A human is asked only for genuinely borderline calls** — where the
+   final score sits close enough to a cutoff that a small difference in
+   judgment flips the answer. That is ~15% of the stack, down from 53%
+   when panel disagreement was the trigger.
+
+The final score is the mean of the three dimensions, and one function
+turns it into `advance` / `hold` / `reject`. The arbiter never returns a
+verdict, only a score — otherwise the same 6.5 could mean two different
+things depending on whether the panel happened to split.
+
+**The thresholds belong to the model, not the pipeline.** Different models
+grade on different scales, so each gets cutoffs fitted to its own
+distribution. Skipping that made a good model look 0.26 worse than it was.
+
+Full detail in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 ### Where to read next
 
 | If you want | Read |
@@ -29,6 +65,7 @@ Built for the problem of a talent team reading every resume by hand with no ATS.
 | How the test corpus was built | [corpus_design.md](docs/corpus_design.md) |
 | Per-candidate scores and reasoning | [CANDIDATE_REPORTS.md](docs/CANDIDATE_REPORTS.md) |
 | The full results of the latest run | [EVAL_RESULTS.md](docs/EVAL_RESULTS.md) |
+| How the system is built, and why | [ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Project status and open decisions | [PLAN.md](PLAN.md) · [STRUCTURE.md](STRUCTURE.md) |
 
 ![Submit a posting, see the criteria it wrote, then the ranked results](docs/img/candidates.png)

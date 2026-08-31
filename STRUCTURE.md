@@ -52,6 +52,7 @@ removing files rather than editing this by hand.
 ├── docs/                        Design documents and the target job posting.
 │   ├── img/                         Screenshots used by the README.
 │   │   └── candidates.png               The candidates view, used in the README.
+│   ├── ARCHITECTURE.md              Why the system is shaped this way: the cascade, the caching contract, and what each decision cost.
 │   ├── BAKEOFF.md                   Output of scripts/bakeoff.py: macro-F1, cost, speed and JSON reliability per model.
 │   ├── CANDIDATE_REPORTS.md         Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.
 │   ├── corpus_design.md             Archetypes, labels, and generation method for the synthetic resume corpus.

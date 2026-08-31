@@ -103,10 +103,21 @@ class Verdict:
         """Why a human should look at this one first, if they should."""
         if any(p.parse_failed for p in self.panel_scores):
             return "At least one scoring agent returned an unreadable response."
-        if self.candidate.confidence < 0.4:
+        # This used to read `self.candidate.confidence < 0.4`. That
+        # threshold was removed on 2026-08-31: across 180 recorded
+        # screenings it never fired once, and a magic number that has
+        # never triggered is not a safety net, it is decoration.
+        #
+        # What replaced it is the objective case rather than a guess at
+        # one: extraction came back with NO evidence at all. The panel
+        # then scored an empty list, so its confident-looking number is
+        # about nothing. That is provably reachable -- a test constructs
+        # it -- and needs no tuning.
+        if not self.candidate.evidence:
             return (
-                "This resume parsed poorly, so the extracted evidence may be "
-                "incomplete. Scores based on it are less reliable."
+                "No evidence could be extracted from this resume, so the "
+                "scores below are not based on anything the file actually "
+                "said. Read the resume directly."
             )
         # Deliberately NOT `if self.escalated`. Panel disagreement used to
         # trigger this, and it was a poor proxy for "this one is wrong":

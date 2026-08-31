@@ -782,3 +782,47 @@ the answer is **0.813 mean (0.784–0.830)** — the 0.784 was one run, not
 the figure. Either way the arbiter's whole contribution is 0.027
 macro-F1, *inside* the 0.051 noise band, which is the honest frame: it
 was never carrying the system.
+
+
+## Panel switched to GPT-5.6 Luna — 2026-08-31
+
+`DEFAULT_MODEL_IDS` now uses `gpt-5.6-luna` for the panel and arbiter.
+Extraction stays on Haiku. Measured on the full 60, each model given
+cutoffs fitted to its own scale:
+
+| | Sonnet 5 | **GPT-5.6 Luna** |
+|---|---|---|
+| macro-F1 | 0.857 | 0.853 |
+| Review queue | 30% | **15%** |
+| Escalation | **5%** | 23% |
+| Parse failures | 5/180 | **0/180** |
+| Cost per 60 | $0.84 | **$0.31** |
+| p50 latency | **11s** | 13s |
+
+Same accuracy inside the 0.051 noise band, half the human queue, a third
+of the cost. Sonnet keeps latency and a lower escalation rate.
+
+**The arbiter moved with the panel.** It adjudicates between panel
+rationales, so it has to read them on the scale they were written on — a
+Sonnet arbiter ruling on Luna's 4.6-mean distribution would be applying
+2.4-mean instincts.
+
+**Operational cost of this change: production now needs two API keys.**
+`OPENAI_API_KEY` for the panel and arbiter, `ANTHROPIC_API_KEY` for
+extraction, and two spend caps rather than one. `MODEL_PROVIDERS` in
+`core/pipeline.py` holds the non-Anthropic wiring; it is deliberately
+separate from `config/bakeoff.json`, which exists to make experiments
+cheap. A model only reaches production wiring after a bake-off earns it.
+
+## The extraction-confidence review flag, replaced — 2026-08-31
+
+`candidate.confidence < 0.4` was removed. Across 180 recorded screenings
+it fired **zero** times — every flagged verdict was explained by a parse
+failure or a near-cutoff score, with no residual. A magic threshold that
+has never triggered is not a safety net.
+
+It was **not** deleted outright, because a test proved the underlying
+failure is reachable: extraction can return nothing at all, and the panel
+then scores an empty evidence list and produces a confident-looking number
+about nothing. The replacement condition is objective rather than tuned —
+**no evidence extracted** — and the test pins that it fires.

@@ -401,7 +401,13 @@ class TestFallbacks:
         assert verdict.review_reason is not None
         assert "unreadable" in verdict.review_reason
 
-    async def test_unparseable_extraction_yields_low_confidence(self):
+    async def test_extraction_with_no_evidence_is_flagged_for_a_human(self):
+        """The scores are about nothing, so say so.
+
+        This replaced a `confidence < 0.4` threshold that never fired in
+        180 recorded screenings. The condition here is objective rather
+        than tuned, and this test proves it is reachable.
+        """
         models = {
             "triage": FakeModel(["no json here"]),
             "panel": FakeModel([panel_json(7.0)]),
@@ -410,8 +416,9 @@ class TestFallbacks:
         verdict = await screen_one(FIXTURE, JD, models)
 
         assert verdict.candidate.confidence == 0.0
+        assert verdict.candidate.evidence == []
         assert verdict.candidate.name == "sample_resume"  # falls back to filename
-        assert verdict.review_reason is not None
+        assert "No evidence could be extracted" in verdict.review_reason
 
     async def test_arbiter_bad_recommendation_falls_back_to_score_cutoffs(self):
         bad = json.dumps({"score": 8.5, "recommendation": "definitely_hire", "rationale": "x"})
@@ -851,6 +858,7 @@ class TestReviewFlagIsDecoupledFromEscalation:
 
     def _verdict(self, score, distance, escalated=False, parse_failed=False, band=2.4):
         from resume_screener.core.models import (
+            Evidence,
             ExtractedCandidate,
             Recommendation,
             RubricScore,
@@ -865,7 +873,9 @@ class TestReviewFlagIsDecoupledFromEscalation:
                 companies=[],
                 technologies=[],
                 education=[],
-                evidence=[],
+                # Non-empty: an evidence-less candidate is flagged on its
+                # own account, which would mask what these tests check.
+                evidence=[Evidence(quote="shipped it", rubric_dimension="a")],
                 confidence=0.9,
                 raw_text="x",
             ),

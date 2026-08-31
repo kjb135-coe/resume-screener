@@ -50,7 +50,12 @@ from resume_screener.core.models import (
     RubricScore,
     Verdict,
 )
-from resume_screener.core.router import AnthropicModel, Model, Usage
+from resume_screener.core.router import (
+    AnthropicModel,
+    Model,
+    OpenAICompatibleModel,
+    Usage,
+)
 from resume_screener.core.rubric_gen import GeneratedRubric, generate_rubric
 
 log = logging.getLogger(__name__)
@@ -152,18 +157,83 @@ _PANEL_PERSONAS = {
 
 DEFAULT_MODEL_IDS = {
     "triage": "claude-haiku-4-5-20251001",
-    "panel": "claude-sonnet-5",
+    # GPT-5.6 Luna, not Sonnet 5. Measured on the full 60-resume corpus
+    # (docs/CUTOFF_FIT.md, docs/BAKEOFF.md), each model given cutoffs
+    # fitted to its own scale and tested on folds it had not seen:
+    #
+    #                   macro-F1   review queue   escalation   cost/60
+    #   claude-sonnet-5   0.857         30%           5%        $0.84
+    #   gpt-5.6-luna      0.853         15%          23%        $0.31
+    #
+    # Same accuracy inside a 0.051 noise band, half the human review
+    # queue, a third of the cost, and 0 parse failures in 180 panel calls
+    # against Sonnet's 5. Sonnet keeps two advantages: p50 latency 11s vs
+    # 13s, and a lower escalation rate.
+    #
+    # Under a single global cutoff pair this arm looked 0.26 WORSE. That
+    # was calibration, not judgment -- see MODEL_CUTOFFS in core/cutoffs.py.
+    "panel": "gpt-5.6-luna",
     # Sonnet, not Opus. The arbiter adjudicates between three
     # rationales already written for it -- reading and choosing,
     # not fresh analysis. Measured on the recorded run it was ~57%
     # of total spend while running on 55% of candidates, because
     # Opus output is 15x Haiku and 5x Sonnet. See PLAN.md 3g.
-    "arbiter": "claude-sonnet-5",
+    #
+    # Now matched to the panel: the arbiter adjudicates between panel
+    # rationales, so it must read them on the same scale the panel wrote
+    # them on. A Sonnet arbiter ruling on Luna scores would be judging a
+    # 4.6-mean distribution with 2.4-mean instincts.
+    "arbiter": "gpt-5.6-luna",
     # Writing the rubric sets the standard every later score is judged
     # against, and it runs once per batch rather than once per resume.
     # It is the cheapest place in the cascade to buy the best model.
     "rubric": "claude-opus-5",
 }
+
+
+# How to reach a model that is not Anthropic. Anything absent from this
+# table is built as an AnthropicModel against ANTHROPIC_API_KEY.
+#
+# This is production wiring and is deliberately separate from
+# config/bakeoff.json, which exists to make experiments cheap to add. A
+# model only lands here once a bake-off has earned it a place.
+MODEL_PROVIDERS: dict[str, dict] = {
+    "gpt-5.6-luna": {
+        "base_url": "https://api.openai.com/v1",
+        "api_key_env": "OPENAI_API_KEY",
+        "token_param": "max_completion_tokens",
+        "send_temperature": False,
+        "extra_body": {"reasoning_effort": "medium"},
+    },
+}
+
+
+def _build_model(model_id: str) -> Model:
+    spec = MODEL_PROVIDERS.get(model_id)
+    if spec is None:
+        try:
+            return AnthropicModel(model_id, os.environ["ANTHROPIC_API_KEY"])
+        except KeyError:
+            raise RuntimeError(
+                "ANTHROPIC_API_KEY is not set. Export it, or pass an explicit "
+                "`models` dict to screen_one/rank_all (tests do this)."
+            ) from None
+    try:
+        api_key = os.environ[spec["api_key_env"]]
+    except KeyError:
+        raise RuntimeError(
+            f"{spec['api_key_env']} is not set, and it is required for "
+            f"{model_id!r}. Note that evidence extraction still runs on "
+            "Haiku, so ANTHROPIC_API_KEY is needed as well."
+        ) from None
+    return OpenAICompatibleModel(
+        model_id,
+        api_key,
+        spec["base_url"],
+        token_param=spec.get("token_param", "max_tokens"),
+        send_temperature=spec.get("send_temperature", True),
+        extra_body=spec.get("extra_body") or {},
+    )
 
 
 def default_models(overrides: dict[str, str] | None = None) -> dict[str, Model]:
@@ -175,15 +245,8 @@ def default_models(overrides: dict[str, str] | None = None) -> dict[str, Model]:
     the caching contract, the escalation logic, or anything else that
     lives downstream of "which model answered this call".
     """
-    try:
-        api_key = os.environ["ANTHROPIC_API_KEY"]
-    except KeyError:
-        raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Export it, or pass an explicit "
-            "`models` dict to screen_one/rank_all (tests do this)."
-        ) from None
     model_ids = {**DEFAULT_MODEL_IDS, **(overrides or {})}
-    return {slot: AnthropicModel(model_id, api_key) for slot, model_id in model_ids.items()}
+    return {slot: _build_model(model_id) for slot, model_id in model_ids.items()}
 
 
 def _panel_prefix(job_description: str, rubric: GeneratedRubric | None = None) -> str:
