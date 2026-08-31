@@ -9,6 +9,7 @@ Built for the problem of a talent team reading every resume by hand with no ATS.
 - **What it does.** Three AI agents each score one hiring dimension of a resume in parallel, a fourth arbitrates only when they disagree on the verdict, and every score cites a verbatim quote from the resume.
 - **How well.** **macro-F1 0.81–0.86** on 60 labelled synthetic resumes, **~$0.95 per 60** (~1.6¢ each), p50 19s. Quoted as a *range* because four identical runs span 0.051.
 - **The honest part.** The cutoffs that turn a score into a verdict were fitted on the same corpus they're scored against. Errors run one direction — below the label. The corpus is synthetic. There is no bias audit. All of it is written down in [LIMITATIONS.md](docs/LIMITATIONS.md).
+- **Latest finding.** Give a cheaper model cutoffs fitted to its own scale and the model ranking reverses: GPT-5.6 Luna held out at **0.861** against Sonnet's **0.787** on the full corpus, at **a third of the cost** — after looking 0.26 *worse* under the shipped cutoffs. A fixed score threshold is part of the harness, not the model. [CUTOFF_FIT.md](docs/CUTOFF_FIT.md)
 - **The most useful thing here** is not the score. It's the measurement discipline: the noise floor is measured, the metric choice is justified, and three of the biggest findings were corrections to earlier findings.
 - **Try it:** `uvicorn resume_screener.adapters.api:app --reload`, password `marco1`. Opens on a recorded run and costs nothing until you submit a posting.
 
@@ -20,7 +21,7 @@ Built for the problem of a talent team reading every resume by hand with no ATS.
 | Why macro-F1, and what it hides | [METRIC_CHOICE.md](docs/METRIC_CHOICE.md) |
 | How noisy the system is | [VARIANCE.md](docs/VARIANCE.md) |
 | Every measured run, and what changed before it | [RESULTS_HISTORY.md](docs/RESULTS_HISTORY.md) |
-| Which model to use, and the calibration trap | [BAKEOFF.md](docs/BAKEOFF.md) |
+| Which model to use, and the calibration trap | [BAKEOFF.md](docs/BAKEOFF.md) · [CUTOFF_FIT.md](docs/CUTOFF_FIT.md) |
 | Where the money goes | [COST_ANALYSIS.md](docs/COST_ANALYSIS.md) |
 | Why one agent scores everyone low | [SCORE_SCALE.md](docs/SCORE_SCALE.md) |
 | How the cutoffs were chosen | [CUTOFF_SWEEP.md](docs/CUTOFF_SWEEP.md) |

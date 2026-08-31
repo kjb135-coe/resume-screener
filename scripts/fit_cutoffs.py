@@ -112,19 +112,34 @@ def load_arm(arm: str) -> list[list[tuple[str, str, float]]]:
 
 
 def stratified_folds(rows: list[tuple[str, str, float]], k: int) -> list[list[int]]:
-    """k folds, each holding roughly the same label mix as the whole.
+    """k folds, split BY RESUME and stratified by label.
 
-    Random folds would let one fold miss a class entirely, and macro-F1
-    scores a missing class as zero -- which looks like a catastrophic
-    model failure and is really a sampling artefact.
+    Two things this must get right, both learned the hard way:
+
+    1. **Group by resume, not by row.** Scores are pooled across runs, so
+       one resume contributes k rows. Splitting rows would put the same
+       resume in train and test -- the cutoff is then chosen partly from
+       that resume's own typical score, which is leakage, and it inflates
+       the held-out number. Every row for a resume goes to one fold.
+    2. **Stratify by label.** Random folds can leave a fold with no
+       instances of a class at all. Macro-F1 scores a missing class as
+       zero, which reads as catastrophic model failure and is really a
+       sampling artefact.
     """
-    by_label: dict[str, list[int]] = {}
-    for index, (_, label, _) in enumerate(rows):
-        by_label.setdefault(label, []).append(index)
+    by_file: dict[str, list[int]] = {}
+    file_label: dict[str, str] = {}
+    for index, (filename, label, _) in enumerate(rows):
+        by_file.setdefault(filename, []).append(index)
+        file_label[filename] = label
+
+    by_label: dict[str, list[str]] = {}
+    for filename in sorted(by_file):
+        by_label.setdefault(file_label[filename], []).append(filename)
+
     folds: list[list[int]] = [[] for _ in range(k)]
-    for indices in by_label.values():
-        for position, index in enumerate(indices):
-            folds[position % k].append(index)
+    for filenames in by_label.values():
+        for position, filename in enumerate(filenames):
+            folds[position % k].extend(by_file[filename])
     return folds
 
 

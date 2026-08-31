@@ -8,15 +8,19 @@
 
 | Arm | Macro-F1 (range) | Accuracy | Cost/resume | Latency p50 | Parse failures |
 |---|---|---|---|---|---|
-| `anthropic-control-60` | 0.932 (0.864–1.000) | 0.933 | $0.0157 | 12.0s | 5/225 (2.2%) |
-| `gpt-5.6-luna-60` | — | — | — | — | **no successful run** |
+| `anthropic-control-60` | 0.823 (0.797–0.843) | 0.828 | $0.0154 | 11.6s | 22/540 (4.1%) |
+| `gpt-5.6-luna-60` | 0.563 (0.548–0.587) | 0.583 | $0.0053 | 14.2s | 0/540 (0.0%) |
 
 ## Per-run detail
 
 | Arm | Run | n | Macro-F1 | Accuracy | Cost | p50 | Parse failures |
 |---|---|---|---|---|---|---|---|
-| `anthropic-control-60` | 1 | 60 | 0.864 | 0.867 | $0.959 | 11.9s | 2/180 |
-| `anthropic-control-60` | 2 (PARTIAL 15/60) | 15 | 1.000 | 1.000 | $0.232 | 12.1s | 3/45 |
+| `anthropic-control-60` | 1 | 60 | 0.797 | 0.800 | $0.956 | 11.8s | 10/180 |
+| `anthropic-control-60` | 2 | 60 | 0.830 | 0.833 | $0.905 | 11.6s | 4/180 |
+| `anthropic-control-60` | 3 | 60 | 0.843 | 0.850 | $0.913 | 11.5s | 8/180 |
+| `gpt-5.6-luna-60` | 1 | 60 | 0.587 | 0.617 | $0.314 | 13.6s | 0/180 |
+| `gpt-5.6-luna-60` | 2 | 60 | 0.554 | 0.567 | $0.320 | 14.9s | 0/180 |
+| `gpt-5.6-luna-60` | 3 | 60 | 0.548 | 0.567 | $0.319 | 14.1s | 0/180 |
 
 ## Calibration — read this before the ranking above
 
@@ -24,7 +28,8 @@ The verdict cutoffs in `core/pipeline.py` (`ADVANCE_CUTOFF = 4.0`, `HOLD_CUTOFF 
 
 | Arm | Mean score | As shipped (4.0/1.0) | Own best cutoffs | Best macro-F1 |
 |---|---|---|---|---|
-| `anthropic-control-60` | 2.34 | 0.932 | 3.1/0.6 | 0.950 |
+| `anthropic-control-60` | 2.42 | 0.823 | 3.1/0.7 | 0.828 |
+| `gpt-5.6-luna-60` | 4.03 | 0.563 | 5.8/2.6 | 0.884 **(+0.321)** |
 
 **These fitted cutoffs are an upper bound, not a result.** They are chosen on the same resumes they are scored against, on a sample of 20 — a smaller corpus than the 60 that `docs/LIMITATIONS.md` already calls overfitted. Read the right-hand column as *"this model is not out of the running"*, never as its accuracy. A model that needs its own cutoffs also needs them re-fitted on a corpus it has not seen before any of it counts.
 

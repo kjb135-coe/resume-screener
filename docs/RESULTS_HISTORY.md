@@ -562,3 +562,73 @@ A fixed score-to-verdict threshold is part of the **harness**, not part of
 the model. Any bake-off that holds it constant across models is partly
 measuring which model happens to share the calibration of whichever model
 the threshold was tuned on. Full detail: `docs/CUTOFF_FIT.md`.
+
+## The 60-resume bake-off, finished — 2026-08-27
+
+Both arms, 3 runs each, all 60 resumes, no failures. This completes the
+run that credit exhaustion cut short earlier.
+
+| | Sonnet 5 (control) | GPT-5.6 Luna |
+|---|---|---|
+| Under shipped cutoffs (4.0/1.0) | **0.823** (0.797–0.843) | 0.563 (0.548–0.587) |
+| **Held-out, own cutoffs** | 0.787 | **0.861** |
+| Cost per resume | $0.0154 | **$0.0053** (2.9x cheaper) |
+| p50 latency | **11.6s** | 14.2s |
+| Parse failures | 22/540 (4.1%) | **0/540** |
+| Escalation rate | **47%** | 70% |
+
+**The ordering reverses once both models are calibrated fairly.** Paired
+by fold:
+
+| Fold | Sonnet | Luna | Diff |
+|---|---|---|---|
+| 1 | 0.972 | 0.972 | +0.000 |
+| 2 | 0.799 | 0.836 | +0.037 |
+| 3 | 0.855 | 0.944 | +0.089 |
+| 4 | 0.635 | 0.749 | +0.114 |
+| 5 | 0.674 | 0.804 | +0.130 |
+| **mean** | **0.787** | **0.861** | **+0.074** |
+
+Luna wins 4 of 5 folds and loses none. The 0.074 gap exceeds the 0.051
+noise band. **On 20 resumes Sonnet won, 0.896 to 0.814; on 60 the result
+flips.** That is a warning about the 20-resume sample, not a contradiction
+— the noise band there is ~0.098, wider than either gap.
+
+### Sonnet's shipped number flatters it
+
+Sonnet scores 0.823 under the shipped cutoffs and **0.787** held out. The
+difference is not noise, it is the cutoffs: 4.0/1.0 were swept against
+*this corpus* using *Sonnet's* scores, so the shipped configuration
+carries a home-field advantage that does not survive unseen resumes. Luna
+never had it.
+
+### A flaw found and fixed in our own method
+
+The first version of the cross-validation split **prediction rows**. With
+3 runs pooled, the same resume then appeared in both training and test
+folds, so a cutoff was chosen partly from that resume's own typical
+score. That is leakage. `stratified_folds` now groups every row for a
+resume into one fold.
+
+The corrected numbers were identical to three decimals — fitting two
+scalar thresholds is not sensitive enough for the leak to bite — but the
+method was wrong and is now right.
+
+### What this does NOT license
+
+**Do not swap the panel to Luna on this evidence.**
+
+- **Luna escalates 70% of candidates against Sonnet's 47%.** It sends far
+  more work to the arbiter. Cost above already includes that; a real
+  deployment would feel it as latency and reviewer load.
+- **Fold spread is wide** — 0.635–0.972 for Sonnet, 0.749–0.972 for Luna,
+  at 12 resumes per fold. Read the mean, never a fold.
+- **Still one synthetic corpus.** Better than fitting and scoring on all
+  60, but not fresh data.
+- **Every arm still needs an Anthropic key**, because extraction stays on
+  Haiku.
+
+What it establishes: **Luna is a serious candidate, not the also-ran the
+shipped-cutoff number implied — and no model comparison here is valid
+until the cutoffs are re-fitted per model.** Full detail:
+`docs/CUTOFF_FIT.md`.

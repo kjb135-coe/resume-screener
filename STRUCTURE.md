@@ -12,6 +12,8 @@ removing files rather than editing this by hand.
 │   ├── synthetic_resumes/           The 60 generated resumes (fictional, no real candidates) -- individually undescribed, see docs/corpus_design.md for the archetypes.
 │   │   └── (60 generated resumes, listed in data/labels.json)
 │   ├── bakeoff__anthropic-control-60__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__anthropic-control-60__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__anthropic-control-60__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control-prefix__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
@@ -21,6 +23,9 @@ removing files rather than editing this by hand.
 │   ├── bakeoff__anthropic-control__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__anthropic-control__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__gpt-5.6-luna-60__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__gpt-5.6-luna-60__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__gpt-5.6-luna-60__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__gpt-5.6-luna-medium__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__gpt-5.6-luna-medium__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__gpt-5.6-luna-medium__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.

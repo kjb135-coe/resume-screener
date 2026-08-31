@@ -77,7 +77,13 @@ understates the noise.
    **macro-F1 0.051**, and it is a floor — it grew from 0.042 at two
    runs. See `docs/VARIANCE.md`. **Any comparison turning on less than
    0.051 is unresolved.**
-2. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
+2. **Re-fit the cutoffs per model before any model comparison.** Measured
+   2026-08-27: on 60 resumes, held out, GPT-5.6 Luna scores **0.861** vs
+   Sonnet's **0.787** at a third of the cost — after scoring 0.563 vs
+   0.823 under the shipped 4.0/1.0. The threshold is part of the harness,
+   not the model. Luna escalates 70% vs 47% though, so this is not yet a
+   switch recommendation. `docs/CUTOFF_FIT.md`.
+3. **Single-pass arm of the bake-off** (PLAN §8). The cascade's entire
    justification is that it beats one big call. That is asserted, never
    measured. **No single-pass code path exists** — this is implementation
    plus a run, not just a run. It must beat the cascade by more than
