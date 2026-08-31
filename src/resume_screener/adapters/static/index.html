@@ -780,7 +780,11 @@ async function loadStats() {
 
   const tiles = el("div","tiles");
   for (const [v,l,acc] of [
-    [d.run.macro_f1,"Macro-F1",true],[d.run.accuracy,"Accuracy",false],
+    // Fixed to 3 places. Raw, 0.8995 rounds to 0.9 and the tile read
+    // "0.9" beside a chart labelled "0.900" and a table of 0.90s -- the
+    // same number at three precisions on one page.
+    [d.run.macro_f1.toFixed(3),"Macro-F1",true],
+    [d.run.accuracy.toFixed(3),"Accuracy",false],
     [`$${d.run.cost_total}`,"Total cost",false],[`$${d.run.cost_per_resume}`,"Per resume",false],
     [`${d.run.latency_p50}s`,"Latency p50",false],
     [`${Math.round(d.run.escalation_rate*100)}%`,"Escalated",false],
