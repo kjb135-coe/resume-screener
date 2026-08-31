@@ -816,11 +816,11 @@ async def index() -> FileResponse:
 
 @app.get("/api/budget")
 async def get_budget() -> JSONResponse:
-    """What the demo has spent today, and what is left.
+    """What the app has spent today, and what is left.
 
-    Public on purpose: a visitor who gets refused should be able to see
-    that it was a spend cap and when it resets, rather than guessing the
-    app is broken.
+    Behind the password gate like every other route. A blocked run
+    already returns a message naming the cap and its reset, so nobody is
+    left guessing; this is the running total for whoever holds the link.
     """
     return JSONResponse(budget.snapshot())
 

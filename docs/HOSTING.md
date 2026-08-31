@@ -36,8 +36,10 @@ combined $30 provider cap is the backstop that survives any bug here.
   `MAX_RESUMES_PER_RUN`, which is why that limit exists.
 - Refused requests get **HTTP 429** and a message saying it is a spend
   cap and when it resets — not a generic error.
-- `GET /api/budget` reports spend, limit and remaining. Public on
-  purpose: a refused visitor should be able to see why.
+- `GET /api/budget` reports spend, limit and remaining. It sits behind
+  the password gate like everything else, so it is for whoever holds the
+  link, not the open internet. The refusal message itself names the cap
+  and its reset, which is what a blocked user actually needs.
 - The ledger is **in memory** and resets on restart and at midnight UTC.
   For a week-long demo behind provider caps that is an accepted trade;
   a real deployment would persist it.

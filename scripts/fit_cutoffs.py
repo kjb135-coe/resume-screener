@@ -44,6 +44,10 @@ import statistics
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from resume_screener.core.cutoffs import cutoffs_for
+
 REPO = Path(__file__).resolve().parent.parent
 DATA = REPO / "data"
 LABELS = REPO / "data" / "labels.json"
@@ -82,6 +86,13 @@ def best_cutoffs(rows: list[tuple[str, float]]) -> tuple[float, float, float]:
             if score > best[0]:
                 best = (score, advance, hold)
     return best
+
+
+def _arm_model_id(arm: str) -> str:
+    """The model id an arm ran on, read back from its own run files."""
+    for path in sorted(DATA.glob(f"bakeoff__{arm}__run*.json")):
+        return json.loads(path.read_text(encoding="utf-8")).get("model_id", "")
+    return ""
 
 
 def load_arm(arm: str) -> list[list[tuple[str, str, float]]]:
@@ -162,8 +173,14 @@ def main() -> int:
         # be noise.
         pooled = [(f, t, s) for run in runs for f, t, s in run]
 
+        # The cutoffs this arm ACTUALLY runs with, not the global
+        # default. Reporting 4.0/1.0 here understated every arm that has
+        # its own entry in MODEL_CUTOFFS -- which, since cutoffs went
+        # per-model, is the shipped configuration itself.
+        live = cutoffs_for(_arm_model_id(arm))
         shipped = statistics.mean(
-            macro_f1([(t, verdict(s, 4.0, 1.0)) for _, t, s in run]) for run in runs
+            macro_f1([(t, verdict(s, live.advance, live.hold)) for _, t, s in run])
+            for run in runs
         )
         fitted_f1, advance, hold = best_cutoffs([(t, s) for _, t, s in pooled])
 
@@ -199,7 +216,7 @@ def main() -> int:
         "swept against Sonnet. A model that grades on a different scale loses "
         "macro-F1 to the mismatch rather than to its judgment. This refits "
         "them per model on recorded scores — offline, no API calls.\n")
-    add("| Arm | Mean score | Shipped 4.0/1.0 | Fitted cutoffs | Fitted (upper bound) | **Held-out (honest)** |")
+    add("| Arm | Mean score | As shipped | Fitted cutoffs | Fitted (upper bound) | **Held-out (honest)** |")
     add("|---|---|---|---|---|---|")
     for arm, r in results.items():
         a, h = r["fitted_cutoffs"]
