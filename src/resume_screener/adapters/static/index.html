@@ -86,6 +86,10 @@
 
   main{max-width:1360px;margin:0 auto;padding:24px 20px 64px}
   .lede{color:var(--muted);font-size:14px;margin:0 0 18px;max-width:70ch}
+    .sitefoot{margin:56px 0 24px;padding-top:20px;border-top:1px solid var(--line,#2a2a30);
+      color:var(--mut,#8a8a92);font-size:.86rem;line-height:1.6;max-width:62ch}
+    .sitefoot p{margin:0 0 10px}
+    .sitefoot a{color:inherit;text-decoration:underline}
 
   /* ---------- step 1 ---------- */
   .eyebrow{
@@ -342,6 +346,21 @@
         ground-truth labels.</p>
       <div id="stats-body"></div>
     </div>
+    <footer class="sitefoot">
+      <p><strong>What this is measured on.</strong> 60 synthetic resumes whose
+        correct answer came from the template each was generated from — not from
+        a hiring manager. The screener agrees with that answer key about 90% of
+        the time, and identical runs of it vary by enough that the number should
+        be read as a range.</p>
+      <p>Roughly a tenth of candidates are scored wrongly, and only the ones
+        landing near a decision boundary get flagged for a person — so about half
+        of the mistakes are never seen by anyone. Nothing here decides anything:
+        every verdict is advice, with the resume line it came from attached.</p>
+      <p><a href="https://github.com/kjb135-coe/resume-screener/blob/main/docs/LIMITATIONS.md"
+        target="_blank" rel="noopener">Full limitations</a> ·
+        <a href="https://github.com/kjb135-coe/resume-screener"
+        target="_blank" rel="noopener">Source</a></p>
+    </footer>
   </main>
 </div>
 
@@ -923,8 +942,15 @@ async function boot() {
     const results = await resultsRes.json();
     if (resultsRes.ok) {
       showResult(results, "Step 3 — Results from the last recorded run of all 60");
+      // macro-F1 alone is jargon, and quoting it bare implies a
+      // precision the number does not have -- identical runs span 0.051.
+      // Say what it means and that it moves.
       $("headline").textContent =
-        `recorded run · ${results.summary.n} screened · macro-F1 ${results.summary.macro_f1}`;
+        `recorded run · ${results.summary.n} screened · agrees with the ` +
+        `answer key ${Math.round(results.summary.macro_f1 * 100)}% of the time`;
+      $("headline").title =
+        `macro-F1 ${results.summary.macro_f1}. Identical runs of the same ` +
+        `configuration span 0.051, so read this as a range, not a point.`;
     }
   } catch (err) {
     if (err.message !== "auth") console.error(err);
