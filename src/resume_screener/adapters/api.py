@@ -65,6 +65,7 @@ from resume_screener.core.cutoffs import (
 from resume_screener.core.ingest import load_resume_text
 from resume_screener.core.models import Verdict
 from resume_screener.core.pipeline import (
+    DEFAULT_MODEL_IDS,
     default_models,
     hand_written_personas,
     rank_paths,
@@ -929,10 +930,21 @@ _last_failure: dict[str, str] | None = None
 
 
 def _record_failure(exc: BaseException) -> str:
-    """Remember a failure for /health, and return its secret-free tag."""
+    """Remember a failure, and return its secret-free tag.
+
+    Two fields, two audiences. `tag` is safe for the public /health --
+    class, status, and the provider's error category, nothing more.
+    `detail` is the provider's actual message, which is what finally
+    names the cause, and it is served only from /api/diagnostics behind
+    the password gate.
+    """
     global _last_failure
     tag = failure_tag(exc)
-    _last_failure = {"tag": tag, "at": datetime.now(UTC).isoformat()}
+    _last_failure = {
+        "tag": tag,
+        "at": datetime.now(UTC).isoformat(),
+        "detail": str(exc)[:2000],
+    }
     return tag
 
 
@@ -968,8 +980,25 @@ async def health() -> dict:
             "OPENAI_API_KEY": bool(os.environ.get("OPENAI_API_KEY")),
             "APP_PASSWORD": bool(os.environ.get("APP_PASSWORD")),
         },
-        "last_failure": _last_failure,
+        "last_failure": (
+            {k: v for k, v in _last_failure.items() if k != "detail"}
+            if _last_failure
+            else None
+        ),
     }
+
+
+@app.get("/api/diagnostics")
+async def diagnostics() -> dict:
+    """The last provider failure in full. Behind the password gate.
+
+    /health gives the category; this gives the sentence. They are split
+    because the provider's message is the only thing that reliably names
+    the cause, and it is also the only part that could ever quote a
+    request. Gating it costs the operator one login and removes the
+    question of what is safe to print.
+    """
+    return {"last_failure": _last_failure, "models": dict(DEFAULT_MODEL_IDS)}
 
 
 @app.get("/api/default-jd")

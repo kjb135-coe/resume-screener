@@ -70,7 +70,7 @@ questions that cause almost every hosted failure:
 {
   "ok": true,
   "configured": {"ANTHROPIC_API_KEY": true, "OPENAI_API_KEY": true, "APP_PASSWORD": true},
-  "last_failure": {"tag": "APIStatusError 401", "at": "2026-08-31T16:40:02Z"}
+  "last_failure": {"tag": "BadRequestError 400 invalid_request_error", "at": "2026-08-31T16:40:02Z"}
 }
 ```
 
@@ -84,10 +84,21 @@ recent provider error. Read it like this:
 
 | Tag | Meaning | Fix |
 |---|---|---|
-| `401` | The key is wrong or revoked | Re-enter it in **Environment** |
-| `429` | Out of credit, or rate limited | Add credit, or wait a minute |
-| `500`, `529` | The provider is refusing requests | Wait; nothing to fix here |
+| `authentication_error` | The key is wrong or revoked | Re-enter it in **Environment** |
+| `permission_error` | The key cannot use that model | Check the model access on the account |
+| `rate_limit_error` | Out of credit, or rate limited | Add credit, or wait a minute |
+| `invalid_request_error` | The provider rejected the request | Read the message — see below |
+| `api_error`, `overloaded_error` | The provider is refusing requests | Wait; nothing to fix here |
 | `configured` shows `false` | The key was never set | Add it in **Environment** |
+
+The status code alone is not enough. Anthropic returns **400 for both** a
+request it cannot parse and an account with no credit — opposite problems
+wearing the same number. The category tells them apart.
+
+When the category is `invalid_request_error`, log in and open
+`/api/diagnostics`. It serves the provider's own message, which is the
+sentence that finally names the cause. It sits behind the password gate
+because that message is the one field that could quote a request.
 
 Both the rubric step and the screening step need **both** keys: criteria
 generation runs on Opus and evidence extraction runs on Haiku, so

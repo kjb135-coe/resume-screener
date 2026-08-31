@@ -192,3 +192,44 @@ class TestFailureTag:
         exc = RuntimeError("x-api-key: sk-ant-SECRETVALUE")
         exc.status_code = 401
         assert "SECRET" not in self._tag(exc)
+
+
+class TestProviderErrorType:
+    """The status alone was too coarse to diagnose a live deploy.
+
+    Anthropic returns 400 both for a request it cannot parse and for an
+    account with no credit. Those are opposite problems wearing the same
+    number, and the hosted site could not tell them apart. The provider's
+    own error category separates them, comes from a fixed vocabulary, and
+    carries no request content.
+    """
+
+    def _tag(self, exc):
+        from resume_screener.adapters.budget import failure_tag
+
+        return failure_tag(exc)
+
+    def test_reads_the_category_from_a_structured_body(self):
+        exc = RuntimeError("boom")
+        exc.status_code = 400
+        exc.body = {"type": "error", "error": {"type": "invalid_request_error"}}
+        assert self._tag(exc) == "RuntimeError 400 invalid_request_error"
+
+    def test_reads_the_category_out_of_the_message(self):
+        exc = RuntimeError(
+            "Error code: 400 - {'type': 'error', 'error': "
+            "{'type': 'authentication_error', 'message': 'invalid x-api-key'}}"
+        )
+        exc.status_code = 400
+        assert self._tag(exc) == "RuntimeError 400 authentication_error"
+
+    def test_omits_the_category_when_there_is_none(self):
+        exc = RuntimeError("Connection reset by peer")
+        assert self._tag(exc) == "RuntimeError"
+
+    def test_the_category_never_drags_the_message_along(self):
+        exc = RuntimeError(
+            "{'error': {'type': 'invalid_request_error', "
+            "'message': 'x-api-key sk-ant-SECRETVALUE'}}"
+        )
+        assert "SECRET" not in self._tag(exc)

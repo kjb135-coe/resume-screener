@@ -26,6 +26,7 @@ Design notes, in order of how much they matter:
 from __future__ import annotations
 
 import os
+import re
 import threading
 from datetime import UTC, datetime
 
@@ -149,24 +150,51 @@ _RATE_LIMIT = ("rate_limit", "rate limit", "too many requests")
 _OVERLOADED = ("overloaded", "service unavailable", "502 bad gateway", "503")
 
 
+# The provider's own error category, e.g. `invalid_request_error`. Both
+# Anthropic and OpenAI return one in the body. It is drawn from a fixed
+# vocabulary and carries no request content, so it is safe on a public
+# page -- unlike the message beside it.
+_ERROR_TYPE = re.compile(r"'type':\s*'([a-z_]+_error)'|\"type\":\s*\"([a-z_]+_error)\"")
+
+
+def _provider_error_type(exc: BaseException) -> str | None:
+    """The provider's error category, if the exception carries one."""
+    body = getattr(exc, "body", None)
+    if isinstance(body, dict):
+        error = body.get("error")
+        if isinstance(error, dict) and isinstance(error.get("type"), str):
+            return error["type"]
+    match = _ERROR_TYPE.search(str(exc))
+    if match:
+        return match.group(1) or match.group(2)
+    return None
+
+
 def failure_tag(exc: BaseException) -> str:
-    """A short, secret-free label for an exception: `APIStatusError 401`.
+    """A short, secret-free label: `BadRequestError 400 invalid_request_error`.
 
     Safe to show on a public page and to log. It carries the exception
-    class and the HTTP status if there is one, and nothing else -- never
-    the message body, which can quote a request and therefore a key.
+    class, the HTTP status, and the provider's own error category --
+    never the message body, which can quote a request.
 
     This exists because "check the server log" is useless advice on a
     hosted demo: the operator is not watching the log, and the visitor
-    cannot reach it. A status code names the problem in one glance --
-    401 is a key, 429 is credit or a rate limit, 500 is the provider.
+    cannot reach it. The status alone proved too coarse: Anthropic
+    returns 400 both for a request it cannot parse and for an account
+    with no credit, which are opposite problems with the same number. The
+    error category separates them.
     """
     status = getattr(exc, "status_code", None)
     if status is None:
         response = getattr(exc, "response", None)
         status = getattr(response, "status_code", None)
-    name = type(exc).__name__
-    return f"{name} {status}" if status is not None else name
+    parts = [type(exc).__name__]
+    if status is not None:
+        parts.append(str(status))
+    kind = _provider_error_type(exc)
+    if kind:
+        parts.append(kind)
+    return " ".join(parts)
 
 
 def explain_provider_failure(exc: BaseException) -> str | None:

@@ -112,6 +112,30 @@ class TestPage:
         assert body["configured"]["OPENAI_API_KEY"] is False
         assert "SECRETVALUE" not in client.get("/health").text
 
+    def test_health_never_serves_the_provider_message(self, client, anon):
+        """/health is public, so it gets the category and not the sentence.
+
+        The provider's own message is the only thing that reliably names
+        a cause, and it is also the only part that could quote a request.
+        So it lives behind the password gate, at /api/diagnostics.
+        """
+        api._last_failure = {
+            "tag": "BadRequestError 400 invalid_request_error",
+            "at": "2026-08-31T20:55:37+00:00",
+            "detail": "Error code: 400 - do not show this publicly",
+        }
+        try:
+            public = anon.get("/health")
+            assert "invalid_request_error" in public.text
+            assert "do not show this publicly" not in public.text
+            assert "detail" not in public.json()["last_failure"]
+
+            assert anon.get("/api/diagnostics").status_code == 401
+            gated = client.get("/api/diagnostics").json()
+            assert gated["last_failure"]["detail"].endswith("show this publicly")
+        finally:
+            api._last_failure = None
+
 
 class TestResults:
     """The recorded run is the landing view. It reads a file, so it must
