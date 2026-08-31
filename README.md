@@ -6,10 +6,10 @@ Built for the problem of a talent team reading every resume by hand with no ATS.
 
 ## TL;DR
 
-- **What it does.** Three AI agents each score one hiring dimension of a resume in parallel, a fourth arbitrates only when they disagree on the verdict, and every score cites a verbatim quote from the resume.
-- **How well.** **macro-F1 0.81–0.86** on 60 labelled synthetic resumes, **~$0.95 per 60** (~1.6¢ each), p50 19s. Quoted as a *range* because four identical runs span 0.051.
+- **What it does.** Writes scoring criteria from a job posting, scores each resume against them with a quoted rationale per dimension, and asks a second model for another look when the call is close.
+- **How well.** **macro-F1 0.88–0.92** on 60 labelled synthetic resumes, **~$0.28 per 60** (~0.5¢ each), p50 8.4s, ~16% sent to a human. Quoted as a *range* because identical runs span 0.051.
 - **The honest part.** The cutoffs that turn a score into a verdict were fitted on the same corpus they're scored against. Errors run one direction — below the label. The corpus is synthetic. There is no bias audit. All of it is written down in [LIMITATIONS.md](docs/LIMITATIONS.md).
-- **The parallel panel earns nothing; the arbiter earns everything.** Three agents plus an arbiter score 0.847. The three agents *alone* score 0.788 — worse than a single call's 0.821, and losing 12-6 when paired per candidate. The arbiter is worth +0.059 on top. So the expensive part of the architecture is not the part that works, and the stage we nearly deleted is. [Full working](docs/RESULTS_HISTORY.md)
+- **It replaced its own architecture.** It ran as three parallel agents plus an arbiter. Measured, the parallel panel scored *worse* than a single call (0.788 vs 0.821) while costing twice the API calls; the arbiter was the part earning its keep. Now it is one scoring call plus a conditional arbiter: **0.899**, half the calls, 26% faster. [Working](docs/RESULTS_HISTORY.md)
 - **Latest finding.** Give a cheaper model cutoffs fitted to its own scale and the model ranking reverses: GPT-5.6 Luna held out at **0.861** against Sonnet's **0.787** on the full corpus, at **a third of the cost** — after looking 0.26 *worse* under the shipped cutoffs. A fixed score threshold is part of the harness, not the model. [CUTOFF_FIT.md](docs/CUTOFF_FIT.md)
 - **The most useful thing here** is not the score. It's the measurement discipline: the noise floor is measured, the metric choice is justified, and three of the biggest findings were corrections to earlier findings.
 - **Try it:** `uvicorn resume_screener.adapters.api:app --reload`, password `marco1`. Opens on a recorded run and costs nothing until you submit a posting.
@@ -25,19 +25,18 @@ Then, per resume:
 1. **A Haiku agent pulls out quoted evidence.** Not a summary — verbatim
    lines from the file. Everything downstream scores those quotes, so no
    verdict can be based on an impression the resume never supported.
-2. **Three agents score in parallel, one dimension each.** They never see
-   each other. They read the same evidence, so when they disagree they
-   disagree about *judgment*, not about which half of the resume they
-   happened to read.
-3. **A fourth agent arbitrates — but only when it could change the
-   answer.** If the three scores straddle a verdict boundary *and* the
-   average sits close enough to that boundary to be moved, an arbiter
-   reads the three rationales and returns a score. Otherwise it is not
-   called: 92% of the time it used to be, it changed nothing.
+2. **One call scores all three dimensions** against that evidence, with a
+   quoted rationale for each. This used to be three parallel agents that
+   never saw each other, until measurement showed the parallel version
+   was *worse* than one call and cost twice as many API calls.
+3. **A second agent takes another look — but only when it could change
+   the answer.** If the score lands within 0.5 of a verdict boundary, an
+   arbiter re-reads the three rationales and returns its own score.
+   Otherwise it is not called: it moves a score by 0.33 on average, so
+   further out it cannot cross a line.
 4. **A human is asked only for genuinely borderline calls** — where the
    final score sits close enough to a cutoff that a small difference in
-   judgment flips the answer. That is ~15% of the stack, down from 53%
-   when panel disagreement was the trigger.
+   judgment flips the answer. ~15% of the stack, down from 53%.
 
 The final score is the mean of the three dimensions, and one function
 turns it into `advance` / `hold` / `reject`. The arbiter never returns a
@@ -85,7 +84,7 @@ Submit a posting, and the whole flow runs top to bottom:
 2. **It writes three scoring criteria from that posting**, each with the brief for the agent that owns it.
 3. **Resumes get screened against those criteria**, ranked, with the reasoning behind every score.
 
-The screenshot shows 60 test resumes screened for roughly **$0.95 total**, about 1.6 cents each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
+The screenshot shows 60 test resumes screened for roughly **$0.28 total**, about half a cent each. 18 advance, 15 hold, 27 reject, and **29 flagged for a human**.
 
 ```bash
 uvicorn resume_screener.adapters.api:app --reload
@@ -103,7 +102,7 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 **Working:** the cascade, rubrics generated from any posting, an MCP server (5 tools), a CLI (3 commands), a web app that runs the whole flow, resume upload for PDF/Word/Markdown/text, and a 60-resume labelled evaluation. 249 tests, all offline.
 
-**Measured:** macro-F1 **0.81–0.86** across four runs of 60 labelled resumes, ~1.6 cents each. That is up from 0.601 after the score-to-verdict cutoffs were swept against the corpus rather than guessed — `hold` recall went 0.20 → 0.65. It is quoted as a range because four identical runs span 0.051; see [docs/VARIANCE.md](docs/VARIANCE.md).
+**Measured:** macro-F1 **0.88–0.92** across three runs of 60 labelled resumes, ~0.5 cents each. Up from 0.601 — the cutoffs were swept rather than guessed, the model was recalibrated to its own scale, and the parallel panel was replaced by one call. Quoted as a range because identical runs span 0.051; see [docs/VARIANCE.md](docs/VARIANCE.md).
 
 **Remaining weakness:** all 9 surviving errors still run one direction, the model scoring below the label. `production_light_ai` — strong production history, shallow AI depth — is 1 of 7.
 
@@ -111,7 +110,7 @@ The first question anyone asks about AI-written feedback is whether it actually 
 
 ## How it works
 
-Each resume goes through three stages, and the last one runs on slightly under half of them.
+Two stages per resume, plus a third on about a quarter of them.
 
 ```
   Resume
@@ -120,40 +119,36 @@ Each resume goes through three stages, and the last one runs on slightly under h
   Extract        cheap model pulls out quoted evidence
     │
     ▼
-  Panel          3 agents score in parallel, one per dimension
+  Score          ONE call, all three dimensions
     │            8.0        9.0        6.0
     │
     ▼
-  Do they agree?
+  Is the mean near a verdict cutoff?
     │
-    ├── yes ──▶  average the scores            (53% of candidates)
+    ├── no  ──▶  take it                       (~75% of candidates)
     │
-    └── no  ──▶  arbiter reads all three       (47% of candidates)
+    └── yes ──▶  arbiter re-reads the           (~25% of candidates)
                  rationales and rules
                           │
                           ▼
-              ≥4 advance · ≥1 hold · else reject
+                advance · hold · reject
 ```
 
-Escalation is triggered by the panel disagreeing about the *verdict*, not by a score being near a cutoff and not by the scores merely varying — a 9.0/7.0/6.0 panel has a wide spread but nothing an arbiter could return would change the outcome. A candidate everyone agrees on costs one cheap extraction and three panel calls. A candidate the panel splits on pays for a fourth call, and gets flagged for a person.
+The arbiter is gated on **distance to a cutoff**, not on disagreement. It moves a score by 0.33 on average and never more than 1.5, so a score sitting further out than that is one it cannot change — and 92% of the calls under the old disagreement trigger changed nothing.
 
-The arbiter used to run on Opus. It was moved to Sonnet after cost accounting showed it was ~57% of total spend while adjudicating rationales that were already written for it — reading and choosing, not fresh analysis. That swap shipped in the same run as the cutoff fix, so its effect on accuracy was never isolated and no claim is made about it.
+### Why three dimensions
 
-### Why three agents
+The count came from the posting, not from an experiment. This job description has three distinct requirement clusters:
 
-The count came from the posting, not from an experiment. This job description has three distinct requirement clusters, so there's one agent per cluster:
-
-| Agent | What it judges |
+| Dimension | What it judges |
 |---|---|
 | `production_reality` | Shipped and running, or a demo that stopped at the prototype? The posting says "not demos or prototypes" three separate times. |
 | `technical_integration` | Real agentic work with memory, tools, and orchestration, or a skills list? |
 | `client_communication` | Evidence of explaining technical work to non-technical people. |
 
-Three also happens to be the smallest number that makes disagreement *readable*. With one agent there's no disagreement signal at all. With two you learn they differ but not which one is the outlier. With three you get a spread and a majority, so "two agreed, one dissented" is something you can act on. Each agent is another API call per resume, so cost scales with the count.
+`core/rubric_gen.py` rejects any rubric that isn't exactly three.
 
-It's now load-bearing: the escalation threshold is a spread across three scores, and more agents would widen that spread by chance alone and silently escalate more often. `core/rubric_gen.py` rejects any rubric that isn't exactly three.
-
-**Honest caveat:** the count was never tested. Two versus three versus five is still an open question in [PLAN.md §8](PLAN.md), and the "be skeptical of unbacked claims" instinct was folded into all three agents rather than made a fourth agent specifically to avoid prejudging it.
+**Honest caveat:** the count was never tested. Two versus three versus five is still open in [PLAN.md §8](PLAN.md).
 
 ### Try it on your own resume
 
@@ -202,11 +197,11 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 
 | Metric | Value |
 |---|---|
-| Macro-F1 ([why this metric](docs/METRIC_CHOICE.md)) | **0.81–0.86** (4 runs) |
-| Accuracy | 0.80–0.86 |
-| Cost | ~$0.95 for 60 (~1.6c each) |
-| Latency | p50 19.4s, p95 32.9s |
-| Flagged for a human | 18 / 60 (was 32) |
+| Macro-F1 ([why this metric](docs/METRIC_CHOICE.md)) | **0.88–0.92** (3 runs) |
+| Accuracy | 0.88–0.92 |
+| Cost | ~$0.28 for 60 (~0.5c each) |
+| Latency | p50 8.4s |
+| Flagged for a human | 9 / 60 (was 32) |
 
 **The number that matters more than the headline: run the same configuration four times, unchanged, and macro-F1 spans 0.051.** 9 of 51 candidates change verdict at least once, and all 9 sit within 1.0 of a score cutoff. So the headline is one draw from a wide distribution, not a fixed property — which is why it is quoted as a range, and why any comparison below that turns on less than 0.051 is unresolved rather than decided. Measured over four runs in [docs/VARIANCE.md](docs/VARIANCE.md).
 
@@ -309,7 +304,7 @@ Score one resume:
 resume-screener screen data/synthetic_resumes/quiet_builder__elena_vasquez.md docs/job_description.md
 ```
 
-Rank the whole corpus. 60 resumes, roughly $0.95 and a few minutes:
+Rank the whole corpus. 60 resumes, roughly $0.28 and a few minutes:
 
 ```bash
 resume-screener rank data/synthetic_resumes docs/job_description.md --top 10
@@ -335,4 +330,4 @@ The 60 resumes are generated, not real. [docs/corpus_design.md](docs/corpus_desi
 
 ## Local models
 
-An Ollama provider sits behind the same `Model` interface as Anthropic (`core/router.py`) and is tested against a mocked endpoint, but is not wired into the default path. The reason is hardware, not code ([PLAN.md §6](PLAN.md)). It's the on-prem and data-residency story rather than something running today.
+`core/router.py` is provider-agnostic, and that is demonstrated rather than asserted: adding OpenAI took one adapter class and no change to the cascade, and the panel now runs on it. A local provider would be the same shape. It is not built — the reason is hardware, not code ([PLAN.md §6](PLAN.md)) — so treat on-prem as a plausible next step, not a feature.

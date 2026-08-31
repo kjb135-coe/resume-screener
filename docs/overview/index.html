@@ -37,13 +37,13 @@ footer{margin-top:3.5em;padding-top:1.4em;border-top:1px solid var(--line);color
 </style></head><body><div class="wrap">
 
 <h1>AI Resume Screener</h1>
-<p class="sub">Four agents read a resume against a specific job posting. This page is what the measurements actually say — including where they stop.</p>
+<p class="sub">An AI screener that writes its own criteria from a job posting. This page is what the measurements actually say — including where they stop.</p>
 
 <div class="grid">
-  <div class="stat"><b>0.81–0.86</b><span>macro-F1, quoted as a range</span></div>
-  <div class="stat"><b>$0.31</b><span>per 60 resumes</span></div>
-  <div class="stat"><b>15%</b><span>sent to a human</span></div>
-  <div class="stat"><b>320</b><span>offline tests</span></div>
+  <div class="stat"><b>0.88–0.92</b><span>macro-F1, quoted as a range</span></div>
+  <div class="stat"><b>$0.28</b><span>per 60 resumes</span></div>
+  <div class="stat"><b>16%</b><span>sent to a human</span></div>
+  <div class="stat"><b>334</b><span>offline tests</span></div>
 </div>
 
 <h2>The headline is a range, and that is the point</h2>
@@ -66,31 +66,33 @@ footer{margin-top:3.5em;padding-top:1.4em;border-top:1px solid var(--line);color
 </table>
 <blockquote><p>The same model went from <strong>worst to best</strong> without a single change to the model, the prompt, or the evidence. A fixed score threshold is part of the harness, not the model.</p></blockquote>
 
-<h2>Cutting the human queue by two thirds</h2>
-<p>Escalating to a tie-breaker agent also flagged the candidate for human review. Both halves were wrong.</p>
+<h2>It replaced its own architecture</h2>
+<p>It ran as three agents scoring in parallel plus a tie-breaker. Measuring each part separately showed the expensive half was the half doing nothing:</p>
 <table>
-<tr><th></th><th>Before</th><th>After</th></tr>
-<tr><td>Tie-breaker called</td><td>47%</td><td class="win">23%</td></tr>
-<tr><td>Sent to a human</td><td>53%</td><td class="win">15%</td></tr>
-<tr><td>Errors that review catches</td><td>36%</td><td class="win">~50%</td></tr>
-<tr><td>macro-F1</td><td>0.840</td><td>0.853</td></tr>
+<tr><th>Architecture</th><th>macro-F1</th><th>API calls / resume</th></tr>
+<tr><td>Parallel panel alone</td><td class="lose">0.788</td><td>~4.0</td></tr>
+<tr><td>One call alone</td><td>0.821</td><td>~2.0</td></tr>
+<tr><td>Parallel panel + tie-breaker</td><td>0.872</td><td>~4.3</td></tr>
+<tr><td><strong>One call + tie-breaker</strong></td><td class="win">0.899</td><td class="win">~2.3</td></tr>
 </table>
-<p>The tie-breaker moves a score by 0.33 on average, so if the score sits far from a decision boundary it <em>cannot</em> change the verdict — <strong>92% of those calls changed nothing</strong>. And panel disagreement turned out to be a poor predictor of a wrong answer; distance to a boundary is a much better one.</p>
+<blockquote><p>The parallel panel scored <em>worse</em> than a single call. The tie-breaker was the part earning its keep. The architecture now does one scoring call and asks for a second opinion only when the score sits near a decision boundary — <strong>same accuracy, half the calls, 26% faster</strong>.</p></blockquote>
+<p>The human queue fell the same way, and for the same reason. Escalating used to flag a candidate for review automatically; panel disagreement turned out to be a poor predictor of a wrong answer. Flagging on <em>distance to a decision boundary</em> instead took the queue from <strong>53% to 16%</strong> while catching <em>more</em> errors.</p>
 
 <h2>What this does not prove</h2>
 <blockquote class="caveat"><p><strong>The corpus is synthetic.</strong> All 60 resumes were generated and their labels come from the archetype each was generated from. Every number here is agreement with an intended verdict, not with a hiring manager.</p></blockquote>
 <blockquote class="caveat"><p><strong>The cutoffs were fitted on the same corpus they are scored against.</strong> Cross-validation makes them honest — cutoffs are chosen on 4/5 of the data and tested on the fifth — but no held-out corpus exists.</p></blockquote>
-<blockquote class="caveat"><p><strong>About half the errors ship unreviewed.</strong> The system is wrong on ~13% of candidates and a human sees 15%. Reviewing a sixth of a stack cannot catch most of the mistakes in it. That is arithmetic, not a tuning failure.</p></blockquote>
-<blockquote class="caveat"><p><strong>There is no bias audit.</strong> The corpus has no demographic variation, so nothing here says whether scores move when a name changes. This is the most important open gap.</p></blockquote>
+<blockquote class="caveat"><p><strong>About half the errors ship unreviewed.</strong> The system is wrong on ~10% of candidates and a human sees 16%. Reviewing a sixth of a stack cannot catch most of the mistakes in it. That is arithmetic, not a tuning failure.</p></blockquote>
+<blockquote class="caveat"><p><strong>The bias audit found nothing, which is weaker than it sounds.</strong> Swapping only the candidate's name moved group means by at most 0.20 points against a ~0.88 noise floor. That rules out a <em>large</em> name effect, not a small one, and says nothing about bias a name does not trigger.</p></blockquote>
 
 <h2>How it works</h2>
-<p><strong>1.</strong> An agent reads your job posting and writes three scoring dimensions from it. <strong>2.</strong> A cheap agent pulls verbatim quotes out of each resume. <strong>3.</strong> Three agents score in parallel, one dimension each, never seeing each other. <strong>4.</strong> A tie-breaker runs only when the panel straddles a boundary <em>and</em> sits close enough to it to be moved. <strong>5.</strong> A human is asked only for genuinely borderline calls.</p>
+<p><strong>1.</strong> An agent reads your job posting and writes three scoring dimensions from it. <strong>2.</strong> A cheap agent pulls verbatim quotes out of each resume. <strong>3.</strong> One call scores all three dimensions against those quotes. <strong>4.</strong> A second agent takes another look, but only when the score sits near a decision boundary. <strong>5.</strong> A human is asked only for genuinely borderline calls.</p>
 
 <footer>
 Full detail: <a href="../../README.md">README</a> ·
 <a href="../ARCHITECTURE.md">Architecture</a> ·
 <a href="../VARIANCE.md">Variance</a> ·
 <a href="../CUTOFF_FIT.md">Calibration</a> ·
+<a href="../BIAS_AUDIT.md">Bias audit</a> ·
 <a href="../LIMITATIONS.md">Limitations</a> ·
 <a href="../RESULTS_HISTORY.md">Every measured run</a>
 </footer>

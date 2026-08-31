@@ -7,7 +7,13 @@ from scores already in data/eval_run.json. No API calls.
 
 ## The question
 
-The pipeline escalates to the arbiter when the panel's score *spread*
+HISTORICAL. Superseded 2026-08-27 by the margin gate, and again on
+2026-08-31 when the parallel panel was replaced by a single scoring call
+-- there is no panel spread to sweep any more. Kept because
+docs/ESCALATION_SWEEP.md cites it and those numbers must stay
+reproducible.
+
+When this was written, the pipeline escalated when the panel's score *spread*
 exceeds a threshold. That measures variance, not decision uncertainty,
 and those are different things. A panel of 9/7/6 has a spread of 3.0 and
 escalates -- but every one of those three scores says "good", so no

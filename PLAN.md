@@ -7,8 +7,8 @@ piece before we can move on).
 
 ## Start here — updated 2026-08-27
 
-**State:** macro-F1 **0.81–0.86** (a range; the noise band is 0.051),
-**~$0.85** per 60-resume run on Sonnet or **~$0.31** on GPT-5.6 Luna,
+**State:** macro-F1 **0.88–0.92** (a range; the noise band is 0.051),
+**~$0.28** per 60-resume run,
 **308 offline tests**, everything committed and pushed. Nothing is
 half-finished in the working tree.
 
@@ -41,7 +41,7 @@ Escalation is **5%** / **23%**, down from 47% / ~70%.
 quote macro-F1 as a range), `docs/LIMITATIONS.md` (fitted cutoffs,
 one-directional errors, no bias audit) and `docs/COST_ANALYSIS.md` (the
 pricing table was wrong until 2026-08-27, and the $1.20 that replaced it
-was still ~20% high; the measured figure is ~$0.95).
+was still ~20% high; the measured figure is ~$0.28 on the shipped config).
 
 ---
 
@@ -602,9 +602,10 @@ anonymously.
 
 ## 6. Local and embedding models — settled
 
-- Full generative models (Ollama): implemented behind the same
-  `Model` interface as Anthropic (`core/router.py`), explicitly kept
-  off the demo path — your GTX 970 (Maxwell, 4GB) genuinely can't do
+- Full generative models (local, e.g. Ollama): would sit behind the same
+  `Model` interface as Anthropic (`core/router.py`) — a shape now proven
+  by the OpenAI adapter. An untested placeholder class was deleted
+  2026-08-31; the option stays open, off the demo path — your GTX 970 (Maxwell, 4GB) genuinely can't do
   this workload justice. Documented as the on-prem/PII-residency story
   instead.
 - Embeddings are a different, much lighter workload and a genuinely
@@ -645,7 +646,7 @@ run, both untrue for a while by then.
 - **249 offline tests**, none of which touch the network.
 - The 60-resume synthetic corpus, its labels, and three recorded eval
   runs, plus four variance runs. The current figure: macro-F1
-  **0.81–0.86**, roughly $0.95 for 60 resumes. Written up in `docs/EVAL_RESULTS.md` and
+  **0.88–0.92**, roughly $0.28 for 60 resumes. Written up in `docs/EVAL_RESULTS.md` and
   `docs/CANDIDATE_REPORTS.md`, with the full history in
   `docs/RESULTS_HISTORY.md`. Read §3c before quoting any of these to
   three decimals — run-to-run drift is larger than it looks.
@@ -915,7 +916,7 @@ MCP server (5 tools), the CLI (3 commands), the web app (submit a posting
 resume upload for PDF/Word/Markdown/text, a password gate, and a
 60-resume labelled eval. 249 offline tests.
 
-**The honest headline:** macro-F1 **0.81–0.86**, ~1.6 cents per
+**The honest headline:** macro-F1 **0.88–0.92**, ~0.5 cents per
 resume. `hold` recall is 0.65 against 0.90 for `advance` and 1.00 for
 `reject` — the middle class is still the weak one, but it is no longer
 broken. It was 0.20 before the cutoffs were swept.

@@ -146,9 +146,8 @@ class Model(ABC):
         There is deliberately no `temperature` argument. The Anthropic SDK
         removed it in 1.0 (sampling is no longer a caller-facing knob), and
         an interface advertising a parameter its primary provider ignores
-        would be worse than not having one. Providers that do expose
-        sampling controls take them as constructor arguments instead --
-        see OllamaModel.
+        would be worse than not having one. A provider that does expose
+        sampling controls should take it as a constructor argument.
         """
 
 
@@ -224,62 +223,6 @@ class AnthropicModel(Model):
                 cache_creation_input_tokens=getattr(raw, "cache_creation_input_tokens", 0) or 0,
                 cache_read_input_tokens=getattr(raw, "cache_read_input_tokens", 0) or 0,
                 latency_s=elapsed,
-                model_id=self._model_id,
-            ),
-        )
-
-
-class OllamaModel(Model):
-    """Local provider. Implemented and tested against a mocked endpoint;
-    deliberately not wired into the default cascade -- see README for why
-    (VRAM/compute limits, not a code limitation).
-    """
-
-    def __init__(
-        self,
-        model_id: str,
-        host: str = "http://localhost:11434",
-        temperature: float = 0.0,
-    ):
-        self._model_id = model_id
-        self._host = host
-        # Scoring is a classification task, not creative generation, so this
-        # defaults to deterministic. Provider-specific because Anthropic no
-        # longer exposes sampling controls at all.
-        self._temperature = temperature
-
-    async def complete(
-        self,
-        system: str,
-        user: str,
-        *,
-        max_tokens: int = 1024,
-        cache_system: bool = True,
-    ) -> ModelResponse:
-        import httpx
-
-        started = time.monotonic()
-        async with httpx.AsyncClient(base_url=self._host, timeout=120.0) as client:
-            resp = await client.post(
-                "/api/chat",
-                json={
-                    "model": self._model_id,
-                    "messages": [
-                        {"role": "system", "content": system},
-                        {"role": "user", "content": user},
-                    ],
-                    "options": {"temperature": self._temperature},
-                    "stream": False,
-                },
-            )
-            resp.raise_for_status()
-            body = resp.json()
-        return ModelResponse(
-            text=body["message"]["content"],
-            usage=Usage(
-                input_tokens=body.get("prompt_eval_count", 0) or 0,
-                output_tokens=body.get("eval_count", 0) or 0,
-                latency_s=time.monotonic() - started,
                 model_id=self._model_id,
             ),
         )

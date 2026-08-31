@@ -178,11 +178,14 @@ but it is a real operational cost and is not free.
   queries over one session's candidates, not as storage.
 - **No vector search or embeddings.** 60 resumes against one posting does
   not need retrieval, and adding it would be resume-driven design.
-- **No local model in the default path.** `OllamaModel` exists and is
-  tested against a mocked endpoint, but is not wired in — a hardware
-  limit, not a code one.
-- **`core/enrichment.py` is an intentionally unimplemented extension
-  point** for consuming external MCP servers.
+- **No local model.** The `Model` interface is provider-agnostic — adding
+  OpenAI took one class — so a local provider is the same shape. Not
+  built; a hardware limit, not a code one.
+- **No external MCP client.** Consuming a third-party MCP server (a
+  GitHub server verifying a claimed profile, say) would fold into the
+  evidence step. There was a placeholder Protocol for it; it was deleted
+  because an unimplemented interface is documentation pretending to be
+  code.
 
 ## Where to go deeper
 

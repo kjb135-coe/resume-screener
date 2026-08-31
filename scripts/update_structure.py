@@ -101,7 +101,6 @@ DESCRIPTIONS: dict[str, str] = {
     "src/resume_screener/core/ingest.py": "Resume file -> raw text. PDF, DOCX, Markdown, plain text.",
     "src/resume_screener/core/pipeline.py": "The cascade: extract -> panel -> arbitrate on disagreement. Owns the caching contract.",
     "src/resume_screener/core/query.py": "Follow-up questions: sandboxed DuckDB SQL plus a bounded evidence-judgment call.",
-    "src/resume_screener/core/enrichment.py": "Documented extension point for consuming external MCP servers. Intentionally unimplemented.",
     "src/resume_screener/core/rubric_gen.py": "Writes the rubric and the three panel personas from any job posting. Validated, not trusted.",
     "src/resume_screener/adapters": "Thin translation layers over core. No scoring logic lives here.",
     "src/resume_screener/adapters/mcp_server.py": "MCP server exposing five tools. The primary interface.",

@@ -44,9 +44,9 @@ persona. Read that module docstring before touching prompt assembly.
 
 ## Where things stand
 
-- **macro-F1 0.81–0.86** on 60 labelled synthetic resumes, measured over
-  four runs. **Quote it as a range**, never as a point — four identical
-  runs span 0.051. Roughly **$0.95** per full run (~1.6c/resume),
+- **macro-F1 0.88–0.92** on 60 labelled synthetic resumes, measured over
+  three runs. **Quote it as a range**, never as a point — identical
+  runs span 0.051. Roughly **$0.28** per full run (~0.5c/resume),
   measured, stable to a cent.
 - 306 offline tests, ruff clean.
 - **Escalation and the human-review flag are separate decisions.** The
