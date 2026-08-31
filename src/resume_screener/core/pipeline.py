@@ -640,6 +640,7 @@ async def screen_one_single_pass(
     job_description: str,
     models: dict[str, Model] | None = None,
     rubric: GeneratedRubric | None = None,
+    arbitrate: bool = False,
 ) -> Verdict:
     """The control arm: one call scores all three dimensions at once.
 
@@ -668,10 +669,26 @@ async def screen_one_single_pass(
     cannot help letting a strong answer on one colour the others. Whether
     that costs anything is the question.
 
-    There is no arbiter here, and there is nothing to arbitrate -- a
-    single response cannot disagree with itself. Its `panel_spread` is
-    therefore 0.0 and it never escalates, which is part of what makes it
-    cheap.
+    `arbitrate=False` runs one call and stops. That is the pure control.
+
+    `arbitrate=True` adds a conditional arbiter, gated on the final score
+    sitting within `ESCALATION_MARGIN` of a cutoff -- NOT on panel
+    disagreement, which this architecture cannot measure honestly. The
+    three dimension scores come from one response, so their spread
+    reflects one model's internal consistency rather than three
+    independent readings, and gating on it would be measuring the wrong
+    thing.
+
+    That combination exists because decomposing the cascade showed the
+    parallel panel earns nothing and the arbiter earns +0.059:
+
+        cascade with arbiter      0.847
+        cascade without arbiter   0.788
+        single-pass               0.821
+
+    So the arbiter is the stage worth keeping and the parallel panel is
+    not. This arm tests whether the cheap architecture plus the stage that
+    works beats the expensive one.
     """
     models = models or default_models()
     personas = _personas_for(rubric)
@@ -722,6 +739,27 @@ async def screen_one_single_pass(
     usable = [p.score for p in scores if not p.parse_failed] or [0.0]
     mean_score = statistics.mean(usable)
     cutoffs = cutoffs_for(models["panel"])
+    # Recorded but never used as a gate -- see the docstring. It is one
+    # model's internal consistency, not three independent readings.
+    spread = max(usable) - min(usable) if len(usable) > 1 else 0.0
+
+    if arbitrate and distance_to_cutoff(mean_score, cutoffs) <= ESCALATION_MARGIN:
+        score, rationale, arb_usage = await _arbitrate(
+            candidate, scores, job_description, models["arbiter"], rubric
+        )
+        return Verdict(
+            candidate=candidate,
+            score=score,
+            recommendation=recommendation_from_score(score, cutoffs),
+            rationale=rationale,
+            panel_scores=scores,
+            escalated=True,
+            panel_spread=spread,
+            cutoff_distance=distance_to_cutoff(score, cutoffs),
+            cutoff_band_width=band_width(cutoffs),
+            usage=usage + arb_usage,
+        )
+
     return Verdict(
         candidate=candidate,
         score=mean_score,
@@ -729,7 +767,7 @@ async def screen_one_single_pass(
         rationale=" | ".join(f"[{p.agent_name}] {p.rationale}" for p in scores),
         panel_scores=scores,
         escalated=False,
-        panel_spread=0.0,
+        panel_spread=spread,
         cutoff_distance=distance_to_cutoff(mean_score, cutoffs),
         cutoff_band_width=band_width(cutoffs),
         usage=usage,

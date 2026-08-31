@@ -976,3 +976,61 @@ of the bill is input and cache tokens, which effort does not touch.
 That closes out the cost work honestly: after the pricing correction, the
 model switch, and this, a 60-resume run went **$1.80 → $0.30**. The
 remaining levers are small.
+
+## Single-pass + arbiter — the best architecture found — 2026-08-31
+
+The decomposition said the parallel panel earns nothing and the arbiter
+earns +0.059. This tests the implied architecture: **one scoring call
+plus a conditional arbiter**, gated on distance-to-cutoff rather than
+panel disagreement (a single response has no honest disagreement signal —
+its three dimension scores come from one generation).
+
+All four arms, 3 runs each, 60 resumes:
+
+| Architecture | macro-F1 | Cost | p50 | API calls / resume |
+|---|---|---|---|---|
+| **single-pass + arbiter** | **0.899** (0.883–0.915) | **$0.280** | **8.4s** | **~2.3** |
+| cascade, low effort | 0.872 (0.832–0.901) | $0.299 | 11.3s | ~4.3 |
+| cascade, medium effort | 0.847 (0.804–0.884) | $0.310 | 13.5s | ~4.3 |
+| single-pass, no arbiter | 0.821 (0.789–0.845) | $0.277 | 8.4s | ~2.0 |
+
+**The like-for-like comparison is the top two rows** — both at
+`reasoning_effort: low`, so architecture is the only difference. The
+0.027 gap is inside the 0.051 noise band, so accuracy is **not
+separated**. Paired per candidate, single-pass + arbiter wins **9 to 6**
+of the 15 that differ: consistent direction, not decisive.
+
+What *is* decisive is everything else: **half the API calls, 26% faster,
+6% cheaper, for accuracy that is at worst equal.**
+
+### What this settles
+
+The cascade's premise was that three agents judging dimensions
+independently beats one model judging them together. Measured three ways
+now, it does not:
+
+- panel-only (0.788) loses to single-pass (0.821), paired 12–6
+- the full cascade ties single-pass, because the arbiter's gain cancels
+  the panel's loss
+- single-pass + arbiter beats the full cascade on every axis
+
+**The value was always in the arbiter — a second look at a borderline
+case — not in parallel independent scoring.**
+
+### What is NOT lost by switching
+
+The UI is unchanged. Single-pass still returns three per-dimension scores
+with a quoted rationale each, so the evidence panel and the score
+breakdown are identical. The only thing given up is that the three
+rationales anchored on one another rather than being written blind — and
+the measurement says that independence buys nothing.
+
+### Caveats
+
+- `panel_calls` in the run files counts dimension **scores**, not API
+  calls: 180 for both architectures. It is a parse-failure denominator
+  and was never a cost measure. Real call counts are in the table above.
+- Both arms share the same extraction step, so this is 2 calls against 4,
+  not 1 against 5.
+- 60 synthetic resumes, and the noise band does not separate the top two
+  on accuracy alone.

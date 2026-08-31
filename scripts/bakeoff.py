@@ -239,7 +239,13 @@ async def run_once(arm: dict, files: list[str], labels: dict, jd: str, concurren
     # scores all three dimensions in ONE call instead of three parallel
     # ones plus a conditional arbiter -- the control that tests whether
     # the cascade's extra calls buy anything. See PLAN.md section 8.
-    screen = screen_one_single_pass if arm.get("single_pass") else screen_one
+    if arm.get("single_pass"):
+        arbitrate = bool(arm.get("single_pass_arbitrate"))
+
+        async def screen(path, jd, models):
+            return await screen_one_single_pass(path, jd, models, arbitrate=arbitrate)
+    else:
+        screen = screen_one
 
     semaphore = asyncio.Semaphore(concurrency)
 
@@ -382,6 +388,7 @@ async def main() -> int:
                 "provider": arm["provider"],
                 "swap_slots": swap_slots,
                 "single_pass": bool(arm.get("single_pass")),
+                "single_pass_arbitrate": bool(arm.get("single_pass_arbitrate")),
                 "n": len(rows),
                 "requested": len(files),
                 "macro_f1": f1,
@@ -393,6 +400,10 @@ async def main() -> int:
                 "latency_mean": statistics.mean(latencies),
                 "wall_clock_s": wall_clock,
                 "parse_failed": parse_failed,
+                # Dimension SCORES, not API calls. The cascade produces
+                # these from 3 calls and a single-pass arm from 1, so this
+                # is a parse-failure denominator, never a cost measure.
+                "panel_scores_seen": panel_calls,
                 "panel_calls": panel_calls,
                 "escalated": sum(1 for v in verdicts if v.escalated),
                 "tokens": {

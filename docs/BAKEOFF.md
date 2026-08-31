@@ -8,15 +8,15 @@
 
 | Arm | Macro-F1 (range) | Accuracy | Cost/resume | Latency p50 | Parse failures |
 |---|---|---|---|---|---|
-| `luna-effort-low` | 0.872 (0.832–0.901) | 0.872 | $0.0050 | 11.3s | 0/540 (0.0%) |
+| `single-pass-arbiter` | 0.899 (0.883–0.915) | 0.900 | $0.0047 | 8.4s | 0/540 (0.0%) |
 
 ## Per-run detail
 
 | Arm | Run | n | Macro-F1 | Accuracy | Cost | p50 | Parse failures |
 |---|---|---|---|---|---|---|---|
-| `luna-effort-low` | 1 | 60 | 0.883 | 0.883 | $0.303 | 11.3s | 0/180 |
-| `luna-effort-low` | 2 | 60 | 0.832 | 0.833 | $0.299 | 11.2s | 0/180 |
-| `luna-effort-low` | 3 | 60 | 0.901 | 0.900 | $0.296 | 11.4s | 0/180 |
+| `single-pass-arbiter` | 1 | 60 | 0.915 | 0.917 | $0.279 | 8.4s | 0/180 |
+| `single-pass-arbiter` | 2 | 60 | 0.899 | 0.900 | $0.280 | 8.3s | 0/180 |
+| `single-pass-arbiter` | 3 | 60 | 0.883 | 0.883 | $0.283 | 8.3s | 0/180 |
 
 ## Calibration — read this before the ranking above
 
@@ -24,7 +24,7 @@ The verdict cutoffs in `core/pipeline.py` (`ADVANCE_CUTOFF = 4.0`, `HOLD_CUTOFF 
 
 | Arm | Mean score | As shipped (4.0/1.0) | Own best cutoffs | Best macro-F1 |
 |---|---|---|---|---|
-| `luna-effort-low` | 4.10 | 0.872 | 5.1/2.8 | 0.888 |
+| `single-pass-arbiter` | 4.22 | 0.899 | 5.4/2.6 | 0.899 |
 
 **These fitted cutoffs are an upper bound, not a result.** They are chosen on the same resumes they are scored against, on a sample of 20 — a smaller corpus than the 60 that `docs/LIMITATIONS.md` already calls overfitted. Read the right-hand column as *"this model is not out of the running"*, never as its accuracy. A model that needs its own cutoffs also needs them re-fitted on a corpus it has not seen before any of it counts.
 

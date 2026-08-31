@@ -174,7 +174,7 @@
     },
     {
       "name": "luna-effort-low",
-      "enabled": true,
+      "enabled": false,
       "provider": "openai_compatible",
       "model_id": "gpt-5.6-luna",
       "base_url": "https://api.openai.com/v1",
@@ -191,6 +191,28 @@
         "cache_write": 0.0
       },
       "notes": "Same model and prompts, reasoning_effort='low' instead of 'medium'. Output tokens are 69% of the bill and ~75% of them are reasoning, not visible rationale (271 chars ~= 68 tokens against ~290 output tokens per call), so effort is the lever and rationale length is not."
+    },
+    {
+      "name": "single-pass-arbiter",
+      "enabled": true,
+      "provider": "openai_compatible",
+      "model_id": "gpt-5.6-luna",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "token_param": "max_completion_tokens",
+      "send_temperature": false,
+      "extra_body": {
+        "reasoning_effort": "low"
+      },
+      "pricing": {
+        "in": 0.2,
+        "out": 1.2,
+        "cache_read": 0.02,
+        "cache_write": 0.0
+      },
+      "notes": "One scoring call plus a conditional arbiter, gated on distance-to-cutoff rather than panel disagreement. Tests the decomposition finding: the parallel panel earns nothing (0.788 vs single-pass 0.821) while the arbiter earns +0.059. If this reaches the cascade's 0.847 it is the cheapest architecture that works.",
+      "single_pass": true,
+      "single_pass_arbitrate": true
     }
   ],
   "run": {

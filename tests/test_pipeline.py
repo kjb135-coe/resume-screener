@@ -967,16 +967,25 @@ class TestSinglePassArm:
         ]
         assert verdict.score == pytest.approx((8.0 + 6.0 + 2.0) / 3)
 
-    async def test_it_never_escalates(self):
-        # A single response cannot disagree with itself, so there is
-        # nothing for an arbiter to resolve. This is part of why it is
-        # cheap, and it has to be true for the cost comparison to be fair.
+    async def test_the_pure_control_never_escalates(self):
+        # arbitrate=False is the pure control: one call, then stop.
         models = self._models(self._single_pass_json())
         verdict = await screen_one_single_pass(FIXTURE, JD, models)
 
         assert not verdict.escalated
-        assert verdict.panel_spread == 0.0
         assert models["arbiter"].calls == []
+
+    async def test_spread_is_recorded_but_never_gates(self):
+        """The three scores come from ONE response.
+
+        Their spread is one model's internal consistency, not three
+        independent readings, so it is recorded as information and
+        deliberately not used to decide anything.
+        """
+        models = self._models(self._single_pass_json(8.0, 6.0, 2.0))
+        verdict = await screen_one_single_pass(FIXTURE, JD, models)
+        assert verdict.panel_spread == pytest.approx(6.0)
+        assert not verdict.escalated, "a wide spread must not trigger an arbiter here"
 
     async def test_it_shares_the_cascades_cached_system_block(self):
         # Same standard, same cache entry. A different system string would
@@ -1009,6 +1018,28 @@ class TestSinglePassArm:
         verdict = await screen_one_single_pass(FIXTURE, JD, self._models("not json"))
         assert all(p.parse_failed for p in verdict.panel_scores)
         assert verdict.score == 0.0
+
+    async def test_arbitrate_fires_only_near_a_cutoff(self):
+        # Luna's cutoffs are 5.8/2.6 but FakeModel falls back to the
+        # default 4.0/1.0. Mean 3.9 sits 0.1 from the advance line, inside
+        # ESCALATION_MARGIN, so the arbiter is worth calling.
+        near = self._models(self._single_pass_json(5.0, 3.7, 3.0))
+        verdict = await screen_one_single_pass(FIXTURE, JD, near, arbitrate=True)
+        assert verdict.escalated
+        assert len(near["arbiter"].calls) == 1
+
+    async def test_arbitrate_stays_quiet_far_from_a_cutoff(self):
+        # Mean 8.0: no ruling the arbiter could return crosses a cutoff.
+        far = self._models(self._single_pass_json(8.0, 8.0, 8.0))
+        verdict = await screen_one_single_pass(FIXTURE, JD, far, arbitrate=True)
+        assert not verdict.escalated
+        assert far["arbiter"].calls == []
+
+    async def test_arbiter_reads_the_dimension_rationales(self):
+        near = self._models(self._single_pass_json(5.0, 3.7, 3.0))
+        await screen_one_single_pass(FIXTURE, JD, near, arbitrate=True)
+        sent = near["arbiter"].calls[0]["user"]
+        assert "production_reality" in sent and "shipped" in sent
 
     async def test_usage_covers_extraction_and_the_single_call(self):
         models = self._models(self._single_pass_json())
