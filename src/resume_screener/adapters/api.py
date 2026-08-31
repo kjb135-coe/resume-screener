@@ -729,16 +729,52 @@ async def post_logout() -> JSONResponse:
 
 
 def load_decisions() -> dict[str, dict]:
+    """Decisions from disk, or from memory when the disk is not usable."""
     if DECISIONS_JSON.exists():
         try:
             return json.loads(DECISIONS_JSON.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             log.warning("reviewer_decisions.json is malformed; starting empty")
-    return {}
+    return dict(_DECISION_CACHE)
 
 
-def save_decisions(decisions: dict[str, dict]) -> None:
-    DECISIONS_JSON.write_text(json.dumps(decisions, indent=2, sort_keys=True), encoding="utf-8")
+# Reviewer decisions, held in memory as well as on disk.
+#
+# The file is the record; this is the fallback. A hosted deployment may
+# have a read-only or ephemeral filesystem, and losing a reviewer's work
+# because the disk refused a write -- with the UI reporting success --
+# would be the worst possible failure for the one feature that exists to
+# capture human judgment.
+_DECISION_CACHE: dict[str, dict] = {}
+_DISK_WRITABLE = True
+
+
+def save_decisions(decisions: dict[str, dict]) -> bool:
+    """Persist decisions. Returns whether they reached the disk.
+
+    Never raises. The caller has already accepted the reviewer's input;
+    failing the request at this point would discard it.
+    """
+    global _DISK_WRITABLE
+    _DECISION_CACHE.clear()
+    _DECISION_CACHE.update(decisions)
+    try:
+        DECISIONS_JSON.parent.mkdir(parents=True, exist_ok=True)
+        DECISIONS_JSON.write_text(
+            json.dumps(decisions, indent=2, sort_keys=True), encoding="utf-8"
+        )
+        _DISK_WRITABLE = True
+        return True
+    except OSError as exc:
+        if _DISK_WRITABLE:
+            log.warning(
+                "Could not write %s (%s). Decisions are kept in memory for this "
+                "process and will be lost on restart.",
+                DECISIONS_JSON,
+                exc,
+            )
+        _DISK_WRITABLE = False
+        return False
 
 
 class DecisionRequest(BaseModel):
@@ -766,8 +802,12 @@ async def post_decision(request: DecisionRequest) -> JSONResponse:
             "note": request.note.strip(),
             "at": datetime.now(UTC).isoformat(timespec="seconds"),
         }
-    save_decisions(decisions)
-    return JSONResponse({"ok": True, "decisions": decisions})
+    persisted = save_decisions(decisions)
+    # `persisted: false` means the decision is live for this process but
+    # will not survive a restart -- which on a free hosting tier happens
+    # after ~15 minutes idle. The UI says so rather than implying the
+    # reviewer's work is safe.
+    return JSONResponse({"ok": True, "persisted": persisted, "decisions": decisions})
 
 
 @app.get("/api/decisions")

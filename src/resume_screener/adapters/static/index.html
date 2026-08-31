@@ -264,6 +264,7 @@
   }
   .decide input[type=text]{flex:1;min-width:170px}
   .verdictline{font-size:13px;color:var(--muted);width:100%}
+    .ephemeral{color:#e0a060;font-size:.8rem;margin:0 0 8px;line-height:1.5}
   .verdictline b{color:var(--fg)}
   details{margin-top:18px}
   summary{cursor:pointer;color:var(--muted);font-size:13px;user-select:none}
@@ -492,6 +493,7 @@ const el = (tag, cls, text) => {
   return n;
 };
 const chip = (rec) => el("span", `chip ${rec}`, rec);
+let EPHEMERAL = false;
 
 /* How the verdict was reached, in the language the pipeline actually uses:
    the average of the panel, mapped by the cutoffs. Spread is deliberately
@@ -683,6 +685,12 @@ function decisionBlock(c, mount) {
   const wrap = el("div","decide");
   const existing = DECISIONS[c.file];
   const line = el("div","verdictline");
+  if (existing && EPHEMERAL) {
+    const warn = el("div","ephemeral",
+      "Saved for this session only — this deployment cannot write to disk, " +
+      "so verdicts are lost when the server restarts.");
+    wrap.append(warn);
+  }
   if (existing) {
     line.append(document.createTextNode("Your verdict: "));
     line.append(el("b",null,existing.decision));
@@ -701,7 +709,12 @@ function decisionBlock(c, mount) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ file: c.file, decision, note: note.value }),
       });
-      DECISIONS = (await res.json()).decisions;
+      const payload = await res.json();
+      DECISIONS = payload.decisions;
+      // Say so when a decision is only held in memory. On a free hosting
+      // tier the instance sleeps and the filesystem resets, so silently
+      // "saving" a reviewer's work would be a lie.
+      EPHEMERAL = payload.persisted === false;
       renderList();
       if (!$("view-queue").hidden) renderQueue();
       renderDetail(c, mount, { decide: true });

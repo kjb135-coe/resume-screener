@@ -67,7 +67,12 @@ is acceptable for a link someone opens once; `plan: starter` removes it.
   is the only throttle. Five known colleagues, one week — acceptable. A
   public link would need more.
 - **Reviewer decisions do not survive a restart** on the free plan. The
-  demo is read-mostly, so this is cosmetic.
+  filesystem is ephemeral and the instance sleeps after ~15 minutes idle,
+  so a verdict recorded in the morning is gone by the afternoon. The app
+  detects a failed write, keeps decisions in memory for that process, and
+  **says so in the review panel** rather than reporting a save that did
+  not happen. Attach a Render disk, or move decisions to Postgres, if
+  they need to last.
 - **Uploaded resumes are never persisted.** They are written to a temp
   path, read, and deleted in a `finally`. Someone's real resume is not
   ours to keep on a demo server.

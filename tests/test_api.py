@@ -873,3 +873,40 @@ class TestAccessPassword:
         # APP_PASSWORD="" in a deploy config must not mean "no password".
         monkeypatch.setenv("APP_PASSWORD", "")
         assert len(api._access_password()) >= 10
+
+
+class TestDecisionsSurviveAReadOnlyDisk:
+    """A hosted deployment may not be able to write.
+
+    Losing a reviewer's verdict because the filesystem refused -- while
+    the UI reported success -- would be the worst failure available in
+    the one feature that exists to capture human judgment.
+    """
+
+    def test_a_failed_write_does_not_raise(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(api, "DECISIONS_JSON", tmp_path / "nope" / "d.json")
+        monkeypatch.setattr(
+            api.Path, "write_text",
+            lambda *a, **k: (_ for _ in ()).throw(OSError("read-only file system")),
+        )
+        assert api.save_decisions({"a.md": {"decision": "reject"}}) is False
+
+    def test_decisions_stay_readable_after_a_failed_write(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(api, "DECISIONS_JSON", tmp_path / "missing.json")
+        monkeypatch.setattr(
+            api.Path, "write_text",
+            lambda *a, **k: (_ for _ in ()).throw(OSError("read-only file system")),
+        )
+        api.save_decisions({"a.md": {"decision": "approve", "note": "", "at": "now"}})
+        assert api.load_decisions()["a.md"]["decision"] == "approve"
+
+    def test_a_successful_write_reports_persisted(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(api, "DECISIONS_JSON", tmp_path / "d.json")
+        assert api.save_decisions({"a.md": {"decision": "reject"}}) is True
+
+    def test_the_endpoint_tells_the_page_which_happened(self, client):
+        body = client.post(
+            "/api/decision",
+            json={"file": "x.md", "decision": "reject", "note": ""},
+        ).json()
+        assert "persisted" in body, "the UI cannot warn about what it is not told"
