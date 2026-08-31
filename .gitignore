@@ -18,3 +18,12 @@ EMAIL_DRAFT.md
 
 # Reviewer decisions are local state, not a repo artifact
 data/reviewer_decisions.json
+
+# Working notes, not part of the deliverable
+PLAN.md
+STRUCTURE.md
+
+# Generated per-run reports. The narrative lives in docs/RESULTS_HISTORY.md
+# and the raw numbers in data/*.json; these are derived and bulky.
+docs/CANDIDATE_REPORTS.md
+docs/EVAL_RESULTS__*.md

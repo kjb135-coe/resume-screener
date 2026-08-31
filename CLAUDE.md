@@ -5,15 +5,13 @@ the detail lives in `PLAN.md`, which is the living status doc.
 
 ## What this is
 
-An AI resume screener, built as a **portfolio piece** for a remote AI
-Solutions Engineer role at Marco Technologies, sent as a follow-up after
-a second-round interview. The email is already out and links here, so
-**the README has to carry the entire pitch on its own** — assume the
-reader will not clone anything and may not scroll far.
+An AI resume screener. Reads a stack of resumes against a specific job
+posting, ranks them, and says which ones a person should look at first.
 
-That framing drives most decisions: honesty about what does not work is
-a feature, not a liability. The audience is engineers evaluating
-judgment, not a customer being sold to.
+**The README has to carry the whole thing on its own** — assume the
+reader will not clone anything and may not scroll far. Honesty about what
+does not work is a feature, not a liability: the audience is engineers
+evaluating judgment.
 
 ## Hard constraints
 
@@ -127,18 +125,13 @@ is read:
    attempts made it worse or moved nothing; `docs/SCORE_SCALE.md`
    explains why, and that is currently the better asset.
 
-`docs/ARCHITECTURE.md` is referenced but unwritten, and is lower priority
-than it looks — the README's "How it works" and `STRUCTURE.md` already
-cover most of it.
+
 
 ## Conventions
 
 - Run the app: `uvicorn resume_screener.adapters.api:app --reload`,
-  password `marco1`. It opens on a recorded run and costs nothing until
+  password `screener`. It opens on a recorded run and costs nothing until
   you submit a posting.
-- After adding or removing a file, run `scripts/update_structure.py` —
-  `STRUCTURE.md` is generated, and the file descriptions live in that
-  script, not in the doc.
 - `scripts/sweep_cutoffs.py` and `sweep_escalation.py` re-threshold
   recorded scores offline. Free. Use them before spending on a run.
 - Anything with `--tag <name>` writes to `data/eval_run__<tag>.json` and

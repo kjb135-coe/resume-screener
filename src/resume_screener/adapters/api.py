@@ -14,7 +14,7 @@ lives in the CLI, where whoever starts it knows they started it.
 
 **Identical postings are served from cache.** The posting is hashed; a
 repeat submission returns the stored run instantly and bills nothing. The
-bundled Marco posting maps to the recorded 60-resume eval run, so the
+bundled posting maps to the recorded 60-resume eval run, so the
 default demo path costs zero.
 
 **Screening is a job, not a request.** A minute-long blocking HTTP call
@@ -52,6 +52,7 @@ from resume_screener.adapters.budget import (
     MAX_RESUMES_PER_RUN,
     BudgetExceeded,
     budget,
+    explain_provider_failure,
 )
 from resume_screener.core.ingest import load_resume_text
 from resume_screener.core.models import Verdict
@@ -82,7 +83,7 @@ DECISIONS_JSON = REPO / "data" / "reviewer_decisions.json"
 # link is not an open invoice: every live screening call costs money, and
 # an ungated public page with an API key behind it is a page anyone can
 # spend from. See PLAN.md 11.
-ACCESS_PASSWORD = os.environ.get("APP_PASSWORD", "marco1")
+ACCESS_PASSWORD = os.environ.get("APP_PASSWORD", "screener")
 SESSION_COOKIE = "rs_session"
 
 DEFAULT_SAMPLE = 12
@@ -589,10 +590,12 @@ async def _run_screening(job_id: str, job_description: str, count: int) -> None:
     except RuntimeError as exc:
         # default_models() raises this when ANTHROPIC_API_KEY is unset.
         job["status"], job["error"] = "error", str(exc)
-    except Exception:
+    except Exception as exc:
         log.exception("Screening job %s failed", job_id)
         job["status"] = "error"
-        job["error"] = "Screening failed. Check the server log."
+        job["error"] = (
+            explain_provider_failure(exc) or "Screening failed. Check the server log."
+        )
 
 
 # --------------------------------------------------------------------------
@@ -988,10 +991,12 @@ async def post_screen_upload(
         return JSONResponse({"error": str(exc)}, status_code=422)
     except RuntimeError as exc:  # no API key
         return JSONResponse({"error": str(exc)}, status_code=503)
-    except Exception:
+    except Exception as exc:
         log.exception("Screening an uploaded resume failed")
+        friendly = explain_provider_failure(exc)
         return JSONResponse(
-            {"error": "Screening failed. Check the server log."}, status_code=500
+            {"error": friendly or "Screening failed. Check the server log."},
+            status_code=503 if friendly else 500,
         )
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)

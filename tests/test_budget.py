@@ -121,3 +121,38 @@ class TestDailyBudget:
         assert snap["spent_usd"] == pytest.approx(0.20)
         assert snap["remaining_usd"] == pytest.approx(2.80)
         assert "day" in snap and "max_resumes_per_run" in snap
+
+
+class TestProviderFailureMessages:
+    """Out of credit must not surface as "check the server log".
+
+    It fails per-request, so without this the page shows a message no
+    visitor can act on and the operator cannot see from outside. It
+    happened four times during development.
+    """
+
+    def _explain(self, text):
+        from resume_screener.adapters.budget import explain_provider_failure
+
+        return explain_provider_failure(RuntimeError(text))
+
+    def test_anthropic_out_of_credit(self):
+        msg = self._explain(
+            "Error code: 400 - {'error': {'message': 'Your credit balance is too "
+            "low to access the Anthropic API.'}}"
+        )
+        assert msg and "out of credit" in msg
+        assert "your resume" in msg, "must say it is not the visitor's fault"
+
+    def test_openai_quota_exhausted(self):
+        assert "out of credit" in self._explain("insufficient_quota: exceeded")
+
+    def test_bad_key_is_distinguished_from_no_money(self):
+        msg = self._explain("Error code: 401 - invalid_api_key")
+        assert msg and "not being accepted" in msg
+
+    def test_an_ordinary_failure_is_not_dressed_up(self):
+        # Only real billing/auth problems get a friendly message; anything
+        # else must keep its generic error so it is not hidden.
+        assert self._explain("Connection reset by peer") is None
+        assert self._explain("Malformed JSON in model response") is None

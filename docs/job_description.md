@@ -1,4 +1,4 @@
-# Target job description — AI Solutions Engineer, Marco Technologies
+# Target job description — AI Solutions Engineer
 
 Full text as provided 2026-08-25. This is the ground truth the rubric is
 built against — not a generic "AI engineer" template.
@@ -28,7 +28,7 @@ teams to bring AI solutions to life.
 - Engineer agentic systems with memory, tools, and orchestration,
   working alongside architects to bring advanced AI designs to life.
 - Help define the future Digital Workforce platform, delivering
-  solutions both internally at Marco and externally as client-facing
+  solutions both internally internally and externally as client-facing
   services.
 - Build and implement AI-driven solutions with a focus on LLMs,
   generative AI, AI agents, and automation platforms from leading

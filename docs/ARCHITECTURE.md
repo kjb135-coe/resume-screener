@@ -1,7 +1,6 @@
 # Architecture
 
-Why this is shaped the way it is. `STRUCTURE.md` says where files live;
-this says why they are arranged that way, and what each decision cost.
+Why this is shaped the way it is. This says why the code is arranged the way it is, and what each decision cost.
 
 ## The shape
 

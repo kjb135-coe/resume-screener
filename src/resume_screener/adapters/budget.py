@@ -132,3 +132,41 @@ class BudgetExceeded(RuntimeError):
 
 
 budget = DailyBudget()
+
+
+# Substrings that mean "the account cannot pay", across providers. Matched
+# on the exception text because neither SDK raises a distinct class for
+# it: Anthropic returns HTTP 400 per request with the reason in the body,
+# and OpenAI a 429 that reads the same as a rate limit.
+_OUT_OF_CREDIT = (
+    "credit balance is too low",
+    "insufficient_quota",
+    "exceeded your current quota",
+    "billing_hard_limit_reached",
+)
+_BAD_KEY = ("invalid_api_key", "invalid x-api-key", "incorrect api key", "unauthorized")
+
+
+def explain_provider_failure(exc: BaseException) -> str | None:
+    """A message a visitor can act on, or None if this is not that.
+
+    A run out of credit fails per-request, so without this the page shows
+    "Screening failed, check the server log" for something no visitor can
+    check and the operator cannot see from the outside. It happened four
+    times during development; each time the surface error said nothing
+    useful.
+    """
+    text = str(exc).lower()
+    if any(marker in text for marker in _OUT_OF_CREDIT):
+        return (
+            "The API account behind this site is out of credit, so nothing "
+            "can be scored right now. Nothing is wrong with your resume or "
+            "your posting. Try again later."
+        )
+    if any(marker in text for marker in _BAD_KEY):
+        return (
+            "The API key behind this site is not being accepted, so nothing "
+            "can be scored right now. This is a server configuration "
+            "problem, not something you did."
+        )
+    return None
