@@ -103,11 +103,40 @@ resume-screener rank data/synthetic_resumes docs/job_description.md --top 10
 
 ## Interfaces
 
-The same core runs behind three shells, none of which contain scoring logic:
+The same core runs behind three shells. None of them contain scoring logic — `core/` never imports from `adapters/`.
 
-- **MCP server** — 5 tools, so an assistant can screen and then ask follow-up questions about the batch
 - **CLI** — `rubric`, `screen`, `rank`
 - **Web app** — [`adapters/api.py`](src/resume_screener/adapters/api.py) plus one HTML file, no build step
+- **MCP server** — 5 tools, so an assistant can screen a batch and then ask follow-up questions about it
+
+### Using it as an MCP server
+
+Add this to `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`):
+
+```json
+{
+  "mcpServers": {
+    "resume-screener": {
+      "command": "/absolute/path/to/repo/.venv/bin/python",
+      "args": ["-m", "resume_screener.adapters.mcp_server"],
+      "env": {
+        "OPENAI_API_KEY": "sk-...",
+        "ANTHROPIC_API_KEY": "sk-ant-..."
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. For Claude Code instead:
+
+```bash
+claude mcp add resume-screener -- .venv/bin/python -m resume_screener.adapters.mcp_server
+```
+
+The tools are `preview_rubric`, `screen_resume`, `rank_pool`, `explain_verdict`, and `query_candidates`. The last one is why MCP is here rather than a REST endpoint: after ranking a pool it stays in session, so you can ask "who actually built with tools rather than just listing them" without re-screening anything.
+
+`chmod 600` that config file — it holds live keys in plaintext.
 
 ## Where to read next
 

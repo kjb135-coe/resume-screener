@@ -1034,3 +1034,41 @@ the measurement says that independence buys nothing.
   not 1 against 5.
 - 60 synthetic resumes, and the noise band does not separate the top two
   on accuracy alone.
+
+
+## Recorded run regenerated on the shipped architecture — 2026-08-31
+
+The site opens on `data/eval_run.json`, and that file was still the
+Sonnet cascade: macro-F1 **0.847**, 29 of 60 flagged for review. The
+README said 0.899 and 9 of 60. **The first thing any visitor saw
+contradicted the front page.**
+
+Re-run on the shipped configuration: **macro-F1 0.900, accuracy 0.900,
+12 of 60 escalated, $0.279.** That is inside the range the README
+quotes.
+
+### Two bugs the screenshot exposed
+
+**The adapter had a stale copy of the review rule.** `_review_reason` in
+`adapters/api.py` rebuilds the rule from a recorded run, because a run on
+disk is a dict and not a `Verdict`. When the trigger moved from panel
+disagreement to distance-to-cutoff, that copy kept flagging on
+`escalated` — so the recorded run showed 29 needing review where the live
+rule gives 9. Same corpus, same scores, one stale branch. It now uses
+`cutoffs_for` and the run's own `model_ids`, and a test pins that
+escalation alone no longer flags.
+
+**Citations were silently disappearing.** A model closes a quotation with
+a full stop the resume does not have: a bullet reading
+`...prediction validation` gets cited as `...prediction validation.` and
+then matches nothing. Combined with `bullets_from` always taking the
+first sentence — even when the quote sat in a later clause — this took
+candidates showing at least one citation from **58 of 60 down to 34**.
+
+No test failed and the UI showed nothing missing. On a product whose
+central claim is that every score shows the line it came from, a third of
+the stack was quietly showing prose with no evidence attached. Both are
+fixed and covered by 4 tests.
+
+**Neither would have been found without looking at the running site.**
+The test suite was green throughout.

@@ -127,10 +127,13 @@ class TestResults:
         for candidate in client.get("/api/results").json()["candidates"]:
             assert bool(candidate["needs_human_review"]) == bool(candidate["review_reason"])
 
-    def test_escalated_candidates_are_flagged(self, client):
+    def test_flagging_tracks_the_score_not_escalation(self, client):
+        # Escalation stopped implying review on 2026-08-31. What must hold
+        # is that the flag and its reason never disagree.
         for candidate in client.get("/api/results").json()["candidates"]:
-            if candidate["escalated"]:
-                assert candidate["needs_human_review"]
+            assert bool(candidate["needs_human_review"]) == bool(
+                candidate["review_reason"]
+            )
 
     def test_ground_truth_comparison_is_reported(self, client):
         body = client.get("/api/results").json()
@@ -462,30 +465,49 @@ class TestBulletsOnTheRecordedRun:
 
 
 class TestReviewReason:
-    def test_unreadable_response_takes_priority_over_escalation(self):
+    def test_unreadable_response_takes_priority(self):
         reason = api._review_reason(
             {"panel": [{"parse_failed": True, "score": 0.0}],
-             "escalated": True, "panel_spread": 4.0}
+             "score": 7.0, "predicted": "advance", "escalated": True}
         )
         assert "unreadable" in reason
 
-    def test_escalation_names_the_scores_that_disagreed(self):
-        """"Spread of 4.0" is an abstraction; the scores themselves show a
-        reader which agent dissented."""
+    def test_a_score_near_a_cutoff_is_flagged(self):
+        # Default cutoffs 4.0/1.0. A 3.9 sits 0.1 from the advance line,
+        # inside 12.5% of the 3.0-wide band.
         reason = api._review_reason({
-            "panel": [
-                {"parse_failed": False, "score": 9.0},
-                {"parse_failed": False, "score": 2.0},
-            ],
-            "escalated": True, "panel_spread": 7.0,
+            "panel": [{"parse_failed": False, "score": 3.9}],
+            "score": 3.9, "predicted": "hold", "escalated": False,
         })
-        assert "9.0" in reason and "2.0" in reason
+        assert reason and "3.9" in reason
 
-    def test_clean_agreeing_panel_needs_no_review(self):
+    def test_a_score_far_from_a_cutoff_is_not_flagged(self):
         assert api._review_reason(
             {"panel": [{"parse_failed": False, "score": 7.0}],
-             "escalated": False, "panel_spread": 0.5}
+             "score": 7.0, "predicted": "advance", "escalated": False}
         ) is None
+
+    def test_escalation_alone_no_longer_flags(self):
+        """This copy drifted once and it cost the front page.
+
+        After the review trigger moved from panel disagreement to
+        distance-to-cutoff, this rebuilt-from-disk copy kept flagging on
+        `escalated`, and the recorded run showed 29 of 60 needing review
+        where the live rule gives 9.
+        """
+        assert api._review_reason(
+            {"panel": [{"parse_failed": False, "score": 9.0},
+                       {"parse_failed": False, "score": 2.0}],
+             "score": 7.0, "predicted": "advance", "escalated": True}
+        ) is None
+
+    def test_it_uses_the_runs_own_model_cutoffs(self):
+        # 3.9 is borderline on the default 4.0/1.0 scale and mid-band on
+        # Luna's 5.8/2.6, so the same score must flag differently.
+        row = {"panel": [{"parse_failed": False, "score": 3.9}],
+               "score": 3.9, "predicted": "hold", "escalated": False}
+        assert api._review_reason(row) is not None
+        assert api._review_reason(row, {"panel": "gpt-5.6-luna"}) is None
 
 
 class TestRubricEndpoint:
@@ -788,3 +810,41 @@ class TestStats:
     def test_archetype_breakdown_is_sorted_worst_first(self, client):
         rows = client.get("/api/stats").json()["by_archetype"]
         assert rows == sorted(rows, key=lambda r: r["accuracy"])
+
+
+class TestCitationMatching:
+    """A quote that is in the resume must be found in the resume.
+
+    The product's central claim is that every score shows the line it came
+    from. Two bugs broke that quietly on the recorded run, taking
+    citations from 58 of 60 candidates down to 34, with no test failing
+    and nothing in the UI to indicate anything was missing.
+    """
+
+    RESUME = "## Experience\n\n- Developing machine learning approaches for validation\n- Shipped it\n"
+
+    def test_a_trailing_full_stop_does_not_break_the_match(self):
+        # Models close a quotation with a period the resume does not have.
+        sections = api._resume_sections(self.RESUME)
+        assert api._locate("Developing machine learning approaches for validation.", sections)
+        assert api._locate("Developing machine learning approaches for validation", sections)
+
+    def test_a_quote_that_is_genuinely_absent_still_returns_none(self):
+        # Stripping punctuation must not turn paraphrase into citation.
+        sections = api._resume_sections(self.RESUME)
+        assert api._locate("Led a team of forty engineers.", sections) is None
+
+    def test_a_citation_in_a_later_clause_is_still_surfaced(self):
+        # bullets_from returns one bullet. Taking the first sentence
+        # unconditionally threw the citation away when the quote landed
+        # later in the rationale.
+        rationale = (
+            "This is research, not production. The evidence says "
+            '"Developing machine learning approaches for validation" only.'
+        )
+        bullets = api.bullets_from(rationale, self.RESUME)
+        assert bullets and bullets[0]["citations"], "the citing sentence must win"
+
+    def test_still_returns_prose_when_nothing_can_be_cited(self):
+        bullets = api.bullets_from("No evidence at all.", self.RESUME)
+        assert bullets and bullets[0]["citations"] == []

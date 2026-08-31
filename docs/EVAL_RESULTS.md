@@ -2,33 +2,35 @@
 
 60 of 60 resumes scored. Prompt caching: on.
 
-> **Generated file — the two cost rows below are stale.** This report was
-> written before the pricing table in `scripts/evaluate.py` was corrected
-> on 2026-08-27, so it prices Sonnet 5 at Sonnet 4.6 rates. Real cost for
-> this run is about **$1.20 total / $0.020 per resume**. Re-running
-> `scripts/evaluate.py` regenerates this file with correct rates. Every
-> other number here is accurate. See `docs/COST_ANALYSIS.md`.
-
 ## Headline
 
 | Metric | Value |
 |---|---|
-| **Macro-F1** | **0.847** |
-| Accuracy | 0.850 |
-| Escalated to arbiter | 28/60 (47%) |
-| Flagged for human review | 29/60 (48%) |
-| Cost per resume | $0.0299 |
-| Total cost | $1.796 |
-| Latency p50 / p95 (model time) | 19.4s / 32.9s |
-| Wall clock, whole batch | 168s |
+| **Macro-F1** | **0.900** |
+| Accuracy | 0.900 |
+| Escalated to arbiter | 12/60 (20%) |
+| Flagged for human review | 8/60 (13%) |
+| Cost per resume | $0.0047 |
+| Total cost | $0.279 |
+
+## Cost by model
+
+Priced per model that actually spent the tokens. This used to be billed entirely at the first model in the cascade -- Haiku -- which understated real spend several-fold.
+
+| Model | Cost | Share |
+|---|---|---|
+| `claude-haiku-4-5-20251001` | $0.247 | 89% |
+| `gpt-5.6-luna` | $0.032 | 11% |
+| Latency p50 / p95 (model time) | 7.7s / 11.2s |
+| Wall clock, whole batch | 98s |
 
 ## Per class
 
 | Class | Precision | Recall | F1 | Support |
 |---|---|---|---|---|
-| advance | 1.000 | 0.900 | 0.947 | 20 |
-| hold | 0.867 | 0.650 | 0.743 | 20 |
-| reject | 0.741 | 1.000 | 0.851 | 20 |
+| advance | 0.900 | 0.900 | 0.900 | 20 |
+| hold | 0.895 | 0.850 | 0.872 | 20 |
+| reject | 0.905 | 0.950 | 0.927 | 20 |
 
 ## Confusion matrix
 
@@ -36,9 +38,9 @@ Rows are ground truth, columns are predictions.
 
 | | pred advance | pred hold | pred reject |
 |---|---|---|---|
-| **true advance** | 18 | 2 | 0 |
-| **true hold** | 0 | 13 | 7 |
-| **true reject** | 0 | 0 | 20 |
+| **true advance** | 18 | 1 | 1 |
+| **true hold** | 2 | 17 | 1 |
+| **true reject** | 0 | 1 | 19 |
 
 ## Accuracy by archetype
 
@@ -46,77 +48,77 @@ This is the diagnostic that matters most — a headline number can look fine whi
 
 | Archetype | Correct | Accuracy |
 |---|---|---|
-| production_light_ai | 1/7 | 14% |
-| adjacent_shipper | 4/6 | 67% |
-| demo_specialist | 6/7 | 86% |
+| early_career | 3/6 | 50% |
+| quiet_builder | 5/7 | 71% |
+| wrong_domain | 6/7 | 86% |
 | academic_researcher | 6/6 | 100% |
-| early_career | 6/6 | 100% |
+| adjacent_shipper | 6/6 | 100% |
+| demo_specialist | 7/7 | 100% |
 | keyword_stuffer | 7/7 | 100% |
 | production_generalist | 7/7 | 100% |
-| quiet_builder | 7/7 | 100% |
-| wrong_domain | 7/7 | 100% |
+| production_light_ai | 7/7 | 100% |
 
 ## Every candidate
 
 | Candidate | Archetype | Expected | Predicted | Score | Spread | Arbiter | Reasoning |
 |---|---|---|---|---|---|---|---|
-| Cormac Delaney | production_generalist | advance | advance | 7.8 | 7.0 | yes | Averaging the panel's dimension scores with the rubric's emphasis on production reality and technical/integration depth as primary criteria: Production reality (9.0, conf 0.7) is well-supported by concrete, scaled, live-system evidence —... |
-| Rafael Duarte | production_generalist | advance | advance | 7.3 | 5.0 | no | [production_reality] Multiple quotes describe systems that shipped and are actively used at scale, not demos: "now handles 12K+ documents daily across 40+ enterprise clients with 99.2% uptime," "deployed to production serving 60+ interna... |
-| Lucas Ferreira | production_generalist | advance | advance | 6.8 | 9.0 | yes | Weighting the three panel dimensions per the posting's emphasis (production reality and technical/integration depth as primary, client-facing signal as a differentiator but not disqualifying): Production reality scores strongly on quoted... |
-| Fatima Zahra | production_generalist | advance | advance | 6.7 | 5.0 | no | [production_reality] The evidence describes a deployed, operating system with production infrastructure — "6 years building and operating production agent systems" and "Deployed agentic system on AWS using ECS with auto-scaling; managed ... |
-| Oscar Nakamura | production_generalist | advance | advance | 6.3 | 8.0 | yes | Production reality and technical/integration depth both score strongly and consistently across panelists, anchored in concrete quotes: "Built and deployed a multi-agent orchestration system" processing "approximately 12,000 shipment even... |
-| Anjali Deshmukh | production_generalist | advance | advance | 6.0 | 8.0 | yes | Weighting the three dimensions per the job description: production_reality (9.0, conf 0.85) is well-supported with direct quotes like "Designed and deployed autonomous order management agent serving 12,000+ daily transactions across 8 re... |
-| Delphine Aubert | production_generalist | advance | advance | 6.0 | 8.0 | yes | Weighting the three dimensions as the rubric specifies, but the technical_integration panelist's rationale did not parse, leaving that axis largely unsubstantiated. Production reality is strong and well-evidenced: "Built and shipped an a... |
-| Sana Qureshi | quiet_builder | advance | advance | 6.0 | 8.0 | yes | Averaging the three dimension scores per the rubric's weighting: production_reality (8.0) is well-supported by specific, scaled claims like "Built and maintained core recommendation engine serving 12M+ daily active users" and "Engineered... |
-| Bennett Cross | adjacent_shipper | advance | advance | 5.7 | 7.0 | yes | Averaging the panel's three dimension scores with the posting's own emphasis in mind. Production reality (8.0, conf .75) is well supported: "Architected and deployed a multi-agent document analysis service for compliance workflows... sys... |
-| Dele Adeyemi | adjacent_shipper | advance | advance | 5.5 | 8.0 | yes | Weighting the three dimensions as the rubric specifies: production_reality is strongly supported by concrete, quantified operational evidence — "processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehou... |
-| Elena Vasquez | quiet_builder | advance | advance | 5.5 | 7.0 | yes | Averaging across the three panel dimensions with the posting's own weighting: production reality is well-evidenced by concrete operational metrics ("processing 2.3M images daily with 94% first-pass accuracy," "reduced manual review queue... |
-| Tobias Reinhardt | quiet_builder | advance | advance | 5.5 | 7.0 | yes | Averaging the three panel dimensions with weighting toward production reality and technical depth (as the rubric instructs), while treating client-facing absence as a real but not disqualifying gap. Production reality evidence is solid b... |
-| Sofia Marchetti | adjacent_shipper | advance | advance | 5.3 | 7.0 | yes | Weighting the three dimensions per the job description's own emphasis (production deployment and agentic/technical integration are the core requirements, client-facing signal is an explicit but secondary differentiator): Production reali... |
-| Ewan Brackenridge | quiet_builder | advance | advance | 5.0 | 6.0 | yes | Averaging the panel's assessments: production_reality (6.0) is supported by concrete operational quotes — "monitors production deployments in real-time" and "automated incident remediation that uses LLM reasoning to execute pre-approved ... |
-| Mateo Guzman | quiet_builder | advance | advance | 5.0 | 8.0 | yes | Weighting the three dimensions per the rubric's emphasis on this posting's specific profile: Production reality (8.0, conf 0.7) is well-supported — quotes like 'processes 50,000+ chemical structures daily,' 'currently serving 150+ daily ... |
-| Bruno Salvatore | adjacent_shipper | advance | advance | 4.7 | 6.0 | yes | Weighting the three dimensions per the job's emphasis: production_reality (7.0, conf 0.55) is reasonably well-supported by direct quotes — "serving 2.8M monthly shoppers," integration "via REST APIs" with named platforms, and "processing... |
-| Astrid Bergman | quiet_builder | advance | advance | 4.0 | 6.0 | yes | Weighting the three dimensions per the rubric's emphasis on production reality and technical depth, with client-facing signal being the hardest to find and largely absent here: Production reality shows plausible production-scale metrics ... |
-| Hugo Lindqvist | quiet_builder | advance | advance | 4.0 | 6.0 | yes | Production reality: solid non-AI production evidence — 'REST and gRPC APIs supporting warehouse management system used by 340+ facilities moving 8M pallets annually' and '<300ms latency across 12 regional databases with 99.98% uptime' sh... |
-| Julius Amankwah | adjacent_shipper | advance | hold ⚠ | 3.7 | 6.0 | yes | Weighting the three dimensions per the job description's own emphasis: production reality is reasonably well supported ("an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians acros... |
-| Keiko Yamashita | adjacent_shipper | advance | hold ⚠ | 3.5 | 7.0 | yes | The panel's dimension scores diverge sharply because the evidence base is uneven: strong on infrastructure/production claims, weak on the posting's specific agentic-system requirements, and absent on client-facing signal. Production real... |
-| Ingrid Solberg | early_career | hold | hold | 3.5 | 3.0 | yes | Averaging across the panel's dimension-specific findings, weighted per the rubric's emphasis on production reality and technical depth over client-facing signal: (1) Production reality: strong evidence exists for non-AI systems at scale ... |
-| Zainab Iqbal | demo_specialist | hold | hold | 2.5 | 5.0 | yes | Evidence such as 'Architected multi-agent framework for automating bill summary generation and legislative impact analysis using GPT-4 and Claude with dynamic routing logic' and 'Implemented RAG pipeline integrating 50,000+ archived legi... |
-| Andres Villalobos | early_career | hold | hold | 2.3 | 2.0 | no | [production_reality] There is genuine production evidence — the workflow "runs daily across roughly 2,000 facilities, handling approximately 50,000 documents per day" — but this describes an ETL/data pipeline, not an agentic AI system wi... |
-| Vera Klimenko | early_career | hold | hold | 2.3 | 3.0 | yes | Weighting the three dimensions per the rubric's emphasis on this posting's specific profile: Production reality (4.0, conf 0.6) is credible but narrow — evidence like "integrated OpenAI API to auto-classify permit types, reducing manual ... |
-| Beatrix Hollowell | demo_specialist | hold | hold | 2.0 | 5.0 | yes | Weighting production reality heavily per the rubric's instruction: evidence consistently frames work in benchmark/eval terms — "89.2% accuracy on internal eval set," "measured latency at 340ms per request on benchmarking hardware," "mult... |
-| Mei-Lin Chow | demo_specialist | hold | hold | 2.0 | 3.0 | yes | The evidence centers on benchmark and evaluation metrics ('94.7% F1 on internal benchmark dataset', '99.2% accuracy on evaluation set', 'improved baseline accuracy from 87% to 92.3%') rather than deployed systems used by real users — the... |
-| Rina Matsumoto | demo_specialist | hold | hold | 2.0 | 3.0 | yes | Weighting production reality most heavily per the rubric: evidence is dominated by benchmark/eval metrics ("benchmarked at 78% tool selection accuracy on held-out test set", "measured 87% semantic correctness on internal eval set", "83% ... |
-| Saoirse Lachlan | demo_specialist | hold | hold | 2.0 | 3.0 | yes | Averaging the three panel dimensions with the posting's explicit emphasis on production deployment: Production reality scored 2.0 because evidence describes benchmarked systems ("94% retrieval accuracy," "87% accuracy on held-out test be... |
-| Rohan Malhotra | early_career | hold | hold | 2.0 | 3.0 | yes | Averaging across the three panel dimensions with the posting's own weighting (production reality and technical/agentic depth as primary, client-facing as a differentiator): Production reality (3.0) shows genuine shipped backend work ('re... |
-| Jonah Steinberg | early_career | hold | hold | 1.7 | 3.0 | yes | Weighted synthesis of the three dimensions per the rubric. Production reality (score 3, confidence 0.6): infrastructure evidence like "Developed monitoring and alerting for build infrastructure using Prometheus and Grafana" and "Maintain... |
-| Hana Novak | demo_specialist | hold | hold | 1.5 | 5.0 | yes | Weighting production reality heavily per the job description's explicit emphasis ("not demos or prototypes, but systems used in production"), the candidate's evidence is uniformly research/academic in nature: "Architected multi-agent fra... |
-| Chiara Bellini | early_career | hold | hold | 1.3 | 1.0 | no | [production_reality] The evidence describes pre-production and support-adjacent work — "Tested and documented integration between legacy inventory database and new LLM-powered demand forecasting tool; identified 3 critical data mapping i... |
-| Larissa Petrov | production_light_ai | hold | hold | 1.3 | 1.0 | no | [production_reality] The evidence shows strong production infrastructure experience ("Built and maintained the infrastructure backbone for a distributed API gateway serving 2.8M requests per day", "Managed production Kubernetes clusters ... |
-| Ravi Chandrasekar | academic_researcher | reject | reject | 0.7 | 1.0 | no | [production_reality] All evidence describes research and academic outputs — an internal benchmark ('achieved 91.2% F1 on internal NILT-Policy-2025 benchmark with 847 manually annotated documents'), publications ('Published "Multilingual ... |
-| Tomas Herrera | academic_researcher | reject | reject | 0.7 | 1.0 | no | [production_reality] All evidence describes research/publication work — e.g., "Published primary dissertation work as 'Sequential Embeddings for E-Commerce Product Graphs' in ACM Transactions on Information Systems" and "Published findin... |
-| Amara Nwosu | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] The evidence consists entirely of job titles/dates ("Senior AI Solutions Architect \| Oregon Department of Administrative Services") and bare technology lists ("GPT-4, Claude API, LangChain, LlamaIndex"; "Azure OpenA... |
-| Dashiell Monroe | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] The evidence consists entirely of skills lines and title/date fragments (e.g., "Large language models (LLMs), GPT-4, Claude, and prompt engineering frameworks" and "Payment processing APIs: Stripe, Square, and intern... |
-| Isaac Mwangi | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] The evidence consists entirely of job titles, dates, and skill/tool lists such as "ChatGPT, GPT-4, Claude, LangChain, LlamaIndex" and "Vector database implementations, RAG system components" with no sentence describi... |
-| Omar Benali | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] Every piece of evidence is a bare noun-phrase or skills-list fragment—e.g. "Large language models, generative AI frameworks, RAG systems, vector databases, semantic search" and "Claude API, GPT-4, LangChain integrati... |
-| Signe Aalborg | production_light_ai | hold | reject ⚠ | 0.7 | 1.0 | no | [production_reality] The evidence describes strong production engineering ("99.97% uptime SLA", "on-call rotation covers 24/7 operations for three production services", "Kubernetes" scaling) but none of it involves AI/LLM/agentic systems... |
-| Devon Whitaker | academic_researcher | reject | reject | 0.3 | 1.0 | no | [production_reality] All evidence describes academic research and publication output—e.g., "Contributed to three peer-reviewed publications on uncertainty quantification in structural biology" and "Thesis defended with distinction on dee... |
-| Freya Ashcombe | academic_researcher | reject | reject | 0.3 | 1.0 | no | [production_reality] Every quote describes benchmark evaluation, publication, or academic research—e.g. "evaluated on benchmark dataset of 15,000+ real-world inventory trajectories," "published... in Proceedings of NeurIPS 2023," and "re... |
-| Kwame Asante | academic_researcher | reject | reject | 0.3 | 1.0 | no | [production_reality] Every quote describes research artifacts—"synthetic transaction datasets," "published research... in preprint phase," "4 peer-reviewed papers," "designed evaluation framework for anomaly detection models across 7 pub... |
-| Yuki Tanaka | keyword_stuffer | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence consists entirely of job titles, degree information, and skills/tool lists—e.g., "AI & Machine Learning: LangChain, LlamaIndex, Hugging Face Transformers, OpenAI API..." and "Kubernetes clusters and cont... |
-| Lars Thorvaldsen | production_light_ai | hold | reject ⚠ | 0.3 | 1.0 | no | [production_reality] The evidence shows strong production engineering credentials in logistics/supply-chain systems—"Led redesign of order-routing microservices handling 180K shipments daily" and "Managed 4-person on-call team; establish... |
-| Wren Sutcliffe | production_light_ai | hold | reject ⚠ | 0.3 | 1.0 | no | [production_reality] The evidence describes production infrastructure and reliability engineering work ("achieved 99.95% uptime SLA and reduced MTTR from 45 minutes to 12 minutes", "Implemented comprehensive monitoring stack across 40+ s... |
-| Grace Okonkwo | wrong_domain | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence describes infrastructure/DevOps work—GitLab Runner on Kubernetes, EKS cluster management, Terraform automation, Prometheus/Grafana monitoring, OPA policy-as-code, and cloud cost auditing—with none of it ... |
-| Imani Robinson | wrong_domain | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence describes a Payment Operations Specialist role with internal tooling like "Built internal dashboard using SQL and Tableau for real-time reconciliation reporting" and "Automated routine reporting tasks us... |
-| Malik Johnson | wrong_domain | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence describes a Senior Data Analyst/BI career in healthcare reporting (SQL reports, EHR queries, a Snowflake migration validation), with zero mentions of AI, LLMs, agentic systems, or any production AI deplo... |
-| Nadia Haddad | wrong_domain | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence describes only traditional IT operations/help desk work — "Manage infrastructure and systems support for 120+ internal users" and "Deployed patches and security updates on 180 desktop and laptop systems"... |
-| Tariq Mansour | wrong_domain | reject | reject | 0.3 | 1.0 | no | [production_reality] The evidence describes production data/analytics work like SQL troubleshooting, Tableau dashboards, ETL pipelines, and an AWS migration ('Supported migration of legacy systems to AWS, ensuring zero downtime during tr... |
-| Marcus Feldman | academic_researcher | reject | reject | 0.0 | 0.0 | no | [production_reality] All evidence describes research and benchmarking work — "published results on MLPerf and SPEC benchmarks" and "benchmarked against PyTorch and JAX on synthetic operator graphs" — with no mention of deployment, users,... |
-| Priya Raghunathan | demo_specialist | hold | reject ⚠ | 0.0 | 0.0 | no | [production_reality] No rationale returned. \| [technical_integration] No rationale returned. \| [client_communication] None of the provided evidence mentions explaining work to non-technical audiences, client engagement, or cross-functi... |
-| Aleksandr Volkov | keyword_stuffer | reject | reject | 0.0 | 0.0 | no | [production_reality] Every quote uses exploratory/advisory language—"roadmap development," "strategic assessment," "exploration," "tool comparison matrices"—which describes research and evaluation activity, not systems that shipped or ar... |
-| Rosalind Pike | keyword_stuffer | reject | reject | 0.0 | 0.0 | no | [production_reality] The evidence consists entirely of job titles, dates, and long lists of tools/technologies (e.g., "ChatGPT, Claude, Gemini, LLaMA, Mistral... LangChain, LlamaIndex, RAG frameworks") with no sentences describing what w... |
-| Camila Restrepo | production_light_ai | hold | reject ⚠ | 0.0 | 0.0 | no | [production_reality] None of the evidence mentions AI, LLMs, agentic systems, memory/tools/orchestration, or GenAI at all—it describes production infrastructure work like "Architect and maintain distributed video streaming infrastructure... |
-| Emil Kowalczyk | production_light_ai | hold | reject ⚠ | 0.0 | 0.0 | no | [production_reality] The evidence describes production infrastructure and DevOps work — Kubernetes clusters, disaster recovery, database optimization, monitoring — with strong operational rigor ("Manage Kubernetes cluster infrastructure ... |
-| Theo Vandenberg | production_light_ai | hold | reject ⚠ | 0.0 | 0.0 | no | [production_reality] The evidence describes production infrastructure engineering (payment processing, Kubernetes, PostgreSQL, AWS cost optimization) with strong operational rigor, e.g. "maintained 99.97% uptime SLA through systematic re... |
-| Claire Fontaine | wrong_domain | reject | reject | 0.0 | 0.0 | no | [production_reality] The evidence describes QA/testing work ("Developed and maintained automated test suites using Selenium and Appium, reducing regression testing time by 35%" and "Built automated test framework in Python to validate fi... |
-| Nia Carrington | wrong_domain | reject | reject | 0.0 | 0.0 | no | [production_reality] The evidence describes a supply chain professional building Excel/SQL dashboards and inventory forecasting ('Developed automated reporting dashboard in Excel/SQL that tracks KPIs for 15 distribution centers' and 'Red... |
+| Delphine Aubert | production_generalist | advance | advance | 9.3 | 2.0 | no | [production_reality] The strongest evidence is: "Built and shipped an autonomous content recommendation agent serving Nexus's streaming platform to 2.8M monthly active users." \| [technical_integration] The strongest evidence is: "Develo... |
+| Rafael Duarte | production_generalist | advance | advance | 9.3 | 2.0 | no | [production_reality] The candidate demonstrates substantial production ownership, including that they "Architected and shipped multi-agent workflow system for document processing; now handles 12K+ documents daily across 40+ enterprise cl... |
+| Fatima Zahra | production_generalist | advance | advance | 8.7 | 2.0 | no | [production_reality] The evidence states, "AI engineer with 6 years building and operating production agent systems in government and public sector contexts," supported by deployment on AWS with auto-scaling, though it does not explicitl... |
+| Bennett Cross | adjacent_shipper | advance | advance | 7.0 | 8.0 | yes | The candidate has strong production and technical evidence: "Architected and deployed a multi-agent document analysis service for compliance workflows, integrating Claude API with internal document retrieval system; system processes 15,0... |
+| Bruno Salvatore | adjacent_shipper | advance | advance | 7.0 | 5.0 | no | [production_reality] The strongest production evidence is "Built and deployed an LLM-powered product recommendation agent serving 2.8M monthly shoppers." \| [technical_integration] The strongest technical evidence is "Engineered the agen... |
+| Ewan Brackenridge | quiet_builder | advance | advance | 7.0 | 9.0 | yes | The candidate shows strong hands-on agentic engineering and production relevance, especially having "Built an agentic system for automated incident remediation that uses LLM reasoning to execute pre-approved infrastructure operations." H... |
+| Dele Adeyemi | adjacent_shipper | advance | advance | 6.7 | 7.0 | no | [production_reality] The evidence strongly demonstrates production use: "Architected and deployed an LLM-powered shipment exception handler that processes 8,000+ daily alerts, reducing manual triage time by 72% across 12 regional warehou... |
+| Anjali Deshmukh | production_generalist | advance | advance | 6.7 | 9.0 | no | [production_reality] The strongest production evidence is: "Designed and deployed autonomous order management agent serving 12,000+ daily transactions across 8 retail partners; agent uses tool calling to query inventory APIs, trigger ful... |
+| Cormac Delaney | production_generalist | advance | advance | 6.7 | 10.0 | no | [production_reality] The strongest evidence is: "Shipped customer dispute resolution agent to production, handling 150K+ disputes monthly with 89% autonomous resolution rate." \| [technical_integration] The strongest evidence is: "Implem... |
+| Lucas Ferreira | production_generalist | advance | advance | 6.7 | 10.0 | no | [production_reality] The candidate demonstrates substantial production ownership, including being "On-call for production incidents; established monitoring dashboards tracking agent hallucination rates and API latency." \| [technical_int... |
+| Tobias Reinhardt | quiet_builder | advance | advance | 6.7 | 7.0 | no | [production_reality] The candidate provides strong production-scale evidence: "Architected and deployed production LLM-powered product description generation system processing 180K+ merchandise items monthly". \| [technical_integration] ... |
+| Julius Amankwah | adjacent_shipper | advance | advance | 6.3 | 6.0 | no | [production_reality] The strongest production evidence is that they "Led the design and launch of an LLM-powered clinical documentation assistant that automates medical note generation for over 800 physicians across Meridian's network." ... |
+| Sofia Marchetti | adjacent_shipper | advance | advance | 6.3 | 7.0 | no | [production_reality] The evidence strongly demonstrates production ownership because the candidate "Architected and deployed an LLM-powered claims processing agent serving 40,000+ monthly users; integrates Claude API with legacy COBOL sy... |
+| Andres Villalobos | early_career | hold | advance ⚠ | 6.3 | 1.0 | no | [production_reality] The strongest production signal is: "I work within the clinical data integration team on the PatientSync platform, a system that processes electronic health records from hospital networks across the Southwest region.... |
+| Oscar Nakamura | production_generalist | advance | advance | 6.3 | 10.0 | no | [production_reality] The strongest production evidence is: "I now spend roughly 20% of my time on-call managing agent behavior anomalies and iterating on prompt refinements based on production telemetry." \| [technical_integration] The c... |
+| Mateo Guzman | quiet_builder | advance | advance | 6.3 | 8.0 | no | [production_reality] The candidate demonstrates substantial production usage and operational reliability, stating, "Built RAG system with vector embeddings to enable researchers to query historical trial results—currently serving 150+ da... |
+| Keiko Yamashita | adjacent_shipper | advance | advance | 6.0 | 10.0 | yes | The candidate has strong production and technical evidence, having "Architected and shipped real-time transaction dispute resolution agent serving 50K+ daily users, integrating GPT-4 with internal risk models via API layer." However, no ... |
+| Vera Klimenko | early_career | hold | advance ⚠ | 6.0 | 1.0 | yes | The candidate shows meaningful applied AI and integration experience through a system that "ingested 500+ permit applications monthly" and "integrated OpenAI API to auto-classify permit types," but the evidence does not establish product... |
+| Astrid Bergman | quiet_builder | advance | advance | 6.0 | 7.0 | yes | The candidate shows strong technical relevance and meaningful production scale through “Implemented agentic settlement workflow using Claude API with tool use for dispute resolution” and an engine processing “2.3M+ daily settlement recor... |
+| Elena Vasquez | quiet_builder | advance | advance | 6.0 | 8.0 | yes | The candidate shows strong technical depth through “Engineered LLM-powered claim summarization agent that processes 15k documents per day; integrated with legacy SOAP APIs through custom adapter layer,” but the evidence does not explicit... |
+| Rina Matsumoto | demo_specialist | hold | hold | 5.5 | 8.0 | yes | The candidate shows strong agentic engineering depth, especially a "function-calling orchestration layer enabling tool composition across 40+ API integrations," but the evidence does not establish production operation with real users or ... |
+| Ingrid Solberg | early_career | hold | hold | 5.0 | 5.0 | no | [production_reality] The strongest production evidence is that the audit system "now generates compliance reports consumed by six Fortune 500 financial institutions monthly." \| [technical_integration] The clearest AI implementation evid... |
+| Rohan Malhotra | early_career | hold | hold | 5.0 | 5.0 | no | [production_reality] The strongest production evidence is: "I built out the instrumentation and logging for the recommendation service to better track cache hit rates and model inference timing, making it easier for the team to debug per... |
+| Larissa Petrov | production_light_ai | hold | hold | 5.0 | 7.0 | no | [production_reality] Strong production evidence is shown by "Managed production Kubernetes clusters handling 1.2TB/day of streaming data". \| [technical_integration] The only direct AI integration evidence is limited to "integrated a bas... |
+| Hugo Lindqvist | quiet_builder | advance | hold ⚠ | 5.0 | 8.0 | no | [production_reality] The evidence strongly supports production ownership through "Developed REST and gRPC APIs supporting warehouse management system used by 340+ facilities moving 8M pallets annually". \| [technical_integration] The can... |
+| Hana Novak | demo_specialist | hold | hold | 4.7 | 4.0 | no | [production_reality] The evidence shows substantial engineering work but does not establish production deployment or operational ownership, with the strongest relevant claim being "Architected multi-agent framework for clinical decision ... |
+| Emil Kowalczyk | production_light_ai | hold | hold | 4.7 | 7.0 | no | [production_reality] Strong production evidence is shown by "On-call rotation lead; handled 200+ production incidents annually with average resolution time of 18 minutes". \| [technical_integration] The evidence demonstrates substantial ... |
+| Lars Thorvaldsen | production_light_ai | hold | hold | 4.3 | 8.0 | no | [production_reality] The candidate demonstrates substantial production ownership through "Production engineering leader with 7 years building and operating mission-critical logistics and supply-chain systems at scale". \| [technical_inte... |
+| Theo Vandenberg | production_light_ai | hold | hold | 4.3 | 9.0 | no | [production_reality] The strongest production evidence is: "Architected and operated payment processing infrastructure handling 2.3M transactions daily across 47 regions; designed circuit breaker patterns reducing cascading failures by 9... |
+| Mei-Lin Chow | demo_specialist | hold | hold | 4.0 | 5.0 | no | [production_reality] The evidence describes evaluation results rather than shipped systems, stating that the agent had "99.2% accuracy on evaluation set." \| [technical_integration] The candidate demonstrates hands-on agentic API integra... |
+| Signe Aalborg | production_light_ai | hold | hold | 4.0 | 8.0 | no | [production_reality] The evidence strongly demonstrates production ownership through "Built real-time monitoring and alerting infrastructure using Prometheus and Grafana; on-call rotation covers 24/7 operations for three production servi... |
+| Wren Sutcliffe | production_light_ai | hold | hold | 4.0 | 8.0 | no | [production_reality] Strong production evidence is shown by "Architected and deployed a multi-region e-commerce platform handling 8,000+ concurrent users during peak sales events; reduced latency from 450ms to 180ms through strategic Clo... |
+| Beatrix Hollowell | demo_specialist | hold | hold | 3.7 | 9.0 | no | [production_reality] The evidence describes advanced development but does not establish production deployment or operational use, stating only that the candidate "Developed multi-agent retrieval-augmented generation (RAG) framework for p... |
+| Priya Raghunathan | demo_specialist | hold | hold | 3.7 | 8.0 | no | [production_reality] The evidence shows substantial implementation work but no production deployment, operational ownership, or real-user usage, with the strongest context being "Senior ML Engineer, Luminous Media Labs \| San Francisco, ... |
+| Saoirse Lachlan | demo_specialist | hold | hold | 3.3 | 8.0 | no | [production_reality] The evidence describes evaluated and optimized systems but does not establish production deployment or operational use, as shown by "achieving 94% retrieval accuracy on a curated eval set of 500 supply chain queries.... |
+| Camila Restrepo | production_light_ai | hold | hold | 3.3 | 8.0 | no | [production_reality] The candidate shows strong production ownership through "Architect and maintain distributed video streaming infrastructure handling 40M+ monthly active users across three continents," although the evidence does not e... |
+| Zainab Iqbal | demo_specialist | hold | hold | 3.0 | 7.0 | yes | The candidate shows meaningful agentic-system depth, having "Architected multi-agent framework for automating bill summary generation and legislative impact analysis using GPT-4 and Claude with dynamic routing logic," but the evidence do... |
+| Jonah Steinberg | early_career | hold | hold | 3.0 | 5.0 | yes | The candidate shows meaningful but limited technical integration through "Implemented LLM-powered code review suggestions integrated into GitHub Actions CI pipeline," but the evidence does not establish production ownership of AI systems... |
+| Grace Okonkwo | wrong_domain | reject | hold ⚠ | 3.0 | 4.0 | yes | The candidate shows production infrastructure ownership—“Managed a multi-region EKS cluster on AWS, handling capacity planning, node autoscaling, and cost optimization across development, staging, and production environments”—but provide... |
+| Chiara Bellini | early_career | hold | reject ⚠ | 2.0 | 2.0 | no | [production_reality] The evidence shows pre-production validation rather than ownership of a deployed system: "identified 3 critical data mapping issues before production rollout". \| [technical_integration] The strongest technical evide... |
+| Sana Qureshi | quiet_builder | advance | reject ⚠ | 2.0 | 4.0 | yes | The evidence is largely unsupported summary and skills-list language: “Backend engineer with 6 years of experience building production AI systems and media infrastructure,” without describing shipped systems, integrations, operational ow... |
+| Malik Johnson | wrong_domain | reject | reject | 2.0 | 2.0 | no | [production_reality] The strongest production-use evidence is "Develop and maintain 15+ recurring SQL reports on claims data, insurance denials, and billing cycles," but there is no evidence of deployed AI or agentic systems. \| [technic... |
+| Tariq Mansour | wrong_domain | reject | reject | 2.0 | 1.0 | yes | The candidate has limited production integration evidence—“Maintained ETL pipelines syncing product catalogs from supplier systems into Shopify; handled 50K+ daily SKU updates”—but no evidence of production AI, agentic systems, LLMs, or ... |
+| Ravi Chandrasekar | academic_researcher | reject | reject | 1.7 | 2.0 | no | [production_reality] The evidence emphasizes research evaluation rather than shipped systems, stating, "Designed and implemented few-shot learning pipeline for transfer across 12 government agencies' distinct entity taxonomies; evaluated... |
+| Imani Robinson | wrong_domain | reject | reject | 1.7 | 1.0 | no | [production_reality] The evidence shows operational payment monitoring but no shipped or supported AI system, as indicated by "Monitor transaction flows across ACH, wire, and card networks; resolve settlement discrepancies". \| [technica... |
+| Nadia Haddad | wrong_domain | reject | reject | 1.7 | 3.0 | no | [production_reality] The evidence shows operational ownership of existing infrastructure but no shipped AI system, as the candidate "Manage[s] infrastructure and systems support for 120+ internal users across three regional offices." \| ... |
+| Nia Carrington | wrong_domain | reject | reject | 1.7 | 1.0 | no | [production_reality] The evidence shows operational process improvements but no shipped AI systems, as the resume states, "Developed automated reporting dashboard in Excel/SQL that tracks KPIs for 15 distribution centers; cut manual repo... |
+| Devon Whitaker | academic_researcher | reject | reject | 1.3 | 3.0 | no | [production_reality] The evidence indicates research rather than deployed systems, stating "Developing machine learning approaches for protein structure prediction validation." \| [technical_integration] The candidate demonstrates advanc... |
+| Tomas Herrera | academic_researcher | reject | reject | 1.3 | 3.0 | no | [production_reality] The evidence describes academic experimentation rather than shipped systems, stating, "Conducted extensive experiments on three large-scale e-commerce datasets (Instacart, Amazon Reviews, and internal university data... |
+| Aleksandr Volkov | keyword_stuffer | reject | reject | 1.3 | 1.0 | no | [production_reality] The evidence describes strategy and research rather than shipped systems, including "AI implementation roadmap development across content production pipelines." \| [technical_integration] The candidate shows exposure... |
+| Dashiell Monroe | keyword_stuffer | reject | reject | 1.3 | 1.0 | no | [production_reality] The evidence only identifies the candidate as "Senior Fintech Solutions Architect \| PaymentVault Technologies \| Atlanta, GA \| March 2023 – Present" and does not describe any shipped, monitored, or production-used ... |
+| Claire Fontaine | wrong_domain | reject | reject | 1.3 | 2.0 | no | [production_reality] The evidence shows testing work but does not establish ownership or support of deployed production systems: "Quality assurance specialist with 6 years of progressive experience testing digital media platforms, stream... |
+| Freya Ashcombe | academic_researcher | reject | reject | 1.0 | 2.0 | no | [production_reality] The evidence describes research rather than shipped systems, including "Investigated attention mechanisms for time-series forecasting in logistics networks; published \"Temporal Attention in Supply Chain Demand Predi... |
+| Marcus Feldman | academic_researcher | reject | reject | 1.0 | 2.0 | no | [production_reality] The evidence is research-focused, stating "ML systems researcher with 6 years of experience designing and evaluating compiler optimization frameworks and runtime systems for deep learning workloads," with no demonstr... |
+| Amara Nwosu | keyword_stuffer | reject | reject | 1.0 | 2.0 | no | [production_reality] The evidence provides no specific shipped or operational system, and only identifies the candidate as "Senior AI Solutions Architect \| Oregon Department of Administrative Services \| Portland, OR *March 2024 – Prese... |
+| Omar Benali | keyword_stuffer | reject | reject | 1.0 | 2.0 | no | [production_reality] The only relevant evidence is the role title “Senior AI Solutions Architect \| BioTech Innovations Labs \| Boston, MA \| January 2024 – Present,” which does not establish that any AI systems shipped or are used in pr... |
+| Rosalind Pike | keyword_stuffer | reject | reject | 1.0 | 2.0 | no | [production_reality] The only role evidence is "Senior AI Solutions Architect \| Nexus Logistics Group \| January 2024 – Present," which does not describe a shipped, monitored, supported, or production-used system. \| [technical_integrat... |
+| Kwame Asante | academic_researcher | reject | reject | 0.7 | 2.0 | no | [production_reality] The evidence describes research and benchmarks rather than deployed systems, including "Designed and implemented novel deep learning architectures for detecting payment fraud patterns in synthetic transaction dataset... |
+| Isaac Mwangi | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] The evidence only identifies the candidate as "Senior AI Solutions Architect \| Vertex Commerce Solutions \| Atlanta, GA \| March 2023 – Present" and does not describe a shipped, supported, or production-used system.... |
+| Yuki Tanaka | keyword_stuffer | reject | reject | 0.7 | 1.0 | no | [production_reality] The evidence provides no production ownership or shipped AI systems, only the role title "Senior Infrastructure Engineer \| Vertex Systems Inc. \| June 2023 – Present." \| [technical_integration] The evidence shows i... |

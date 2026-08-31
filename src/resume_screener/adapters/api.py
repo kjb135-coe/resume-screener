@@ -54,6 +54,12 @@ from resume_screener.adapters.budget import (
     budget,
     explain_provider_failure,
 )
+from resume_screener.core.cutoffs import (
+    REVIEW_MARGIN_FRACTION,
+    band_width,
+    cutoffs_for,
+    distance_to_cutoff,
+)
 from resume_screener.core.ingest import load_resume_text
 from resume_screener.core.models import Verdict
 from resume_screener.core.pipeline import (
@@ -105,23 +111,33 @@ app = FastAPI(
 # the recorded run
 # --------------------------------------------------------------------------
 
-def _review_reason(prediction: dict) -> str | None:
+def _review_reason(prediction: dict, model_ids: dict | None = None) -> str | None:
     """Why a human should look at this one first, if they should.
 
-    Mirrors Verdict.review_reason, rebuilt from the recorded run. The
-    extraction-confidence branch is absent because eval_run.json does not
-    record it -- so this can under-flag relative to a live verdict, never
-    over-flag.
+    Mirrors `Verdict.review_reason`, rebuilt from a recorded run. It has
+    to be a rebuild rather than a call, because a recorded run is a dict
+    on disk and not a Verdict -- but it must stay a MIRROR. It drifted
+    once: after the review trigger moved from panel disagreement to
+    distance-to-cutoff, this copy kept flagging on `escalated` and the
+    recorded run showed 29 of 60 needing review where the live rule gives
+    9. Same corpus, same scores, one stale branch.
+
+    The cutoffs are per model, so the run's own `model_ids` decides which
+    apply. An older run without that field falls back to the default pair,
+    which is what it was scored under anyway.
     """
     if any(agent.get("parse_failed") for agent in prediction["panel"]):
         return "At least one scoring agent returned an unreadable response."
-    if prediction["escalated"]:
-        values = ", ".join(
-            f"{a['score']:.1f}" for a in prediction["panel"] if not a.get("parse_failed")
-        )
+
+    panel_model = (model_ids or {}).get("panel", "")
+    cutoffs = cutoffs_for(panel_model)
+    distance = distance_to_cutoff(prediction["score"], cutoffs)
+    if distance / band_width(cutoffs) <= REVIEW_MARGIN_FRACTION:
         return (
-            f"The panel disagreed ({values}); an arbiter resolved it, "
-            "but a human should confirm."
+            f"This scored {prediction['score']:.1f} and landed on "
+            f"`{prediction['predicted']}`, close enough to the line that a "
+            "small difference in judgment changes the answer. A human "
+            "should make this call."
         )
     return None
 
@@ -252,6 +268,13 @@ def _locate(quote: str, sections: list[tuple[str, str]]) -> str | None:
     if "..." in needle or "…" in needle:
         parts = re.split(r"\.\.\.|…", needle)
         needle = max((p.strip() for p in parts), key=len, default="")
+    # Models close a quotation with a full stop the resume does not have:
+    # a bullet reading "...prediction validation" gets cited as
+    # "...prediction validation." and then matches nothing. Measured on
+    # the recorded run, this alone cost 26 of 60 candidates their
+    # citation -- on a product whose central claim is that every score
+    # shows the line it came from.
+    needle = needle.rstrip(".,;:!? ")
     if len(needle) < 15:
         return None
     for heading, body in sections:
@@ -284,6 +307,7 @@ def bullets_from(rationale: str, resume_text: str, limit: int = 1) -> list[dict]
 
     sections = _resume_sections(resume_text or "")
     out: list[dict] = []
+    scored: list[dict] = []
     for sentence in _split_sentences(text):
         # The sentence is kept verbatim. Stripping the quotes out of it to
         # build a tidier "claim" turns a sentence with two citations into
@@ -295,9 +319,16 @@ def bullets_from(rationale: str, resume_text: str, limit: int = 1) -> list[dict]
             if section and quote not in seen:
                 seen.add(quote)
                 citations.append({"quote": quote, "section": section})
-        out.append({"text": sentence, "citations": citations})
-        if len(out) == limit:
-            break
+        scored.append({"text": sentence, "citations": citations})
+
+    # Prefer sentences that actually cite something. `limit` is 1, and
+    # taking the first sentence unconditionally threw the citation away
+    # whenever the quote landed in a later clause -- measured on the
+    # recorded run, that was 26 of 60 candidates showing no evidence at
+    # all, on a product whose whole claim is that every score cites one.
+    out = [b for b in scored if b["citations"]][:limit]
+    if not out:
+        out = scored[:limit]
     return out
 
 
@@ -403,7 +434,7 @@ def load_recorded_run() -> dict:
     for prediction in run["predictions"]:
         file = prediction["file"]
         resume_path = RESUME_DIR / file
-        reason = _review_reason(prediction)
+        reason = _review_reason(prediction, run.get("model_ids"))
         candidates.append(
             {
                 "file": file,

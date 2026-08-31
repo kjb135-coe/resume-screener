@@ -60,6 +60,10 @@ PRICING = {
     "claude-haiku-4-5-20251001": {"in": 1.00, "out": 5.00, "cache_read": 0.10, "cache_write": 1.25},
     "claude-sonnet-5": {"in": 2.00, "out": 10.00, "cache_read": 0.20, "cache_write": 2.50},
     "claude-opus-5": {"in": 5.00, "out": 25.00, "cache_read": 0.50, "cache_write": 6.25},
+    # Scores every resume since 2026-08-31. Without it a run priced the
+    # panel at Sonnet rates and overstated cost roughly fourfold -- the
+    # same class of bug as the Sonnet-4.6-rates error above.
+    "gpt-5.6-luna": {"in": 0.20, "out": 1.20, "cache_read": 0.02, "cache_write": 0.0},
 }
 
 
