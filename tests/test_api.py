@@ -37,8 +37,7 @@ def _fake_verdict(path: str) -> Verdict:
         recommendation=Recommendation.ADVANCE,
         rationale="Strong production evidence.",
         panel_scores=[
-            RubricScore(agent_name=n, score=s, confidence=0.8,
-                        rationale='Evidence: "Shipped an agentic document pipeline to production".')
+            RubricScore(agent_name=n, score=s, rationale='Evidence: "Shipped an agentic document pipeline to production".')
             for n, s in (("production_reality", 8.0), ("technical_integration", 7.5),
                          ("client_communication", 6.5))
         ],

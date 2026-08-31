@@ -126,3 +126,45 @@ In order of size, none of it built:
 
 Combining 1 and 2 would plausibly take a 60-resume run from ~$0.95 to
 ~$0.40. Further caching work would save perhaps five cents.
+
+
+## Does the extraction stage pay for itself? No — measured 2026-08-27
+
+The cascade extracts quoted evidence with Haiku, then sends that evidence
+to the panel instead of the full resume. The obvious assumption is that
+this saves money by shrinking the panel's input. **Measured, it does not.**
+
+The same panel prompt was sent two ways on 4 resumes, reading the API's
+own `input_tokens`:
+
+| Resume | With evidence | With raw resume | Saved |
+|---|---|---|---|
+| `academic_researcher__devon_whitaker` | 2,607 | 2,887 | 280 |
+| `academic_researcher__kwame_asante` | 2,866 | 3,479 | 613 |
+| `adjacent_shipper__bruno_salvatore` | 2,702 | 2,916 | 214 |
+| `adjacent_shipper__keiko_yamashita` | 2,657 | 3,009 | 352 |
+
+**365 tokens saved per panel call, 11.9%.** Across 3 panel calls x 60
+resumes that is 65,655 tokens, or **$0.13** at Sonnet input rates.
+
+**Extraction itself costs $0.24 per 60-resume run** (Haiku, from
+`cost_by_model` on a recorded run). So the stage runs at a **net loss of
+about $0.11 per run**.
+
+**Keep it anyway, for the reasons that are actually true:**
+
+- **Grounding.** The panel scores quoted evidence, so a rationale must
+  cite resume text rather than an impression. This is what fills the
+  evidence panel in the UI.
+- **A shared evidence base.** All three agents read the same extracted
+  quotes, so when they disagree they disagree about judgment — not about
+  which half of the resume they happened to weigh.
+
+What must stop is calling it a cost optimisation. It is a quality
+decision that costs about 11 cents a run.
+
+**One caveat that could flip this.** The corpus is synthetic Markdown and
+short. A real two-page PDF is several times longer, the evidence JSON
+stays roughly the same size, and the saving grows with resume length. On
+real resumes this stage may well pay for itself; on this corpus it does
+not.

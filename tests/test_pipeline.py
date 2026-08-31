@@ -636,3 +636,63 @@ class TestParseFailureIsNotAZero:
         assert verdict.score == 0.0
         assert verdict.review_reason is not None
         assert not verdict.escalated, "nothing to arbitrate between"
+
+
+class TestUnwrapPanelScore:
+    """Recovering a score the model wrapped in an envelope.
+
+    60 of 78 Haiku panel failures in the 2026-08-27 bake-off were this
+    shape -- valid JSON, work done, discarded by the parser. PLAN.md
+    section 8a rejected an all-Haiku panel over "unparseable JSON" partly
+    on this evidence.
+    """
+
+    AGENTS = frozenset(
+        {"production_reality", "technical_integration", "client_communication"}
+    )
+
+    def _unwrap(self, data, name="production_reality"):
+        from resume_screener.core.pipeline import _unwrap_panel_score
+
+        return _unwrap_panel_score(data, name, self.AGENTS)
+
+    def test_correct_shape_passes_through_untouched(self):
+        data = {"score": 7, "confidence": 0.9, "rationale": "ok"}
+        assert self._unwrap(data) is data
+
+    def test_unwraps_envelope_keyed_by_this_agent(self):
+        data = {"production_reality": {"score": 9, "rationale": "shipped"}}
+        assert self._unwrap(data)["score"] == 9
+
+    def test_picks_this_agent_when_model_answers_for_all_three(self):
+        data = {
+            "production_reality": {"score": 9, "rationale": "a"},
+            "technical_integration": {"score": 4, "rationale": "b"},
+            "client_communication": {"score": 1, "rationale": "c"},
+        }
+        assert self._unwrap(data)["score"] == 9
+        assert self._unwrap(data, "client_communication")["score"] == 1
+
+    def test_unwraps_a_generic_single_key_envelope(self):
+        assert self._unwrap({"result": {"score": 6, "rationale": "x"}})["score"] == 6
+
+    def test_refuses_a_different_agents_lone_answer(self):
+        # The cheap wrong move: awarding this agent a score that another
+        # agent wrote. Answering for the wrong dimension is a real error
+        # and must still fail rather than be silently accepted.
+        data = {"client_communication": {"score": 2, "rationale": "x"}}
+        assert "score" not in self._unwrap(data, "production_reality")
+
+    def test_handles_the_flat_prefixed_key(self):
+        data = {"production_reality_score": 8, "rationale": "x"}
+        assert self._unwrap(data)["score"] == 8
+
+    def test_leaves_a_genuinely_unusable_object_alone(self):
+        assert "score" not in self._unwrap({"rationale": "I could not decide."})
+
+    def test_does_not_invent_a_score_from_a_nested_object_without_one(self):
+        assert "score" not in self._unwrap({"result": {"rationale": "no number"}})
+
+    def test_top_level_score_wins_over_an_envelope(self):
+        data = {"score": 5, "production_reality": {"score": 9}}
+        assert self._unwrap(data)["score"] == 5

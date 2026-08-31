@@ -334,6 +334,55 @@ async def extract_candidate(
     return candidate, response.usage
 
 
+def _unwrap_panel_score(data: dict, name: str, siblings: frozenset[str]) -> dict:
+    """Find this agent's object when the model wrapped it in an envelope.
+
+    Asked to score one dimension, weaker models routinely answer with a
+    well-formed object that simply is not the shape requested:
+
+        {"production_reality": {"score": 9, "rationale": "..."}}
+        {"result": {"score": 9, ...}}
+
+    That is valid JSON with no top-level `score`, so it used to count as a
+    parse failure and the score was thrown away. Measured on the
+    2026-08-27 bake-off, **60 of 78 Haiku panel failures were this shape**
+    -- the model had done the work and the parser discarded it. PLAN.md
+    section 8a rejected an all-Haiku panel over "unparseable JSON" on
+    exactly this evidence; the JSON parsed fine.
+
+    Matching is deliberately conservative, because the cheap wrong move
+    here is to award this agent a score another agent wrote:
+
+    - an envelope keyed by THIS agent's name is taken;
+    - a single-key envelope is taken only when that key is not one of the
+      sibling agents -- a lone `{"client_communication": ...}` returned to
+      the `production_reality` agent is a real error, not a wrapper;
+    - anything else is left alone and still fails.
+    """
+    if _maybe_float(data.get("score")) is not None:
+        return data
+
+    named = data.get(name)
+    if isinstance(named, dict) and _maybe_float(named.get("score")) is not None:
+        return named
+
+    if len(data) == 1:
+        (key, value), = data.items()
+        if (
+            isinstance(value, dict)
+            and key not in siblings - {name}
+            and _maybe_float(value.get("score")) is not None
+        ):
+            return value
+
+    # Flat variant: {"production_reality_score": 9, "rationale": "..."}.
+    flat = data.get(f"{name}_score")
+    if _maybe_float(flat) is not None:
+        return {**data, "score": flat}
+
+    return data
+
+
 async def _panel_agent(
     name: str,
     lens: str,
@@ -341,6 +390,7 @@ async def _panel_agent(
     job_description: str,
     model: Model,
     rubric: GeneratedRubric | None = None,
+    siblings: frozenset[str] = frozenset(),
 ) -> tuple[RubricScore, Usage]:
     evidence_json = json.dumps(
         [{"quote": e.quote, "rubric_dimension": e.rubric_dimension} for e in candidate.evidence]
@@ -348,7 +398,7 @@ async def _panel_agent(
     user = (
         f"Your specific lens: {lens}\n\n"
         f"Candidate evidence:\n{evidence_json}\n\n"
-        "Respond as JSON: {score (0-10), confidence (0-1), rationale}. "
+        "Respond as JSON: {score (0-10), rationale}. "
         "The rationale must be ONE sentence that quotes verbatim the single "
         "piece of resume evidence that decided your score. No preamble, no "
         "summary of the resume, no second sentence."
@@ -359,14 +409,18 @@ async def _panel_agent(
     data = _parse_json(response.text) or {}
     if not isinstance(data, dict):
         data = {}
+    # Recover this agent's object when the model wrapped it in an envelope
+    # keyed by dimension name. Conservative by design -- see the docstring.
+    data = _unwrap_panel_score(data, name, siblings)
 
     # A missing score must not become a confident-looking 0.0. The failure
     # this guards against is real and observed: asked for one dimension,
     # the model sometimes answers for all of them at once, keyed by
-    # dimension name. That parses as valid JSON with no top-level "score",
-    # so scoring it 0.0 would silently reject a candidate on a number no
-    # agent ever assigned -- and, because the parse "succeeded", would not
-    # flag the verdict for human review.
+    # dimension name. _unwrap_panel_score recovers the cases that can be
+    # attributed to THIS agent safely; what is left really is unusable, and
+    # scoring it 0.0 would silently reject a candidate on a number no agent
+    # ever assigned -- and, because the parse "succeeded", would not flag
+    # the verdict for human review.
     score_value = _maybe_float(data.get("score"))
     if score_value is None:
         log.warning(
@@ -379,7 +433,6 @@ async def _panel_agent(
     score = RubricScore(
         agent_name=name,
         score=score_value if score_value is not None else 0.0,
-        confidence=_coerce_float(data.get("confidence"), 0.0),
         rationale=str(data.get("rationale") or "No rationale returned."),
         parse_failed=score_value is None,
     )
@@ -472,7 +525,15 @@ async def screen_one(
 
     panel_results = await asyncio.gather(
         *[
-            _panel_agent(name, lens, candidate, job_description, models["panel"], rubric)
+            _panel_agent(
+                name,
+                lens,
+                candidate,
+                job_description,
+                models["panel"],
+                rubric,
+                siblings=frozenset(personas),
+            )
             for name, lens in personas.items()
         ]
     )

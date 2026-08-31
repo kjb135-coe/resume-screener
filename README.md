@@ -129,13 +129,15 @@ Measured on 60 labeled synthetic resumes ([full results](docs/EVAL_RESULTS.md), 
 
 | Metric | Value |
 |---|---|
-| Macro-F1 | **0.81–0.86** (4 runs) |
+| Macro-F1 ([why this metric](docs/METRIC_CHOICE.md)) | **0.81–0.86** (4 runs) |
 | Accuracy | 0.80–0.86 |
 | Cost | ~$0.95 for 60 (~1.6c each) |
 | Latency | p50 19.4s, p95 32.9s |
 | Flagged for a human | 29 / 60 |
 
 **The number that matters more than the headline: run the same configuration four times, unchanged, and macro-F1 spans 0.051.** 9 of 51 candidates change verdict at least once, and all 9 sit within 1.0 of a score cutoff. So the headline is one draw from a wide distribution, not a fixed property — which is why it is quoted as a range, and why any comparison below that turns on less than 0.051 is unresolved rather than decided. Measured over four runs in [docs/VARIANCE.md](docs/VARIANCE.md).
+
+**One word that trips people up: "parse failure" is *our* code failing to read the *model's* answer** — not the model failing to read a resume. Each scoring agent is asked to reply with JSON. When that reply is missing the field we need, the score is discarded and the candidate is flagged for a human. Sonnet fails this way on 1–4% of calls; an all-Haiku panel failed on 43%. See [docs/BAKEOFF.md](docs/BAKEOFF.md).
 
 **Where it actually fails:** `hold` is still the weakest class at 0.65 recall, against 0.90 for `advance` and 1.00 for `reject`. Identifying the middle is harder than separating the ends, and it stayed the hardest even after the fix that tripled it.
 

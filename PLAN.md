@@ -696,9 +696,17 @@ just the architecture shape. First data point, via
 (writes to tag-suffixed files, never the baseline):
 
 **All-Haiku panel, Sonnet arbiter:** macro-F1 0.847 → 0.516, cost $1.796
-→ $1.286. Rejected. The cause is decisive rather than marginal: 88 of 180
-Haiku panel calls (49%) returned unparseable JSON, against 2.2% for
-Sonnet on the identical prompt. Full analysis in
+→ $1.286. Rejected. 88 of 180 Haiku panel calls (49%) failed to yield a
+usable score, against 2.2% for Sonnet on the identical prompt.
+
+> **Correction, 2026-08-27.** This section originally called those 88
+> responses "unparseable JSON". They parsed fine — they were the wrong
+> *shape*, an object keyed by dimension name with no top-level `score`.
+> Re-tested properly in §8b: a prefill fix and a parser fix each moved the
+> failure rate without moving accuracy, because the dominant remaining
+> failure is Haiku scoring a **different dimension** than it was asked
+> about. The rejection stands; the stated cause was wrong. See
+> `docs/RESULTS_HISTORY.md`. Full analysis in
 `docs/EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md`.
 
 Worth noting for later: this reads as a structured-output problem, not a
@@ -771,6 +779,70 @@ prerequisite, not a bigger model.
    the scope above is actually locked, not before — pricing out a list
    that's still shifting isn't useful. Coming once corpus generation
    and the 3-way bake-off scope above are final.
+
+### 8b. Multi-provider bake-off — run 2026-08-27, 2 of 3 arms
+
+Cross-provider arms against the current Anthropic config as a control.
+GLM was dropped before running. **Results and the full writeup are in
+`docs/RESULTS_HISTORY.md` and `docs/BAKEOFF.md`.**
+
+**Headline: the comparison as designed measured the wrong thing.** Under
+the shipped cutoffs Luna scored 0.517 against the control's 0.867. Under
+cutoffs fitted to its own score distribution it reaches 0.896, at a third
+of the cost. The cutoffs were swept against Sonnet, and Luna grades ~2
+points higher, so the ranking was scoring calibration rather than
+judgment. Every future arm must be re-thresholded before its accuracy is
+quoted.
+
+**Gemini 3.7 Flash is blocked on the free tier** — 20 requests per day
+per model, against the 60+ one run needs. The model id is confirmed
+valid. Enable billing and the arm runs unchanged.
+
+**Run it with:**
+
+```
+python scripts/make_bakeoff_sample.py     # once; already committed
+python scripts/bakeoff.py --check         # validates config + keys, free
+python scripts/bakeoff.py                 # 4 arms x 3 runs x 20 resumes
+```
+
+**Design decisions, and why:**
+
+- **20 resumes, 3 runs per arm.** 20 was the cost constraint. Three runs
+  is not optional at that size: resampling stratified 20s from the four
+  variance runs puts the macro-F1 noise band at **~0.098 median**, with
+  48% of draws above 0.10, against 0.051 at n=51 (`docs/VARIANCE.md`).
+  One run per arm would rank four models by coin flip.
+- **Panel + arbiter swapped; extraction stays on Haiku.** Isolates
+  scoring from extraction quality, and matches how §8a was run so the
+  results are comparable. Every arm therefore still needs
+  `ANTHROPIC_API_KEY`.
+- **The Anthropic control runs on the same 20.** Comparing new models
+  against the existing 0.81-0.86 would confound a model change with a
+  sample change, since that range was measured on 51-60 resumes.
+- **One `OpenAICompatibleModel`, not three SDKs.** OpenAI, Gemini and
+  Zhipu all expose the OpenAI `/chat/completions` shape, so a provider is
+  a base_url in `config/bakeoff.json`, not new code. No new dependency —
+  it uses the `httpx` already in the tree.
+- **Nothing about the providers is hardcoded.** `token_param`,
+  `send_temperature` and `extra_body` are config, because the spelling of
+  those knobs differs per provider and per model generation. Guessing one
+  wrong fails at request time and reads like a model problem.
+- **Prices are config, and may be left null.** An arm with no prices
+  still reports real tokens and latency and omits dollars. An invented
+  price is indistinguishable from a measured one.
+
+**What this can settle, and what it cannot.** At 20 resumes the ranking
+by accuracy will mostly be noise unless a gap exceeds the per-arm spread.
+What it *will* settle is JSON reliability and cost/latency — and §8a was
+decided entirely on JSON reliability (49% unparseable vs 2.2%), not
+accuracy. `docs/BAKEOFF.md` leads with parse-failure rate for that reason.
+
+**Caching is not like-for-like across providers.** Anthropic caching is
+an explicit breakpoint and is ~6% of cost here; other providers cache
+automatically or not at all. Reported cached tokens are real, but the
+cost comparison slightly favours Anthropic.
+
 
 ### How this gets evaluated
 

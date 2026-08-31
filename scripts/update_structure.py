@@ -63,6 +63,9 @@ DESCRIPTIONS: dict[str, str] = {
     "STRUCTURE.md": "This file. Auto-generated map of the repo.",
     "pyproject.toml": "Package metadata, dependencies, pytest and ruff config.",
     ".gitignore": "Excludes venv, caches, .env, and generated databases.",
+    "data/bakeoff_sample.json": "The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.",
+    "config": "Configuration you edit by hand. Not generated.",
+    "config/bakeoff.json": "Bake-off arms: model ids, endpoints, key env vars, prices. Fill in before running.",
     ".env.example": "Template for .env. Names the one key needed; holds no secret.",
     "LICENSE": "MIT.",
 
@@ -132,7 +135,9 @@ DESCRIPTIONS: dict[str, str] = {
     "docs/SCORE_SCALE.md": "Why a strong candidate scores 6 not 8, and the measured cost of fixing it.",
     "docs/RESULTS_HISTORY.md": "Every measured run, what changed before it, and why the number moved.",
     "docs/ESCALATION_SWEEP.md": "Output of scripts/sweep_escalation.py: escalation policies compared on cost.",
+    "docs/METRIC_CHOICE.md": "Why macro-F1 is the headline metric, what was rejected, and what it hides.",
     "docs/VARIANCE.md": "Output of scripts/variance_report.py: how much macro-F1 moves between identical runs.",
+    "docs/BAKEOFF.md": "Output of scripts/bakeoff.py: macro-F1, cost, speed and JSON reliability per model.",
     "docs/CUTOFF_SWEEP.md": "Output of scripts/sweep_cutoffs.py: what the advance/hold cutoffs should be.",
     "docs/EVAL_RESULTS__all-haiku-panel-sonnet-arbiter_ANALYSIS.md": "Writeup: why an all-Haiku panel was rejected (JSON-reliability collapse, not accuracy).",
     "docs/CANDIDATE_REPORTS.md": "Full per-candidate report: score, panel breakdown, full reasoning, for all 60. Generated from data/eval_run.json.",
@@ -148,6 +153,8 @@ DESCRIPTIONS: dict[str, str] = {
     "scripts/sweep_escalation.py": "Compares escalation policies on cost and pointless calls. No API calls.",
     "scripts/sweep_cutoffs.py": "Re-thresholds recorded scores to test the advance/hold cutoffs. No API calls.",
     "scripts/variance_report.py": "Reports run-to-run spread across repeated runs of one config. No API calls.",
+    "scripts/bakeoff.py": "Runs the multi-model bake-off from config/bakeoff.json. --check validates without spending.",
+    "scripts/make_bakeoff_sample.py": "Picks the fixed, stratified 20-resume sample every bake-off arm scores on. No API calls.",
     "scripts/generate_candidate_report.py": "Builds CANDIDATE_REPORTS.md from the last evaluate.py run.",
 }
 
@@ -197,6 +204,8 @@ def walk(directory: Path, prefix: str = "") -> tuple[list[str], list[str]]:
             description = "A scripts/evaluate.py comparison run (non-baseline --tag). See docs/RESULTS_HISTORY.md."
         elif description is None and re.fullmatch(r"EVAL_RESULTS__.+\.md", entry.name):
             description = "Human-readable report for a comparison run. See docs/RESULTS_HISTORY.md."
+        elif description is None and re.fullmatch(r"bakeoff__.+__run\d+\.json", entry.name):
+            description = "One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md."
         elif description is None:
             description = "NEEDS DESCRIPTION"
             missing.append(rel)

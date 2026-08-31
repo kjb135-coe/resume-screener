@@ -78,10 +78,7 @@ def _print_verdict(verdict: Verdict, *, show_panel: bool) -> None:
     if show_panel:
         for panel in verdict.panel_scores:
             flag = "  (unreadable response)" if panel.parse_failed else ""
-            typer.echo(
-                f"    {panel.agent_name:<38} {panel.score:>4.1f}  "
-                f"conf {panel.confidence:.2f}{flag}"
-            )
+            typer.echo(f"    {panel.agent_name:<38} {panel.score:>4.1f}{flag}")
     if verdict.review_reason:
         typer.secho(f"    needs review: {verdict.review_reason}", fg=typer.colors.YELLOW)
 

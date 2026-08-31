@@ -524,7 +524,6 @@ function renderDetail(c, mount, opts = {}) {
     const hd = el("div","hd");
     hd.append(el("span","n",a.score.toFixed(1)), el("code","who2",a.agent));
     if (a.parse_failed) hd.append(el("span","warn","UNREADABLE — EXCLUDED"));
-    else hd.append(el("span","conf",`confidence ${a.confidence.toFixed(2)}`));
     box.append(hd);
 
     // This agent runs low for almost everyone by design (docs/SCORE_SCALE.md):

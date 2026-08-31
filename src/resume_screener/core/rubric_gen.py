@@ -106,7 +106,7 @@ class GeneratedRubric:
             "the other dimensions cover and do not double-count them.",
             "",
             "You are assigned exactly ONE of them. Score only your assigned",
-            "dimension, 0-10, and report a confidence (0-1) alongside it. Return",
+            "dimension, 0-10. Return",
             "a single score object. Do not return one entry per dimension, and do",
             "not key your answer by dimension name.",
             "",

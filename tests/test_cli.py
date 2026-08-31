@@ -58,8 +58,7 @@ def _verdict(name: str = "Jane Doe", score: float = 8.0) -> Verdict:
         recommendation=Recommendation.ADVANCE,
         rationale="Strong production evidence.",
         panel_scores=[
-            RubricScore(agent_name="production_reality", score=score, rationale="ok",
-                        confidence=0.8)
+            RubricScore(agent_name="production_reality", score=score, rationale="ok")
         ],
         escalated=False,
     )

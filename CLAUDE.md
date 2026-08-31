@@ -48,10 +48,18 @@ persona. Read that module docstring before touching prompt assembly.
   four runs. **Quote it as a range**, never as a point — four identical
   runs span 0.051. Roughly **$0.95** per full run (~1.6c/resume),
   measured, stable to a cent.
-- 249 offline tests, ruff clean.
+- 290 offline tests, ruff clean.
+- **Panel agents no longer emit a confidence score.** It was never used in
+  any logic and was anti-correlated with correctness (0.867 mean when the
+  verdict was wrong, 0.816 when right). Extraction confidence is kept —
+  it gates the review flag — though that flag has never once fired.
 - Working: the cascade, rubrics generated from any posting, MCP server
   (5 tools), CLI (3 commands), web app with reviewer workflow and
   password gate, PDF/Word upload.
+
+`docs/METRIC_CHOICE.md` explains why macro-F1 is the headline, and what
+it hides. **"Parse failure" throughout these docs means our code could
+not read the model's JSON reply — not that a resume failed to parse.**
 
 **Read `docs/LIMITATIONS.md` before making any accuracy claim.** The
 short version: the noise band is 0.051 so any smaller difference is

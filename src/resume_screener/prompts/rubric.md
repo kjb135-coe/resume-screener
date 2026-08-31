@@ -11,9 +11,7 @@ integration into real business systems, and client-facing communication
 balanced against engineering rigor. Score against that profile
 specifically, not against a generic AI-engineer checklist.
 
-Score the candidate 0-10 on each of the three dimensions below, and
-report a confidence (0-1) alongside each score, not just the score
-itself.
+Score the candidate 0-10 on each of the three dimensions below.
 
 1. **Production reality** — does the evidence describe systems that
    shipped and are used, or research, coursework, and proof-of-concept

@@ -1,0 +1,46 @@
+{
+  "seed": 20260827,
+  "size": 20,
+  "labels": {
+    "advance": 7,
+    "hold": 7,
+    "reject": 6
+  },
+  "archetypes": {
+    "academic_researcher": 2,
+    "adjacent_shipper": 3,
+    "demo_specialist": 3,
+    "early_career": 2,
+    "keyword_stuffer": 2,
+    "production_generalist": 2,
+    "production_light_ai": 2,
+    "quiet_builder": 2,
+    "wrong_domain": 2
+  },
+  "difficulty_from_recorded_baseline": {
+    "near_cutoff": 16,
+    "scored": 20
+  },
+  "files": [
+    "academic_researcher__devon_whitaker.md",
+    "academic_researcher__kwame_asante.md",
+    "adjacent_shipper__bruno_salvatore.md",
+    "adjacent_shipper__keiko_yamashita.md",
+    "adjacent_shipper__sofia_marchetti.md",
+    "demo_specialist__mei_lin_chow.md",
+    "demo_specialist__priya_raghunathan.md",
+    "demo_specialist__rina_matsumoto.md",
+    "early_career__ingrid_solberg.md",
+    "early_career__vera_klimenko.md",
+    "keyword_stuffer__isaac_mwangi.md",
+    "keyword_stuffer__rosalind_pike.md",
+    "production_generalist__lucas_ferreira.md",
+    "production_generalist__oscar_nakamura.md",
+    "production_light_ai__camila_restrepo.md",
+    "production_light_ai__larissa_petrov.md",
+    "quiet_builder__ewan_brackenridge.md",
+    "quiet_builder__hugo_lindqvist.md",
+    "wrong_domain__claire_fontaine.md",
+    "wrong_domain__nia_carrington.md"
+  ]
+}

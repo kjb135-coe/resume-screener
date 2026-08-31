@@ -52,7 +52,6 @@ class RubricScore:
     agent_name: str
     score: float
     rationale: str
-    confidence: float = 0.0
     parse_failed: bool = False
     evidence: list[Evidence] = field(default_factory=list)
 
@@ -60,7 +59,6 @@ class RubricScore:
         return {
             "agent": self.agent_name,
             "score": self.score,
-            "confidence": self.confidence,
             "rationale": self.rationale,
             "parse_failed": self.parse_failed,
         }

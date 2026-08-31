@@ -1,0 +1,132 @@
+{
+  "_README": [
+    "Model bake-off arms. Fill in every FILL_IN before running.",
+    "",
+    "scripts/bakeoff.py refuses to start while any FILL_IN remains, so a",
+    "typo fails immediately instead of 20 resumes into a paid run.",
+    "",
+    "model_id  : the exact API string. Not the marketing name. A wrong id",
+    "            fails at request time and reads like a model problem.",
+    "base_url  : prefilled with each provider's documented OpenAI-compatible",
+    "            endpoint. VERIFY THESE -- they move, and regional endpoints",
+    "            differ (Zhipu in particular has a separate international host).",
+    "api_key_env: the env var to read. Nothing is read from .env automatically.",
+    "pricing   : USD per 1M tokens. Leave null and the run still works --",
+    "            it reports tokens and latency, and omits dollars rather",
+    "            than inventing them.",
+    "extra_body: merged into the request as-is. Put reasoning effort here;",
+    "            the key differs per provider ('reasoning_effort', etc).",
+    "token_param: 'max_tokens' or 'max_completion_tokens'. Newer reasoning",
+    "            models reject the old name.",
+    "send_temperature: false for models that reject temperature at any value."
+  ],
+  "arms": [
+    {
+      "name": "anthropic-control",
+      "enabled": true,
+      "provider": "anthropic",
+      "model_id": "claude-sonnet-5",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "pricing": {
+        "in": 2.0,
+        "out": 10.0,
+        "cache_read": 0.2,
+        "cache_write": 2.5
+      },
+      "notes": "The config in production today. The only arm whose numbers are already trusted."
+    },
+    {
+      "name": "gpt-5.6-luna-medium",
+      "enabled": true,
+      "provider": "openai_compatible",
+      "model_id": "gpt-5.6-luna",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_env": "OPENAI_API_KEY",
+      "token_param": "max_completion_tokens",
+      "send_temperature": false,
+      "extra_body": {
+        "reasoning_effort": "medium"
+      },
+      "pricing": {
+        "in": 0.2,
+        "out": 1.2,
+        "cache_read": 0.02,
+        "cache_write": 0.0
+      },
+      "notes": "Published rates: $0.20 in / $0.02 cached in / $1.20 out per 1M. cache_write is 0 -- OpenAI does not bill for writing to the cache. token_param and send_temperature are set for a reasoning model."
+    },
+    {
+      "name": "haiku-panel-bare",
+      "enabled": true,
+      "provider": "anthropic",
+      "model_id": "claude-haiku-4-5-20251001",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "pricing": {
+        "in": 1.0,
+        "out": 5.0,
+        "cache_read": 0.1,
+        "cache_write": 1.25
+      },
+      "notes": "Reproduces PLAN.md section 8a on the 20-resume sample: Haiku panel, no JSON enforcement. Expected to fail ~49% of panel calls. Present as the control for haiku-panel-prefill -- without it, a good prefill result cannot be attributed to the prefill."
+    },
+    {
+      "name": "haiku-panel-prefill",
+      "enabled": true,
+      "provider": "anthropic",
+      "model_id": "claude-haiku-4-5-20251001",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "prefill": "{",
+      "pricing": {
+        "in": 1.0,
+        "out": 5.0,
+        "cache_read": 0.1,
+        "cache_write": 1.25
+      },
+      "notes": "Same model, same prompt, with the assistant turn prefilled with '{' so the model cannot open with prose. Tests section 8a's own hypothesis that Haiku's 49% failure rate was a structured-output problem, not a capability problem."
+    },
+    {
+      "name": "gemini-3.7-flash-medium",
+      "enabled": false,
+      "provider": "openai_compatible",
+      "model_id": "gemini-3.7-flash",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "api_key_env": "GEMINI_API_KEY",
+      "token_param": "max_tokens",
+      "send_temperature": true,
+      "extra_body": {},
+      "pricing": {
+        "in": 0.75,
+        "out": 3.75,
+        "cache_read": 0.075,
+        "cache_write": 0.0
+      },
+      "notes": "BLOCKED 2026-08-27: this key is on the Gemini free tier, capped at 20 requests per day per model. One 20-resume run needs 60+ (20 x 3 panel agents), so the arm cannot complete. Enable billing on the Google Cloud project to unblock; nothing in this config needs to change. model_id is CONFIRMED valid -- the quota error names the model, so it resolved. Rates: $0.75 in / $3.75 out per 1M, 90% cache discount. concurrency 2 because 5 resumes x 3 agents is 15 requests in flight.",
+      "concurrency": 2
+    },
+    {
+      "name": "haiku-panel-unwrapped",
+      "enabled": true,
+      "provider": "anthropic",
+      "model_id": "claude-haiku-4-5-20251001",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "pricing": {
+        "in": 1.0,
+        "out": 5.0,
+        "cache_read": 0.1,
+        "cache_write": 1.25
+      },
+      "notes": "Same bare Haiku panel as haiku-panel-bare, run AFTER _unwrap_panel_score landed. The pair isolates what the parser fix is worth: 60 of 78 failures in the bare run were valid JSON wrapped in a dimension-keyed envelope."
+    }
+  ],
+  "run": {
+    "sample_size": 20,
+    "runs_per_arm": 3,
+    "concurrency": 5,
+    "swap_slots": [
+      "panel",
+      "arbiter"
+    ],
+    "_swap_slots_note": "Which model slots the arm's model replaces. Extraction (triage) stays on Haiku in every arm so the comparison isolates scoring, and matches PLAN.md section 8a.",
+    "_concurrency_note": "Default for arms that do not set their own. An arm can override with a top-level \"concurrency\" field when its provider rate-limits."
+  }
+}

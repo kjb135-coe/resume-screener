@@ -1,0 +1,175 @@
+{
+  "arm": "anthropic-control",
+  "run": 3,
+  "model_id": "claude-sonnet-5",
+  "provider": "anthropic",
+  "swap_slots": [
+    "panel",
+    "arbiter"
+  ],
+  "n": 20,
+  "requested": 20,
+  "macro_f1": 0.8968253968253967,
+  "per_class_f1": {
+    "advance": 1.0,
+    "hold": 0.8333333333333333,
+    "reject": 0.8571428571428571
+  },
+  "accuracy": 0.9,
+  "cost_total": 0.306759,
+  "cost_per_resume": 0.01533795,
+  "latency_p50": 12.234599292976782,
+  "latency_mean": 12.027277625340503,
+  "wall_clock_s": 35.11080500000389,
+  "parse_failed": 2,
+  "panel_calls": 60,
+  "escalated": 10,
+  "tokens": {
+    "input": 63877,
+    "output": 23072,
+    "cache_read": 139860,
+    "cache_write": 0
+  },
+  "predictions": [
+    {
+      "file": "academic_researcher__devon_whitaker.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "academic_researcher__kwame_asante.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false
+    },
+    {
+      "file": "adjacent_shipper__bruno_salvatore.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.666666666666667,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__keiko_yamashita.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.0,
+      "escalated": true
+    },
+    {
+      "file": "adjacent_shipper__sofia_marchetti.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "escalated": true
+    },
+    {
+      "file": "demo_specialist__mei_lin_chow.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 2.3,
+      "escalated": true
+    },
+    {
+      "file": "demo_specialist__priya_raghunathan.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 1.0,
+      "escalated": true
+    },
+    {
+      "file": "demo_specialist__rina_matsumoto.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 2.0,
+      "escalated": true
+    },
+    {
+      "file": "early_career__ingrid_solberg.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 3.5,
+      "escalated": false
+    },
+    {
+      "file": "early_career__vera_klimenko.md",
+      "expected": "hold",
+      "predicted": "hold",
+      "score": 2.0,
+      "escalated": true
+    },
+    {
+      "file": "keyword_stuffer__isaac_mwangi.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "keyword_stuffer__rosalind_pike.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false
+    },
+    {
+      "file": "production_generalist__lucas_ferreira.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 9.0,
+      "escalated": false
+    },
+    {
+      "file": "production_generalist__oscar_nakamura.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 6.0,
+      "escalated": true
+    },
+    {
+      "file": "production_light_ai__camila_restrepo.md",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false
+    },
+    {
+      "file": "production_light_ai__larissa_petrov.md",
+      "expected": "hold",
+      "predicted": "reject",
+      "score": 0.6666666666666666,
+      "escalated": false
+    },
+    {
+      "file": "quiet_builder__ewan_brackenridge.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 4.0,
+      "escalated": true
+    },
+    {
+      "file": "quiet_builder__hugo_lindqvist.md",
+      "expected": "advance",
+      "predicted": "advance",
+      "score": 5.5,
+      "escalated": true
+    },
+    {
+      "file": "wrong_domain__claire_fontaine.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    },
+    {
+      "file": "wrong_domain__nia_carrington.md",
+      "expected": "reject",
+      "predicted": "reject",
+      "score": 0.0,
+      "escalated": false
+    }
+  ]
+}

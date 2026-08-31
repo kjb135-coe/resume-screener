@@ -303,3 +303,202 @@ cases, which would have understated the very thing it was measuring.
 this automatically.
 
 Full detail: `docs/VARIANCE.md`.
+
+## Multi-provider bake-off — 2026-08-27
+
+First cross-provider comparison. Panel + arbiter swapped; extraction
+stays on Haiku in every arm. 20 resumes (`data/bakeoff_sample.json`,
+stratified 7/7/6 across all 9 archetypes), 3 runs per arm.
+
+| Arm | Macro-F1 (3 runs) | Cost/resume | p50 latency | Parse failures |
+|---|---|---|---|---|
+| `anthropic-control` (Sonnet 5) | 0.867 (0.802–0.949) | $0.0164 | 12.8s | 2/180 (1.1%) |
+| `gpt-5.6-luna` (medium) | 0.517 (0.456–0.579) | **$0.0053** | 16.6s | **0/180** |
+
+**Gemini 3.7 Flash did not run.** The key is on the free tier, capped at
+**20 requests per day per model**. One 20-resume run needs 60+ (20 x 3
+panel agents). The model id `gemini-3.7-flash` is confirmed valid — the
+quota error names it, so it resolved. This arm needs billing enabled on
+the Google Cloud project, nothing else.
+
+### The headline number is misleading, and the reason is the interesting part
+
+Read alone, Luna looks far worse: 0.517 against 0.867, a gap of 0.35 that
+is way outside the ~0.098 noise band for a 20-resume sample. That reading
+is wrong.
+
+**Luna grades on a different scale.** Its mean score is 4.60 against the
+control's 2.65, and its errors run entirely the opposite direction:
+
+| Arm | Errors above the label | Errors below the label |
+|---|---|---|
+| `anthropic-control` | 1 | 7 |
+| `gpt-5.6-luna` | **27** | **0** |
+
+Every single Luna error is a candidate scored too generously. The
+cutoffs it is being judged against (`ADVANCE_CUTOFF = 4.0`,
+`HOLD_CUTOFF = 1.0`) were swept against *Sonnet's* distribution in
+`docs/CUTOFF_SWEEP.md`. Applying them to a model that grades two points
+higher is the same mistake that held macro-F1 at 0.601 until the cutoffs
+were fixed.
+
+Re-thresholding each arm's recorded scores offline (free):
+
+| Arm | As shipped (4.0/1.0) | Own best cutoffs | Best macro-F1 |
+|---|---|---|---|
+| `anthropic-control` | 0.867 | 3.7/0.7 | 0.881 |
+| `gpt-5.6-luna` | 0.517 | 5.7/3.1 | **0.896** |
+
+**With cutoffs fitted to itself, Luna edges the control — at a third of
+the cost.** That is not a licence to switch: those cutoffs are fitted on
+the same 20 resumes they are scored against, which is worse overfitting
+than the 60-resume version `docs/LIMITATIONS.md` already flags. It means
+the arm is live, not that it wins.
+
+**The methodological finding is the durable one.** As designed, this
+bake-off measured *"which model shares Sonnet's calibration"* rather than
+*"which model judges better"*. Any future arm must be re-thresholded
+before its accuracy is quoted, so `scripts/bakeoff.py` now prints a
+Calibration section above the ranking, and `--report-only` rebuilds it
+from recorded runs at no cost.
+
+### Two smaller results
+
+- **Luna is not a JSON-reliability problem.** 0 parse failures in 180
+  panel calls, against Sonnet's 2/180. This is the opposite of §8a, where
+  an all-Haiku panel was rejected on 49% unparseable output. Cheaper did
+  not mean sloppier here.
+- **Cheaper is slower.** Luna costs 3.1x less per resume but its p50 is
+  16.6s against 12.8s — reasoning tokens at medium effort. Cost and
+  latency do not move together.
+
+### The variance prediction held
+
+Before running this, the 20-resume noise band was predicted at ~0.098
+median (2000 resamples of the four variance runs, 90th percentile 0.163).
+The control arm's observed band across 3 runs was **0.147**, and Luna's
+**0.123**. Both sit inside the predicted distribution. `docs/VARIANCE.md`
+is doing its job.
+
+Full detail: `docs/BAKEOFF.md`.
+
+## Haiku panel, re-tested properly — 2026-08-27
+
+An all-Haiku panel was already tried and rejected in PLAN.md §8a, on the
+stated grounds that **49% of its responses were "unparseable JSON"**.
+That diagnosis was wrong, and the re-test replaces it.
+
+Three Haiku arms on the same 20 resumes, 3 runs each:
+
+| Arm | Macro-F1 | Parse failures | What changed |
+|---|---|---|---|
+| `anthropic-control` (Sonnet) | 0.933 (0.901–0.949) | 8/180 (4.4%) | — |
+| `haiku-panel-bare` | 0.433 (0.404–0.447) | 78/180 (43.3%) | reproduces §8a |
+| `haiku-panel-prefill` | 0.390 (0.364–0.442) | 70/180 (38.9%) | assistant turn prefilled with `{` |
+| `haiku-panel-unwrapped` | 0.402 (0.318–0.447) | 60/180 (33.3%) | parser now unwraps envelopes |
+
+**Haiku is rejected again, but for the right reason this time.**
+
+### The JSON was never unparseable
+
+Reading the failures rather than the count: Haiku's output is valid JSON.
+It is the wrong *shape*.
+
+    {"production_reality": {"score": 9, "confidence": 0.95, ...}}
+
+The parser found no top-level `score` and discarded a score the model had
+already produced. 60 of 78 failures in the bare run were this envelope.
+
+Two hypotheses were tested, in order of cheapness:
+
+1. **Structured output (prefill).** §8a's own note guessed this was a
+   formatting problem. Prefilling the assistant turn with `{` makes the
+   preamble impossible. **Refuted:** failures moved 43.3% → 38.9% and
+   macro-F1 did not improve. The arm is kept as evidence.
+2. **Parser unwrapping.** `_unwrap_panel_score` now recovers an envelope
+   keyed by the agent's own name, and refuses one keyed by a sibling
+   agent. **Partly worked:** failures 43.3% → 33.3%. Accuracy unmoved.
+
+### The real cause, and why no fix rescues it
+
+Of the 45 remaining failures, **29 are Haiku answering for a different
+dimension than the one it was asked to judge.** The agent is told "your
+specific lens: production_reality" and returns a score for
+`client_communication`. The parser correctly refuses those — accepting
+one would award an agent a number another agent wrote.
+
+That is not a formatting problem and no output constraint fixes it. It is
+an instruction-following failure: **Haiku cannot reliably hold a single-
+dimension persona in this three-agent design.** It explains why macro-F1
+sits near 0.40 across all three arms regardless of what is repaired
+downstream, and why even its own best cutoffs only reach 0.633–0.662
+against the control's 0.933.
+
+### What was kept
+
+`_unwrap_panel_score` stays. It recovers real work from a real failure
+mode, it is conservative about attribution, and it benefits any model
+that wraps its answer — 9 tests cover it, including the case where it
+must refuse a sibling's score. It simply does not make Haiku viable.
+
+The pre-fix control runs are preserved as
+`data/bakeoff__anthropic-control-prefix__run*.json` so the parser change
+can be evaluated against them later. The control's own numbers moved
+0.867 → 0.933 across the two rounds, which is inside the 20-resume noise
+band (~0.098) and should not be read as an effect of the fix.
+
+Full detail: `docs/BAKEOFF.md`.
+
+## Panel confidence removed — 2026-08-27
+
+Each panel agent used to return `{score, confidence, rationale}`. The
+confidence is gone. Measured on the same 20 resumes, 3 runs each:
+
+| | Macro-F1 | Output tokens | Cost |
+|---|---|---|---|
+| With confidence | 0.933 (0.901–0.949) | 24,311 | $0.332 |
+| **Without** | 0.914 (0.897–0.949) | 23,452 | $0.317 |
+
+**No measurable accuracy cost.** The 0.019 difference is far inside the
+20-resume noise band (~0.098) and the ranges overlap almost completely.
+Output tokens fell 3.5% and cost 4.5%, free.
+
+### Why it was removed
+
+**It was never used for anything.** Panel confidence never touched the
+score, the escalation decision, or the verdict. It was printed in the CLI
+and the web UI and nowhere else.
+
+**And it was actively misleading.** Across 537 recorded panel scores:
+
+| Measure | Value |
+|---|---|
+| Mean | 0.824, never below 0.50, clustered 0.85–0.95 |
+| Mean when the verdict was **correct** | 0.816 |
+| Mean when the verdict was **wrong** | **0.867** |
+
+It is *higher when the system is wrong*. A reviewer using it to decide
+what to check would be steered toward the cases the system got right.
+
+Per agent, the pattern is worse:
+
+| Agent | Mean confidence |
+|---|---|
+| `production_reality` | 0.798 |
+| `technical_integration` | 0.810 |
+| **`client_communication`** | **0.864** |
+
+`client_communication` barely discriminates and scores nearly everyone
+low (`docs/SCORE_SCALE.md`). It was the most confident of the three.
+
+**Extraction confidence is kept** — different field, and load-bearing: it
+gates a human-review flag at `< 0.4`.
+
+### A related finding: that flag has never fired
+
+Across `var1`, `var3` and `var4` (180 resume-screenings), every verdict
+flagged for review is explained by escalation or a parse failure. **Zero**
+came from extraction confidence below 0.4. The branch is live code that
+has never once triggered on this corpus. Either the threshold is too low
+or Haiku never reports low confidence on clean synthetic input — worth
+knowing before that flag is trusted on real, messier resumes.
