@@ -15,6 +15,7 @@ from resume_screener.core.pipeline import (
     recommendation_from_score,
     rubric_for,
     screen_one,
+    screen_one_cascade,
     screen_one_single_pass,
 )
 from resume_screener.core.router import Usage
@@ -147,7 +148,7 @@ class TestRecommendationCutoffs:
 class TestScreenOne:
     async def test_agreeing_panel_does_not_escalate(self):
         models = _models([7.0, 7.5, 7.2])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not verdict.escalated
         assert models["arbiter"].calls == [], "arbiter must not run on agreement"
@@ -157,7 +158,7 @@ class TestScreenOne:
 
     async def test_disagreeing_panel_escalates_to_arbiter(self):
         models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(2.0, "hold"))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.escalated
         assert len(models["arbiter"].calls) == 1
@@ -175,24 +176,24 @@ class TestScreenOne:
         the panel happened to split.
         """
         models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(0.5, "advance"))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.score == 0.5
         assert verdict.recommendation == Recommendation.REJECT
 
     async def test_panel_spread_recorded(self):
-        verdict = await screen_one(FIXTURE, JD, _models([9.0, 4.0, 3.5]))
+        verdict = await screen_one_cascade(FIXTURE, JD, _models([9.0, 4.0, 3.5]))
         assert verdict.panel_spread == pytest.approx(5.5)
 
     async def test_usage_accumulates_across_every_call(self):
-        verdict = await screen_one(FIXTURE, JD, _models([7.0, 7.0, 7.0]))
+        verdict = await screen_one_cascade(FIXTURE, JD, _models([7.0, 7.0, 7.0]))
         # 1 extraction + 3 panel calls, 100 input tokens each in the fake
         assert verdict.usage.input_tokens == 400
         assert verdict.usage.output_tokens == 80
 
     async def test_all_three_personas_are_consulted(self):
         models = _models([7.0, 7.0, 7.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
         agents = {p.agent_name for p in verdict.panel_scores}
         assert agents == {"production_reality", "technical_integration", "client_communication"}
 
@@ -205,14 +206,14 @@ class TestCachingContract:
 
     async def test_system_prefix_identical_across_personas(self):
         models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models)
+        await screen_one_cascade(FIXTURE, JD, models)
 
         systems = {c["system"] for c in models["panel"].calls}
         assert len(systems) == 1, "panel calls must share one cacheable prefix"
 
     async def test_persona_travels_in_user_turn_not_system(self):
         models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models)
+        await screen_one_cascade(FIXTURE, JD, models)
 
         for call in models["panel"].calls:
             assert "Your specific lens" in call["user"]
@@ -225,7 +226,7 @@ class TestCachingContract:
 
     async def test_caching_is_requested(self):
         models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models)
+        await screen_one_cascade(FIXTURE, JD, models)
         assert all(c["cache_system"] for c in models["panel"].calls)
 
     async def test_generated_rubric_keeps_one_shared_prefix(self):
@@ -235,7 +236,7 @@ class TestCachingContract:
         """
         rubric = parse_rubric(json.loads(rubric_json()))
         models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models, rubric)
+        await screen_one_cascade(FIXTURE, JD, models, rubric)
 
         systems = {c["system"] for c in models["panel"].calls}
         assert len(systems) == 1
@@ -250,14 +251,14 @@ class TestGeneratedRubricDrivesThePanel:
     async def test_panel_agents_are_named_by_the_generated_dimensions(self):
         rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
         models = _models([7.0, 7.0, 7.0])
-        verdict = await screen_one(FIXTURE, JD, models, rubric)
+        verdict = await screen_one_cascade(FIXTURE, JD, models, rubric)
 
         assert {p.agent_name for p in verdict.panel_scores} == {"shipping", "depth", "comms"}
 
     async def test_static_personas_are_not_used_when_a_rubric_is_given(self):
         rubric = parse_rubric(json.loads(rubric_json(["shipping", "depth", "comms"])))
         models = _models([7.0, 7.0, 7.0])
-        await screen_one(FIXTURE, JD, models, rubric)
+        await screen_one_cascade(FIXTURE, JD, models, rubric)
 
         sent = " ".join(c["user"] for c in models["panel"].calls)
         assert "You judge shipping only" in sent
@@ -269,7 +270,7 @@ class TestGeneratedRubricDrivesThePanel:
         not quietly start generating one.
         """
         models = _models([7.0, 7.0, 7.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert {p.agent_name for p in verdict.panel_scores} == {
             "production_reality",
@@ -282,7 +283,7 @@ class TestGeneratedRubricDrivesThePanel:
         # Mean 3.83, inside ESCALATION_MARGIN of the 4.0 cutoff, so this
         # still reaches the arbiter. [9.0, 4.0, 3.5] no longer does.
         models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
-        await screen_one(FIXTURE, JD, models, rubric)
+        await screen_one_cascade(FIXTURE, JD, models, rubric)
 
         assert rubric.markdown in models["arbiter"].calls[0]["system"]
 
@@ -296,7 +297,10 @@ class TestGeneratedRubricDrivesThePanel:
 
         systems = {c["system"] for c in models["panel"].calls}
         assert len(systems) == 1, "one prefix for the whole batch, not one per resume"
-        assert len(models["panel"].calls) == 12  # 4 resumes x 3 agents
+        # 4 resumes x ONE scoring call each. This was 12 under the
+        # cascade -- the caching contract holds either way, and the call
+        # count is the saving that made the switch worth it.
+        assert len(models["panel"].calls) == 4
 
 
 class TestRubricFor:
@@ -337,7 +341,7 @@ class TestScoreShapedLikeSomethingElse:
             "panel": FakeModel([self.ALL_DIMENSIONS_AT_ONCE]),
             "arbiter": FakeModel([arbiter_json(5.0)]),
         }
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert all(p.parse_failed for p in verdict.panel_scores)
         assert verdict.review_reason is not None
@@ -358,7 +362,7 @@ class TestScoreShapedLikeSomethingElse:
             "panel": FakeModel([payload]),
             "arbiter": FakeModel([arbiter_json(5.0)]),
         }
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
         assert all(p.parse_failed for p in verdict.panel_scores)
 
     async def test_a_genuine_zero_is_not_a_parse_failure(self):
@@ -366,7 +370,7 @@ class TestScoreShapedLikeSomethingElse:
         must stay distinguishable from a missing one.
         """
         models = _models([0.0, 0.0, 0.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not any(p.parse_failed for p in verdict.panel_scores)
         assert verdict.score == 0.0
@@ -396,7 +400,7 @@ class TestFallbacks:
             "panel": FakeModel(["I'm sorry, I can't do that."]),
             "arbiter": FakeModel([arbiter_json(5.0)]),
         }
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert all(p.parse_failed for p in verdict.panel_scores)
         assert verdict.review_reason is not None
@@ -414,7 +418,7 @@ class TestFallbacks:
             "panel": FakeModel([panel_json(7.0)]),
             "arbiter": FakeModel([arbiter_json(7.0)]),
         }
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.candidate.confidence == 0.0
         assert verdict.candidate.evidence == []
@@ -424,14 +428,14 @@ class TestFallbacks:
     async def test_arbiter_bad_recommendation_falls_back_to_score_cutoffs(self):
         bad = json.dumps({"score": 8.5, "recommendation": "definitely_hire", "rationale": "x"})
         models = _models([9.0, 4.0, 3.5], arbiter=bad)
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.recommendation == Recommendation.ADVANCE  # 8.5 -> advance
 
     async def test_arbiter_missing_score_falls_back_to_panel_mean(self):
         bad = json.dumps({"recommendation": "hold", "rationale": "x"})
         models = _models([9.0, 4.0, 3.0], arbiter=bad)
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.score == pytest.approx(5.333, abs=0.01)
 
@@ -488,7 +492,7 @@ class TestEscalationGuard:
         # 2.5 spread, clears DISAGREEMENT_THRESHOLD, but 9.0/8.0/7.0 are all
         # >= ADVANCE_CUTOFF so no ruling could change the answer.
         models = _models([9.5, 8.0, 7.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not verdict.escalated
         assert models["arbiter"].calls == [], "paid to resolve a settled verdict"
@@ -501,7 +505,7 @@ class TestEscalationGuard:
         verdict that was never in doubt.
         """
         models = _models([9.0, 7.0, 6.0], arbiter=arbiter_json(7.5))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not verdict.escalated
         assert models["arbiter"].calls == []
@@ -511,7 +515,7 @@ class TestEscalationGuard:
         # Mean 3.83, only 0.17 from the 4.0 line: a typical arbiter move
         # of 0.33 crosses it, so this call can actually change something.
         models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.escalated
         assert len(models["arbiter"].calls) == 1
@@ -527,7 +531,7 @@ class TestEscalationGuard:
         this case.
         """
         models = _models([9.0, 4.0, 3.5], arbiter=arbiter_json(5.0, "hold"))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not verdict.escalated
         assert models["arbiter"].calls == [], "paid for a verdict it could not move"
@@ -535,7 +539,7 @@ class TestEscalationGuard:
 
     async def test_narrow_spread_never_escalates(self):
         models = _models([7.0, 7.5, 7.2])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
         assert not verdict.escalated
 
     @pytest.mark.parametrize(
@@ -550,7 +554,7 @@ class TestEscalationGuard:
     )
     async def test_escalates_only_when_buckets_differ(self, scores, expect_escalation):
         models = _models(scores, arbiter=arbiter_json(6.0, "hold"))
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
         assert verdict.escalated is expect_escalation
 
 
@@ -599,7 +603,7 @@ class TestPerModelUsage:
         models = _models([9.0, 2.0, 0.5], arbiter=arbiter_json(5.0, "hold"))
         for name, tier in (("triage", "t"), ("panel", "p"), ("arbiter", "a")):
             models[name]._model_id = tier
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert set(verdict.usage.by_model) == {"t", "p", "a"}
 
@@ -625,21 +629,21 @@ class TestParseFailureIsNotAZero:
 
     async def test_failed_agent_is_excluded_from_the_average(self):
         models = self._mixed([8.0, 6.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         # mean of the two that answered, not (8 + 6 + 0) / 3
         assert verdict.score == pytest.approx(7.0)
 
     async def test_failed_agent_does_not_inflate_the_spread(self):
         models = self._mixed([8.0, 6.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.panel_spread == pytest.approx(2.0)
 
     async def test_failed_agent_does_not_buy_an_arbiter_call(self):
         """The 0.0 used to manufacture a disagreement out of nothing."""
         models = self._mixed([8.0, 7.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert not verdict.escalated
         assert models["arbiter"].calls == []
@@ -647,14 +651,14 @@ class TestParseFailureIsNotAZero:
     async def test_the_failure_is_still_flagged_for_a_human(self):
         """Excluding it must not also hide it."""
         models = self._mixed([8.0, 6.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.review_reason is not None
         assert "unreadable" in verdict.review_reason
 
     async def test_the_failed_agent_still_appears_in_the_panel(self):
         models = self._mixed([8.0, 6.0])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         failed = [p for p in verdict.panel_scores if p.parse_failed]
         assert len(failed) == 1, "a reviewer needs to see that an agent failed"
@@ -665,7 +669,7 @@ class TestParseFailureIsNotAZero:
             "panel": FakeModel([self.BROKEN]),
             "arbiter": FakeModel([arbiter_json(5.0)]),
         }
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         assert verdict.score == 0.0
         assert verdict.review_reason is not None
@@ -843,7 +847,7 @@ class TestEscalationMargin:
     @pytest.mark.asyncio
     async def test_verdict_records_its_distance_to_a_cutoff(self):
         models = _models([7.0, 7.5, 7.2])
-        verdict = await screen_one(FIXTURE, JD, models)
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
 
         # Mean 7.23 against the default 4.0 advance line.
         assert verdict.cutoff_distance == pytest.approx(3.23, abs=0.01)
@@ -1046,3 +1050,42 @@ class TestSinglePassArm:
         verdict = await screen_one_single_pass(FIXTURE, JD, models)
         # 1 extraction + 1 panel call, 100 input tokens each in the fake.
         assert verdict.usage.input_tokens == 200
+
+
+
+class TestDefaultArchitecture:
+    """`screen_one` is a dispatcher, and which way it points is a decision.
+
+    Switched 2026-08-31: one scoring call plus a conditional arbiter
+    reaches the cascade's accuracy on half the API calls. The cascade is
+    kept runnable because every recorded run before that date used it.
+    """
+
+    def test_the_default_is_single_pass_plus_arbiter(self):
+        from resume_screener.core.pipeline import DEFAULT_ARCHITECTURE
+
+        assert DEFAULT_ARCHITECTURE == "single_pass_arbiter"
+
+    async def test_screen_one_makes_one_scoring_call_not_three(self):
+        models = {
+            "triage": FakeModel([EXTRACTION_JSON]),
+            "panel": FakeModel([json.dumps({
+                "production_reality": {"score": 8.0, "rationale": "shipped"},
+                "technical_integration": {"score": 7.0, "rationale": "built"},
+                "client_communication": {"score": 6.0, "rationale": "spoke"},
+            })]),
+            "arbiter": FakeModel([arbiter_json(7.0)]),
+        }
+        verdict = await screen_one(FIXTURE, JD, models)
+
+        assert len(models["panel"].calls) == 1
+        assert len(verdict.panel_scores) == 3, "the UI still gets three dimensions"
+
+    async def test_the_cascade_is_still_runnable(self):
+        # Older recorded results depend on it, and it is the control any
+        # future architecture gets measured against.
+        models = _models([7.0, 7.5, 7.2])
+        verdict = await screen_one_cascade(FIXTURE, JD, models)
+
+        assert len(models["panel"].calls) == 3
+        assert verdict.score == pytest.approx(7.233, abs=0.01)

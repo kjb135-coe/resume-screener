@@ -28,10 +28,10 @@ judgment, not a customer being sold to.
 
 ## Architecture in one paragraph
 
-Three stages per resume: extract quoted evidence (Haiku 4.5) → three
-agents score one rubric dimension each in parallel (Sonnet 5) → an
-arbiter runs only when the panel disagrees on the *verdict bucket*
-(Sonnet 5). `recommendation_from_score` owns every verdict; the arbiter
+Two stages per resume: extract quoted evidence (Haiku 4.5) → one call
+scores all three rubric dimensions (GPT-5.6 Luna) → an arbiter takes a
+second look only when the score lands within `ESCALATION_MARGIN` of a
+cutoff (Luna). `recommendation_from_score` owns every verdict; the arbiter
 returns a score, never a recommendation. `core/` never imports from
 `adapters/` — the MCP server, CLI, and web API are thin shells over the
 same core.

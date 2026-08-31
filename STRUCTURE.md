@@ -44,6 +44,9 @@ removing files rather than editing this by hand.
 │   ├── bakeoff__luna-single-pass__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__luna-single-pass__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff__luna-single-pass__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__single-pass-arbiter__run1.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__single-pass-arbiter__run2.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
+│   ├── bakeoff__single-pass-arbiter__run3.json One scripts/bakeoff.py run for one model arm. See docs/BAKEOFF.md.
 │   ├── bakeoff_sample.json          The fixed, stratified 20 resumes every bake-off arm is scored on. Generated, seeded.
 │   ├── bakeoff_sample60.json        The full 60-resume corpus as a bake-off sample, for fitting cutoffs on more than 20 points.
 │   ├── bias_audit.json              Raw per-variant scores from the name-swap audit.

@@ -66,6 +66,7 @@ log = logging.getLogger(__name__)
 # is where scripts/ and tests/ already reach for them.
 __all__ = [
     "ADVANCE_CUTOFF",
+    "DEFAULT_ARCHITECTURE",
     "DEFAULT_CUTOFFS",
     "DEFAULT_MODEL_IDS",
     "ESCALATION_MARGIN",
@@ -82,6 +83,7 @@ __all__ = [
     "recommendation_from_score",
     "rubric_for",
     "screen_one",
+    "screen_one_cascade",
     "screen_one_single_pass",
 ]
 
@@ -774,13 +776,22 @@ async def screen_one_single_pass(
     )
 
 
-async def screen_one(
+async def screen_one_cascade(
     resume_path: str,
     job_description: str,
     models: dict[str, Model] | None = None,
     rubric: GeneratedRubric | None = None,
 ) -> Verdict:
-    """Screen one candidate.
+    """Screen one candidate with the three-agent parallel panel.
+
+    **No longer the default.** Kept because it is the arm every recorded
+    run before 2026-08-31 used, so it has to stay runnable for those
+    numbers to be reproducible -- and because it is the control any future
+    architecture is measured against.
+
+    Superseded by `screen_one_single_pass(arbitrate=True)`, which scores
+    the same three dimensions in one call and reaches the same accuracy on
+    half the API calls. See `screen_one` below.
 
     `rubric=None` scores against the hand-written rubric anchored to
     docs/job_description.md. Pass a GeneratedRubric to score against any
@@ -885,6 +896,57 @@ async def rubric_for(
     """
     models = models or default_models()
     return await generate_rubric(job_description, models["rubric"])
+
+
+DEFAULT_ARCHITECTURE = "single_pass_arbiter"
+"""Which pipeline `screen_one` runs.
+
+`"single_pass_arbiter"` (default) scores all three dimensions in one call
+and calls an arbiter only when the score lands near a cutoff.
+`"cascade"` is the original: three agents in parallel, then a conditional
+arbiter.
+
+Switched 2026-08-31 on measurement, 3 runs each over 60 resumes at
+matched reasoning effort:
+
+                            macro-F1        cost    p50    calls/resume
+  single_pass_arbiter  0.899 (.883-.915)   $0.280   8.4s      ~2.3
+  cascade              0.872 (.832-.901)   $0.299  11.3s      ~4.3
+
+Accuracy is NOT separated -- the 0.027 gap sits inside the 0.051 noise
+band, and the paired per-candidate result is 9-6, a direction rather than
+a verdict. The switch rests on half the API calls, 26% faster and 6%
+cheaper for accuracy that is at worst equal.
+
+The premise this replaces was that three agents judging dimensions
+independently beat one model judging them together. Measured three ways,
+it did not: panel-only (0.788) LOSES to one call (0.821); the full
+cascade ties one call because the arbiter's gain cancels the panel's
+loss; and one call plus an arbiter beats the full cascade. The value was
+always the second look at a borderline case.
+
+Nothing user-facing changes. Both paths return three per-dimension scores
+with a quoted rationale each, so the evidence panel is identical.
+"""
+
+
+async def screen_one(
+    resume_path: str,
+    job_description: str,
+    models: dict[str, Model] | None = None,
+    rubric: GeneratedRubric | None = None,
+) -> Verdict:
+    """Screen one candidate. The single entry point every adapter uses.
+
+    Dispatches on `DEFAULT_ARCHITECTURE` so the architecture can be
+    changed in one place, and so the superseded cascade stays runnable for
+    reproducing older results.
+    """
+    if DEFAULT_ARCHITECTURE == "cascade":
+        return await screen_one_cascade(resume_path, job_description, models, rubric)
+    return await screen_one_single_pass(
+        resume_path, job_description, models, rubric, arbitrate=True
+    )
 
 
 async def rank_paths(

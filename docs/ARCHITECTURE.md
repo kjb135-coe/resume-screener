@@ -26,14 +26,12 @@ RESUME ──► [2] EXTRACT AGENT · Haiku 4.5 · 1 call
              ▼
         EVIDENCE JSON   (replaces the resume downstream)
              │
-      ┌──────┴──────┬─────────────┐
-      ▼             ▼             ▼      [3] PANEL · GPT-5.6 Luna
- production_   technical_     client_        3 calls IN PARALLEL
-   reality     integration  communication    none sees the others
-      │             │             │
-  score 0-10    score 0-10    score 0-10
-      │             │             │
-      └──────┬──────┴─────────────┘
+             ▼      [3] SCORING · GPT-5.6 Luna · ONE call
+      ┌──────────────────────────────────┐
+      │ production_reality      score 0-10│
+      │ technical_integration   score 0-10│
+      │ client_communication    score 0-10│
+      └──────┬───────────────────────────┘
              │
       any unreadable reply? ──► FLAG for human review
              │
@@ -41,9 +39,9 @@ RESUME ──► [2] EXTRACT AGENT · Haiku 4.5 · 1 call
       SCORE = mean of the three
              │
       ┌──────┴───────────────────────────────┐
-      │ spread > 2.0                         │
-      │ AND the three straddle a verdict     │
-      │ AND the mean is within 0.5 of a cutoff│
+      │ is the mean within 0.5 of a cutoff?  │
+      │ (NOT panel disagreement -- one       │
+      │  response cannot disagree with itself)│
       └──────┬───────────────────────────────┘
         NO   │         │  YES
              │         ▼
@@ -63,16 +61,37 @@ RESUME ──► [2] EXTRACT AGENT · Haiku 4.5 · 1 call
 
 ## The decisions, and what each one cost
 
-### Three agents, one dimension each, in parallel
+### Three dimensions, one call — and why it used to be three calls
 
-They never see each other. Disagreement is therefore about judgment, not
-about which half of the resume each happened to weigh — they all read the
-same extracted evidence.
+The system scores three dimensions and shows three rationales. It used to
+compute them with **three parallel agents that never saw each other**, on
+the premise that independent judgments beat one model judging all three
+together.
 
-**Three is enforced in code.** `core/rubric_gen.py` rejects any rubric
-that is not exactly three dimensions, because the escalation threshold is
-a *spread across three scores*. More agents would widen that spread by
-chance alone and silently escalate more often.
+**That premise was measured and it was wrong.** Three ways:
+
+| | macro-F1 |
+|---|---|
+| Parallel panel alone | 0.788 |
+| One call alone | 0.821 |
+| Parallel panel + arbiter | 0.872 |
+| **One call + arbiter** | **0.899** |
+
+The panel-only arm *loses* to a single call, paired 12–6 per candidate.
+The full cascade ties a single call, because the arbiter's gain cancels
+the panel's loss. And one call plus an arbiter beats the cascade at half
+the API calls.
+
+So the architecture kept the stage that earned its keep — the second look
+at a borderline case — and dropped the one that did not. Nothing
+user-facing changed: both paths return three per-dimension scores with a
+quoted rationale each.
+
+`screen_one_cascade` is still there, because every recorded result before
+2026-08-31 used it and those numbers have to stay reproducible.
+
+**Three is still enforced in code.** `core/rubric_gen.py` rejects any
+rubric that is not exactly three dimensions.
 
 ### `core/` never imports `adapters/`
 
